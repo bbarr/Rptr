@@ -63,13 +63,23 @@ raptor.jetpack = (function () {
 		
 		// If we're given some data to send; prepare it
 		if(cfg.data) {
-			this.data = _this.prepareQueryString(cfg.data);
+			this.data = jetpack.prepareQueryString(cfg.data);
 		} else {
 			this.data = '';
 		}
 		
+		// Set up the headers
+		if(this.method === 'POST') {
+			this.headers = new Array();
+			this.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+			this.headers['Content-length'] = this.data.length;
+		} 
+		else {
+			this.uri += '?' + this.data;
+		}
+		
 		this.errorHandler = cfg.errorHandler || null;
-		this.throbber = cfg.data || null;
+		this.throbber = cfg.throbber || null;
 		this.success = cfg.success || null;
 		this.async = cfg.async || true;
 		
@@ -160,7 +170,17 @@ raptor.jetpack = (function () {
 		* @param {Object}
 		*/
 		prepareQueryString : function (data) {
-			return '';
+			var qString = '', i=0;
+			for(var name in data) {								
+				
+				if(i>0) qString += '&'
+				
+				qString += name + '=' + data[name];
+				
+				i++;
+			}
+			
+			return qString;
 		},
 		
 		/**
@@ -173,11 +193,18 @@ raptor.jetpack = (function () {
 			xhr.open(jetpackRequest.method, jetpackRequest.uri, jetpackRequest.async);
 
 			// Run the user specified throbber function
-			if(currentRequest.throbber) {
-				currentRequest.throbber();
+			if(jetpackRequest.throbber) {
+				jetpackRequest.throbber();
 			}
-
-			xhr.send(jetpackRequest.data);
+			
+			if(jetpackRequest.method === 'POST') {
+				data = jetpackRequest.data;
+			}
+			else {
+				data = '';
+			}
+			
+			xhr.send(data);
 		},
 		
 		/**
@@ -220,6 +247,6 @@ raptor.jetpack = (function () {
 			
 			var _request = new jetpackRequest(cfg);
 		}
-	}
+	};
 		
 })();
