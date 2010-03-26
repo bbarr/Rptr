@@ -14,7 +14,7 @@ if(typeof raptor === 'undefined') {
 
 raptor.jetpack = (function () {
 	
-	var jetpack = null;
+	var xhr = null;
 	
 	// Hold our status here (are we currently sending any requests already?)
 	var inProgress = false;
@@ -80,7 +80,7 @@ raptor.jetpack = (function () {
 			inProgress = true;
 			
 			currentRequest = this;
-			_this.send(this);
+			jetpack.send(this);
 		}
 		else {
 			requestQueue.push(this);
@@ -88,25 +88,25 @@ raptor.jetpack = (function () {
 		
 	};
 	
-	var _this = {
+	var jetpack = {
 			
 		/**
 		* Internal method for creating an XHR object
 		*/
-		_create : function () {
+		_createXHR : function () {
 			if(window.XMLHttpRequest) {
-				jetpack = new XMLHttpRequest;
+				xhr = new XMLHttpRequest;
 			}
 			else if(window.ActiveXObject) {
-				var xhr, axo, ex, objects, success = false;
+				var _xhr, axo, ex, objects, success = false;
 				objects = ['Microsoft', 'Msxml2', 'Msxml3'];
 				
 				for(var i=0; i<objects.length; i++) {
 					axo = objects[i] + '.XMLHTTP';
 					
 					try {
-						xhr = new ActiveXObject(axo);
-						jetpack = xhr;
+						_xhr = new ActiveXObject(axo);
+						xhr = _xhr;
 						success = true;
 					}
 					
@@ -123,23 +123,23 @@ raptor.jetpack = (function () {
 				return;
 			}
 			
-			jetpack.onreadystatechange = _this._onreadystatechange;
+			xhr.onreadystatechange = jetpack._onreadystatechange;
 		},
 		
 		/**
 		* Internal method for handling XHR ready state change
 		*/
 		_onreadystatechange : function () {
-			if(jetpack.readyState == 4) {
+			if(xhr.readyState == 4) {
 				// Finished request		
-				if(jetpack.status === 200) {
+				if(xhr.status === 200) {
 					if(currentRequest.success) {
 						// Execute user provided callback for successful transmission
-						var response = jetpack.responseXML || jetpack.responseText;
+						var response = xhr.responseXML || xhr.responseText;
 						currentRequest.success(response);
 					}
 					
-					_this.finishRequest();
+					jetpack.finishRequest();
 				}
 				// Error
 				else {
@@ -148,7 +148,7 @@ raptor.jetpack = (function () {
 						currentRequest.errorHandler();
 					}
 					
-					_this.finishRequest();
+					jetpack.finishRequest();
 				}
 			}
 		},
@@ -170,14 +170,14 @@ raptor.jetpack = (function () {
 		* @param {Object} Jetpack Request
 		*/
 		send : function (jetpackRequest) {
-			jetpack.open(jetpackRequest.method, jetpackRequest.uri, jetpackRequest.async);
+			xhr.open(jetpackRequest.method, jetpackRequest.uri, jetpackRequest.async);
 
 			// Run the user specified throbber function
 			if(currentRequest.throbber) {
 				currentRequest.throbber();
 			}
 
-			jetpack.send(jetpackRequest.data);
+			xhr.send(jetpackRequest.data);
 		},
 		
 		/**
@@ -193,10 +193,9 @@ raptor.jetpack = (function () {
 				requestQueue = requestQueue.slice(1);
 				
 				// Force a delay before executing the next request in queue
-				setTimeout(function() { _this.send(currentRequest); }, 500);
+				setTimeout(function() { jetpack.send(currentRequest); }, 500);
 			}
 			else {
-				console.log('done');
 				// Reset the in progress flag if we're done
 				inProgress = false;
 			}
@@ -215,8 +214,8 @@ raptor.jetpack = (function () {
 		engage : function (cfg) {
 			
 			// If no XHR was created earlier, we'll need to make one
-			if(!jetpack) {
-				_this._create();
+			if(!xhr) {
+				jetpack._createXHR();
 			}
 			
 			var _request = new jetpackRequest(cfg);
