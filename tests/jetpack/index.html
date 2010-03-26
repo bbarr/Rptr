@@ -14,18 +14,36 @@
 			
 		</div>
 		
-		<script type="text/javascript" src="/src/jetpack.js"></script>
+		<script type="text/javascript" src="/src/raptor.jetpack.js"></script>
 		<script type="text/javascript">
 			var config = {
 			    'uri' : 'test.html',
 			    'errorHandler' : function () { console.log('error ocurred'); },
 			    'success' : function(response) { console.log(response); },
-			    'throbber' : function() { console.log('sending'); }
+			    'throbber' : function() { console.log('sending'); },
+			    'data' : {
+			    	'myVar' : 'some-data',
+			    	'otherVar' : 'moreData',
+			    	'int' : 0
+			    }
 			};
-
+			
+			var endpoints = new Array('endpoints/htmlEndpoint.html', 'endpoints/xmlEndpoint.xml');
+			
 			for(var i=0; i<20; i++) {
-				if(i>0) {
+				
+				if(endpoints[i]) {
+					config.uri = endpoints[i];
+				}
+				else {
 					config.uri = 'test-' + i + '.html';
+				}
+				
+				if(i === 0) {
+					config.method = 'POST';
+				}
+				else {
+					config.method = 'GET';
 				}
 				
 			    raptor.jetpack.engage(config);
