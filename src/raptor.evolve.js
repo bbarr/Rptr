@@ -11,20 +11,21 @@ if(typeof raptor === 'undefined') {
 }
 
 raptor.evolve = (function () {
-	
-	var evolve = {
+		
+	var xml = {
 		
 		/**
 		* Start a parse of an xml doc
 		*
 		* @param {Object} XML Doc Object
 		*/
-		readXML : function(xmlDoc) {		
-			
+		read : function(xmlDoc) {		
 			// Find the root of the XML file	
 			var root = xmlDoc.childNodes[0];
 			
-			evolve.nodeParse(root);	
+			var obj = xml.nodeParse(root);	
+			
+			console.log(obj);
 		},
 		
 		/**
@@ -34,25 +35,97 @@ raptor.evolve = (function () {
 		*/
 		nodeParse : function(node) {
 			
-			var jsonNode;
+			var jsonNode = {};
+			var simpleNode = true;
 			
-			// Check to see if it has child nodes
-			if(node.childNodes.length > 0) {
+			// Check to see if there are any attributes we need to parse for the node
+			if(node.attributes.length > 0) {
+				simpleNode = false;
+				
+				var attributes = node.attributes,
+					length = attributes.length,
+					_thisAttr;
+		
+				for(var i=0; i<length; i++) {
+					_thisAttr = attributes[i];
+					
+					jsonNode[_thisAttr.nodeName] = _thisAttr.nodeValue;
+				}				
+			}
+			
+			// Check to see if it has child nodes to parse
+			if(node.childNodes.length > 1) {				
 				var length = node.childNodes.length,
 					_thisNode;
-				
+
 				// Loop through child nodes
+				var _thisTagName;
+					blackList = new Array();
+				
 				for(var i=0; i<length; i++) {																		
-					_thisNode = node.childNodes[i];
-					
-					if(_thisNode.tagName !== undefined) {
-						if(evolve.isArray(_thisNode.tagName, node)) {
-							jsonNode = new Array();
+					_thisNode = node.childNodes[i],
+					_thisTagName = _thisNode.tagName;
+										
+					if(_thisTagName !== undefined) {	
+												
+						// If this tagName was already processed skip this loop iteration
+						if(blackList.indexOf(_thisTagName) !== -1) {
+							continue;
+						}
+						// Check to see if this tagName is an array and populate the array for the json object
+						if(xml.isArray(_thisTagName, node)) {
+							jsonNode[_thisTagName] = xml.childArrParse(_thisTagName, node);
+							blackList.push(_thisTagName);
 						}
 					}
 					
 				}
-			}			
+			}
+			// If length was not > 1 we may have text content to parse
+			else if(node.childNodes.length === 1) {
+				
+				if(simpleNode) {
+					jsonNode = node.childNodes[0].textContent;
+				}
+				else {
+					jsonNode['nodeValue'] = node.childNodes[0].textContent;
+				}
+				
+			}
+						
+			if(node.nodeName === '#text') {
+				if(simpleNode) {
+					jsonNode = node.nodeValue;
+				}
+				else {
+					//jsonNode['value'];
+				}
+				
+			}
+			
+			return jsonNode;
+		},
+		
+		/**
+		* Send a tag name and parent to parse
+		* all of the children of a specified type
+		*
+		* @param {String} Tag Name
+		* @param {Object} Parent
+		*/
+		childArrParse : function(tagName, parent) {
+			var children = parent.getElementsByTagName(tagName);
+			var arr = new Array();
+			
+			var length = children.length,
+				_thisChild;
+			
+			for(var i=0; i<length; i++) {
+				_thisChild = children[i];
+				arr.push(xml.nodeParse(_thisChild));
+			}
+			
+			return arr;
 		},
 		
 		/**
@@ -69,7 +142,7 @@ raptor.evolve = (function () {
 	
 	return {
 				
-		'readXML' : evolve.readXML
+		'readXML' : xml.read
 		
 	};
 	
