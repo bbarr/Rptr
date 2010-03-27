@@ -41,6 +41,7 @@ raptor.jetpack = (function () {
 	* throbber (Optional) : Callback for throbber
 	* success (Optional) : Callback for successful transmission
 	* async (Optional) : {Bool}
+	* parse {Optional} : {String} JSON
 	*  
 	*/
 	var jetpackRequest = function (cfg) {
@@ -82,6 +83,7 @@ raptor.jetpack = (function () {
 		this.throbber = cfg.throbber || null;
 		this.success = cfg.success || null;
 		this.async = cfg.async || true;
+		this.parse = cfg.parse || null;
 		
 		/**
 		* Now that we have our configuration set up, we can send this now; or push it to the queue
@@ -145,7 +147,12 @@ raptor.jetpack = (function () {
 				if(xhr.status === 200) {
 					if(currentRequest.success) {
 						// Execute user provided callback for successful transmission
-						var response = xhr.responseXML || xhr.responseText;
+						var response = xhr.responseXML || xhr.responseText;																		
+							
+						if(currentRequest.parse === 'json') {			
+							response = raptor.evolve.readXML(response);	
+						}
+												
 						currentRequest.success(response);
 					}
 					
