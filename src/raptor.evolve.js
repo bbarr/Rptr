@@ -22,7 +22,6 @@ raptor.evolve = (function () {
 		read : function(xmlDoc) {		
 			// Find the root of the XML file	
 			var root = xmlDoc.childNodes[0];
-			
 			var obj = xml.nodeParse(root);	
 			
 			console.log(obj);
@@ -37,7 +36,7 @@ raptor.evolve = (function () {
 			
 			var jsonNode = {};
 			var simpleNode = true;
-			
+
 			// Check to see if there are any attributes we need to parse for the node
 			if(node.attributes.length > 0) {
 				simpleNode = false;
@@ -54,7 +53,7 @@ raptor.evolve = (function () {
 			}
 			
 			// Check to see if it has child nodes to parse
-			if(node.childNodes.length > 1) {				
+			if(node.childNodes.length > 1) {			
 				var length = node.childNodes.length,
 					_thisNode;
 
@@ -77,6 +76,10 @@ raptor.evolve = (function () {
 							jsonNode[_thisTagName] = xml.childArrParse(_thisTagName, node);
 							blackList.push(_thisTagName);
 						}
+						// Otherwise, just populate it normally
+						else {
+							jsonNode[_thisTagName] = xml.nodeParse(_thisNode);
+						}
 					}
 					
 				}
@@ -89,16 +92,6 @@ raptor.evolve = (function () {
 				}
 				else {
 					jsonNode['nodeValue'] = node.childNodes[0].textContent;
-				}
-				
-			}
-						
-			if(node.nodeName === '#text') {
-				if(simpleNode) {
-					jsonNode = node.nodeValue;
-				}
-				else {
-					//jsonNode['value'];
 				}
 				
 			}
