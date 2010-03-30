@@ -30,7 +30,7 @@
 			    'parse' : null
 			};
 			
-			var endpoints = new Array('endpoints/htmlEndpoint.html', 'endpoints/xmlEndpoint.xml');
+			var endpoints = new Array('endpoints/htmlEndpoint.html', 'endpoints/xmlEndpoint2.xml');
 						
 			for(var i=0; i<5; i++) {
 				var _thisConfig = {};
@@ -53,7 +53,7 @@
 					_thisConfig.method = 'GET';
 				}
 				
-				if(i === 1) {					
+				if(i === 1)  {					
 					_thisConfig.parse = 'json';
 				}				
 										

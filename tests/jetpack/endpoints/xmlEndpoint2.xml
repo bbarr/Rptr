@@ -1,0 +1,23 @@
+<raptor_pack>
+	<pack>
+		<pack_name>Pack 1</pack_name>
+		<pack_flag>raptor-flag.gif</pack_flag>
+		<pack_members>
+			<raptor name="Raptor1" />
+			<raptor name="Raptor2" />
+			<raptor name="Raptor3" />
+			<raptor name="Raptor4" bday="02/23/86"/>
+			<raptor name="Raptor5" bday="02/24/86">
+				<parents>
+					<raptor name="Raptor1" />
+					<raptor name="Raptor2" />
+				</parents>
+			</raptor>
+		</pack_members>
+		<pack_hunt>
+			<food name="food1" />
+			<food name="food2" />
+			<food name="food3" />
+		</pack_hunt>
+	</pack>
+</raptor_pack>
