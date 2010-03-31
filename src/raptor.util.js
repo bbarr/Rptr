@@ -9,7 +9,7 @@ if(typeof raptor === 'undefined') {
 	var raptor = {};
 }
 
-(function () {
+raptor.util = (function () {
 	
 	// Let's prototyp the indexOf for arrays
 	if(typeof Array.indexOf !== 'function') {
@@ -25,4 +25,19 @@ if(typeof raptor === 'undefined') {
 		}
 	}
 	
+	return {
+		
+		/**
+		 * Tests for data type by constructor name
+		 * 
+		 * @param {Array} types
+		 * @param {Array|Boolean|Date|Math|Number|String|RegExp} data
+		 */
+		type : function(types, data) {
+			for (var i = 0; i < types.length; i++) {
+				if (data.constructor.toString().indexOf(types[i]) !== -1) return true;
+			}
+			return false;
+		}	
+	}
 })();
