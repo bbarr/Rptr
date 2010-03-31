@@ -13,16 +13,17 @@ raptor.pack = (function() {
 		return nodeStorage[tag].cloneNode(true);
 	}
 	
-	var insertText = function(el, string, needWrap) {
-		if (/\&\S+;/.test(string)) el.innerHTML += string;
-		else el.appendChild(document.createTextNode(string));
-	}
-	
-	var type = function(types, data) {
-		for (var i = 0; i < types.length; i++) {
-			if (data.constructor.toString().indexOf(types[i]) !== -1) return true;
-		}
-		return false;
+	/**
+	 * Adds text to element
+	 * 
+	 * - auto-detects HTML Entities and uses innerHTML
+	 * 
+	 * @param {HTMLElement} el
+	 * @param {String} string
+	 */
+	var insertText = function(el, text) {
+		if (/\&\S+;/.test(text)) el.innerHTML += text;
+		else el.appendChild(document.createTextNode(text));
 	}
 	
 	return {

@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+	
+</head>
+<body>
+	
+	<div id="test"></div>
+	
+	<script type="text/javascript" src="raptor.pack.js"></script>
+	<script type="text/javascript">
+		var start = new Date();
+		
+		var one = raptor.pack.birth('div', {'class' : 'sweet'}, [
+			'content!!!',
+			'and more &amp; content!!!',
+			raptor.pack.birth('span', {}, 'What do you think of my snazzy span?'),
+			raptor.pack.birth('p', {}, 'With crazy stuff &amp; html entities!')
+		], 'testFrag');
+		var two = raptor.pack.birth('div', {'class' : 'sweet'}, [
+			'content!!!',
+			'and more &amp; content!!!',
+			raptor.pack.birth('span', {}, 'What do you think of my snazzy span?'),
+			raptor.pack.birth('p', {}, 'With crazy stuff &amp; html entities!')
+		], 'testFrag');
+		var three = raptor.pack.birth('div', {'class' : 'sweet'}, [
+			'content!!!',
+			'and more &amp; content!!!',
+			raptor.pack.birth('span', {}, 'What do you think of my snazzy span?'),
+			raptor.pack.birth('p', {}, 'With crazy stuff &amp; html entities!')
+		], 'testFrag');
+		var four = raptor.pack.birth('div', {'class' : 'sweet'}, [
+			'content!!!',
+			'and more &amp; content!!!',
+			raptor.pack.birth('span', {}, 'What do you think of my snazzy span?'),
+			raptor.pack.birth('p', {}, 'With crazy stuff &amp; html entities!')
+		], 'testFrag');
+
+		for (var i = 0; i < 1000; i++) {
+			document.getElementById('test').appendChild(raptor.pack.nursery('testFrag'));
+		//	document.getElementById('test').appendChild(one.cloneNode(true));
+		//	document.getElementById('test').appendChild(two.cloneNode(true));
+		//	document.getElementById('test').appendChild(three.cloneNode(true));
+		//	document.getElementById('test').appendChild(four.cloneNode(true));
+		}
+		
+		var end = new Date();
+		
+		alert((end.getTime() - start.getTime()));
+		
+	</script>
+</body>
+</html>
