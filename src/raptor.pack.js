@@ -8,23 +8,46 @@ raptor.pack = (function() {
 	var nodeStorage = {};
 	var fragmentStorage = {};
 	
-	var newElement = function(tag) {
-		if (!nodeStorage[tag]) nodeStorage[tag] = document.createElement(tag);
-		return nodeStorage[tag].cloneNode(true);
+	var util = {
+		
+		/**
+		 * Creates Element and adds to storage or clones existing
+		 * 
+		 * @param {String} tag
+		 */
+		newElement : function(tag) {
+			if (!nodeStorage[tag]) nodeStorage[tag] = document.createElement(tag);
+			return nodeStorage[tag].cloneNode(true);	
+		},
+		
+		/**
+		 * Adds text to element
+		 * 
+		 * - auto-detects HTML Entities and uses innerHTML
+		 * 
+		 * @param {HTMLElement} el
+		 * @param {String} string
+		 */
+		insertText : function(el, text) {
+			if (/\&\S+;/.test(text)) el.innerHTML += text;
+			else el.appendChild(document.createTextNode(text));
+		},
+		
+		/**
+		 * Tests for data type by constructor name
+		 * 
+		 * @param {Array} types
+		 * @param {Array|Boolean|Date|Math|Number|String|RegExp} data
+		 */
+		type : function(types, data) {
+			for (var i = 0; i < types.length; i++) {
+				if (data.constructor && data.constructor.toString().indexOf(types[i]) !== -1) return true;
+			}
+			return false;
+		}
 	}
 	
-	/**
-	 * Adds text to element
-	 * 
-	 * - auto-detects HTML Entities and uses innerHTML
-	 * 
-	 * @param {HTMLElement} el
-	 * @param {String} string
-	 */
-	var insertText = function(el, text) {
-		if (/\&\S+;/.test(text)) el.innerHTML += text;
-		else el.appendChild(document.createTextNode(text));
-	}
+	
 	
 	return {
 		
@@ -42,22 +65,33 @@ raptor.pack = (function() {
 		birth : function(tag, attrs, contents, fragment) {
 
 			// creates new element, or clones existing
-			var el = newElement(tag);
+			var el = util.newElement(tag);
 			
 			// set attributes
+			if (attrs == '') attrs = {};
 			for (var attr in attrs) {
-				if (el[attr]) el[attr] = attrs[attr];
-				else el.setAttribute(attr, attrs[attr]);
+				
+				if (attr == 'style') {
+					
+					var styles = attrs[attr];	
+					for (var prop in styles) {
+						el.style[prop] = styles[prop];
+					}
+				}
+				else {
+					if (el[attr]) el[attr] = attrs[attr];
+					else el.setAttribute(attr, attrs[attr]);
+				}
 			}
 			
 			// parse content
-			if (type(['String', 'Number'], contents)) {
-				insertText(el, contents);
+			if (util.type(['String', 'Number'], contents)) {
+				util.insertText(el, contents);
 			}
-			else if (type(['Array'], contents)){
+			else if (util.type(['Array'], contents)){
 				for (var i = 0; i < contents.length; i++) {
-					if (type(['String', 'Number'], contents[i])) {
-						insertText(el, contents[i], true);
+					if (util.type(['String', 'Number'], contents[i])) {
+						util.insertText(el, contents[i], true);
 					}
 					else {
 						el.appendChild(contents[i]);
@@ -65,13 +99,10 @@ raptor.pack = (function() {
 				}
 			}
 			
-			// if fragment referenced, create and/or add to fragment
+			// if fragment referenced, create and/or add to existing
 			if (fragment) {
-				if (!fragmentStorage[fragment]) {
-					fragmentStorage[fragment] = document.createDocumentFragment();
-					fragmentStorage[fragment].appendChild(el);
-				}
-				else fragmentStorage[fragment].appendChild(el);
+				if (!fragmentStorage[fragment]) fragmentStorage[fragment] = document.createDocumentFragment();
+				fragmentStorage[fragment].appendChild(el);
 			}
 
 			return el;
