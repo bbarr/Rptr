@@ -24,7 +24,7 @@ raptor.evolve = (function () {
 			var root = xmlDoc.childNodes[0];
 			var obj = xml.nodeParse(root);	
 			
-			console.log(obj);
+			return obj;
 		},
 		
 		/**
