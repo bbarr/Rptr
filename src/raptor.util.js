@@ -11,7 +11,7 @@ if(typeof raptor === 'undefined') {
 
 raptor.util = (function () {
 	
-	// Let's prototyp the indexOf for arrays
+	// Let's prototype the indexOf for arrays
 	if(typeof Array.indexOf !== 'function') {
 		
 		Array.prototype.indexOf = function (needle) {
@@ -22,6 +22,29 @@ raptor.util = (function () {
 			}
 			
 			return -1;
+		}
+	}
+	
+	// Prototype the remove function for Arrays
+	if(typeof Array.remove !== 'function') {
+		
+		/*
+		* @param {Int} Index
+		*/
+		Array.prototype.remove = function(index) {
+			
+			if(index + 1 > this.length || index < 0) return this;
+			
+			var left, right;
+			
+			if(index > 0) left = this.slice(0, index);
+			else return this.slice(1, this.length);				
+			
+			if(index < this.length) right = this.slice(index+1, this.length) 
+			else return left;
+															
+			return left.concat(right);										
+			
 		}
 	}
 	
