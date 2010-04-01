@@ -37,7 +37,7 @@ raptor.pack = (function() {
 		 * Tests for data type by constructor name
 		 * 
 		 * @param {Array} types
-		 * @param {Array|Boolean|Date|Math|Number|String|RegExp} data
+		 * @param {Array|Boolean|Date|Math|Number|String|RegExp|Object|HTMLElement} data
 		 */
 		type : function(types, data) {
 			for (var i = 0; i < types.length; i++) {
@@ -59,7 +59,7 @@ raptor.pack = (function() {
 		 * 
 		 * @param {String} tag
 		 * @param {Object} attrs
-		 * @param {String|Number|Array} contents
+		 * @param {String|Number|Array|HTMLElement} contents
 		 * @param {String} fragment (optional)
 		 */
 		birth : function(tag, attrs, contents, fragment) {
@@ -93,11 +93,15 @@ raptor.pack = (function() {
 					if (util.type(['String', 'Number'], contents[i])) {
 						util.insertText(el, contents[i], true);
 					}
+					else if (util.type(['Function'], contents[i])) {
+						contents[i](el); 
+					}
 					else {
 						el.appendChild(contents[i]);
 					}
 				}
 			}
+			else if (util.type(['Function'], contents)) contents(el);
 			
 			// if fragment referenced, create and/or add to existing
 			if (fragment) {
