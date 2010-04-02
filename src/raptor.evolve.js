@@ -1,6 +1,6 @@
 /**
-* Raptor Evolve - Because raptors need to fly too!
-*
+* Raptor Evolve
+* Let's evolve data types into something more useable
 *
 * @author Damian Galarza (dglrza@gmail.com)
 */
@@ -12,6 +12,10 @@ if(typeof raptor === 'undefined') {
 
 raptor.evolve = (function () {
 		
+	/**
+	* XML Parsing Module
+	* Evolves XML document into a friendly JSON Object
+	*/
 	var xml = {
 		
 		/**
@@ -22,9 +26,7 @@ raptor.evolve = (function () {
 		read : function(xmlDoc) {		
 			// Find the root of the XML file	
 			var root = xmlDoc.childNodes[0];
-			var obj = xml.nodeParse(root);	
-			
-			return obj;
+			return xml.nodeParse(root);
 		},
 		
 		/**
@@ -135,7 +137,7 @@ raptor.evolve = (function () {
 	
 	return {
 				
-		'readXML' : xml.read
+		'xml' : xml.read
 		
 	};
 	

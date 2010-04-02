@@ -150,7 +150,7 @@ raptor.jetpack = (function () {
 						var response = xhr.responseXML || xhr.responseText;																		
 							
 						if(currentRequest.parse === 'json') {			
-							response = raptor.evolve.readXML(response);	
+							response = raptor.evolve.xml(response);	
 						}
 												
 						currentRequest.success(response);
