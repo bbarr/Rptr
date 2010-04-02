@@ -36,7 +36,7 @@ raptor.pack = (function() {
 		/**
 		 * Tests for data type by constructor name
 		 * 
-		 * @param {Array} types
+		 * @param {Array|String} types
 		 * @param {Array|Boolean|Date|Math|Number|String|RegExp|Object|HTMLElement} data
 		 */
 		type : function(types, data) {
@@ -108,12 +108,12 @@ raptor.pack = (function() {
 			if (util.type(['String', 'Number'], contents)) {
 				util.insertText(el, contents);
 			}
-			else if (util.type(['Array'], contents)){
+			else if (util.type('Array', contents)){
 				for (var i = 0; i < contents.length; i++) {
 					if (util.type(['String', 'Number'], contents[i])) {
 						util.insertText(el, contents[i], true);
 					}
-					else if (util.type(['Function'], contents[i])) {
+					else if (util.type('Function', contents[i])) {
 						contents[i](el); 
 					}
 					else {
