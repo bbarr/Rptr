@@ -40,9 +40,7 @@ raptor.pack = (function() {
 		 * @param {Array|Boolean|Date|Math|Number|String|RegExp|Object|HTMLElement} data
 		 */
 		type : function(types, data) {
-			
 			var match = false;
-			
 			var test = function(type) {
 				switch(type) {
 					case 'Object':
@@ -55,14 +53,8 @@ raptor.pack = (function() {
 						if (data.constructor && data.constructor.toString().indexOf(type) !== -1) match = true;		
 				}
 			}
-			
 			if (typeof types === 'string') test(types);
-			else {
-				for (var i = 0; i < types.length; i++) {
-					test(types[i]);
-					if (match) break;
-				}
-			}
+			else for (var i = 0; i < types.length && !match; i++) test(types[i]);
 			return (match) ? true : false;
 		}
 	}
