@@ -54,11 +54,22 @@ raptor.util = (function () {
 		 * Tests for data type by constructor name
 		 * 
 		 * @param {Array} types
-		 * @param {Array|Boolean|Date|Math|Number|String|RegExp} data
+		 * @param {Array|Boolean|Date|Math|Number|String|RegExp|Object|HTMLElement} data
 		 */
 		type : function(types, data) {
+			var match = false;
 			for (var i = 0; i < types.length; i++) {
-				if (data.constructor.toString().indexOf(types[i]) !== -1) return true;
+				switch(types[i]) {
+					case 'Object':
+						if (data && typeof data == 'object' && data.length === undefined && data != null) match = true;
+						break;
+					case 'HTMLElement':
+						if (data.tagName) match = true;
+						break;
+					default:
+						if (data.constructor && data.constructor.toString().indexOf(types[i]) !== -1) match = true;		
+				}
+				if (match) return true;
 			}
 			return false;
 		}	
