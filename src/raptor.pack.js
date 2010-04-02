@@ -55,7 +55,7 @@ raptor.pack = (function() {
 			}
 			if (typeof types === 'string') test(types);
 			else for (var i = 0; i < types.length && !match; i++) test(types[i]);
-			return (match) ? true : false;
+			return match;
 		}
 	}
 	
