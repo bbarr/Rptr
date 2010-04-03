@@ -1,7 +1,5 @@
 // Silently create raptor namespace
-if(typeof raptor === 'undefined') {
-	var raptor = {};
-}
+if(typeof raptor === 'undefined') var raptor = {};
 
 raptor.pack = (function() {
 	
@@ -40,27 +38,22 @@ raptor.pack = (function() {
 		 * @param {Array|Boolean|Date|Math|Number|String|RegExp|Object|HTMLElement} data
 		 */
 		type : function(types, data) {
-			var match = false;
 			var test = function(type) {
 				switch(type) {
 					case 'Object':
-						if (typeof data === 'object' && data.length == undefined && data != null) match = true;
-						break;
+						if (typeof data === 'object' && data.length == undefined && data != null) return true;
 					case 'HTMLElement':
-						if (data.tagName) match = true;
-						break;
+						if (data.tagName) return true;
 					default:
-						if (data.constructor && data.constructor.toString().indexOf(type) !== -1) match = true;		
+						if (data.constructor && data.constructor.toString().indexOf(type) !== -1) return true;		
 				}
 			}
 			if (typeof types === 'string') test(types);
-			else for (var i = 0; i < types.length && !match; i++) test(types[i]);
-			return match;
+			else for (var i = 0; i < types.length; i++) test(types[i]);
+			return false;
 		}
 	}
-	
-	
-	
+
 	return {
 		
 		/**
