@@ -1,7 +1,5 @@
 // Silently create raptor namespace
-if(typeof raptor === 'undefined') {
-	var raptor = {};
-}
+if(typeof raptor === 'undefined') var raptor = {};
 
 raptor.pack = (function() {
 	
@@ -36,19 +34,26 @@ raptor.pack = (function() {
 		/**
 		 * Tests for data type by constructor name
 		 * 
-		 * @param {Array} types
-		 * @param {Array|Boolean|Date|Math|Number|String|RegExp} data
+		 * @param {Array|String} types
+		 * @param {Array|Boolean|Date|Math|Number|String|RegExp|Object|HTMLElement} data
 		 */
 		type : function(types, data) {
-			for (var i = 0; i < types.length; i++) {
-				if (data.constructor && data.constructor.toString().indexOf(types[i]) !== -1) return true;
+			var test = function(type) {
+				switch(type) {
+					case 'Object':
+						if (typeof data === 'object' && data.length == undefined && data != null) return true;
+					case 'HTMLElement':
+						if (data.tagName) return true;
+					default:
+						if (data.constructor && data.constructor.toString().indexOf(type) !== -1) return true;		
+				}
 			}
+			if (typeof types === 'string') test(types);
+			else for (var i = 0; i < types.length; i++) test(types[i]);
 			return false;
 		}
 	}
-	
-	
-	
+
 	return {
 		
 		/**
@@ -59,11 +64,11 @@ raptor.pack = (function() {
 		 * 
 		 * @param {String} tag
 		 * @param {Object} attrs
-		 * @param {String|Number|Array} contents
+		 * @param {String|Number|Array|HTMLElement} contents
 		 * @param {String} fragment (optional)
 		 */
 		birth : function(tag, attrs, contents, fragment) {
-
+			
 			// creates new element, or clones existing
 			var el = util.newElement(tag);
 			
@@ -88,16 +93,20 @@ raptor.pack = (function() {
 			if (util.type(['String', 'Number'], contents)) {
 				util.insertText(el, contents);
 			}
-			else if (util.type(['Array'], contents)){
+			else if (util.type('Array', contents)){
 				for (var i = 0; i < contents.length; i++) {
 					if (util.type(['String', 'Number'], contents[i])) {
 						util.insertText(el, contents[i], true);
+					}
+					else if (util.type('Function', contents[i])) {
+						contents[i](el); 
 					}
 					else {
 						el.appendChild(contents[i]);
 					}
 				}
 			}
+			else if (util.type(['Function'], contents)) contents(el);
 			
 			// if fragment referenced, create and/or add to existing
 			if (fragment) {

@@ -23,30 +23,28 @@
 				console.log(response);
 				
 				$ = raptor.pack;
-				
-				var table = $.birth('table', {'class' : 'pack-table'}, '', 'packTable');
-				
-				var _thisMember;
-				
-				// Let's populate the pack members
-				var packMembers = response.pack['pack_members']['raptor'],
-					length = packMembers.length,
-					_thisMember;
 
-				table.appendChild($.birth(
-					'tr', 
-					null,
-					[$.birth('th', null, response.pack['pack_name'])]			
-				));
-				
-				for(var i=0; i<length; i++) {
-					_thisMember = packMembers[i];
-
-					var row = $.birth('tr', null, [$.birth('td', null, _thisMember.name)]);
+				var table = $.birth('table', {'class' : 'pack-table'}, 
 					
-					table.appendChild(row);
-				}
-				
+					[
+					
+						$.birth('tr', null,[$.birth('th', null, response.pack['pack_name'])]),
+						
+						function(table) {
+							var packMembers = response.pack['pack_members']['raptor'];
+							length = packMembers.length;
+							for(var i=0; i<length; i++) {
+								var _thisMember = packMembers[i];
+								var row = $.birth('tr', null, [$.birth('td', null, _thisMember.name)], 'raptors');
+								
+							}
+							table.appendChild($.nursery('raptors'));
+						}
+						
+					], 
+					
+					'packTable');
+								
 				document.getElementById('content').appendChild(table);
 			};
 	
