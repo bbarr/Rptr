@@ -172,6 +172,23 @@
 		},
 		
 		/**
+		* Event Handler for DOMContentLoaded
+		*/
+		domIsLoaded : function () {
+			// Cleanup functions for the document ready method
+			if ( document.addEventListener ) {
+				document.removeEventListener( "DOMContentLoaded", _ready.domIsLoaded, false );
+				_ready.ready();
+			} else if ( document.attachEvent ) {
+				// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
+				if ( document.readyState === "complete" ) {
+					document.detachEvent( "onreadystatechange", _ready.domIsLoaded );
+					_ready.ready();
+				}
+			}
+		},
+		
+		/**
 		* Handle the ready queue
 		*/
 		ready : function () {
@@ -183,6 +200,10 @@
 			}
 		},
 		
+		/**
+		* Actually add event handlers for dealing with ready state
+		*
+		*/
 		handleReady : function () {
 			
 			if ( document.readyState === "complete" ) {
@@ -194,10 +215,11 @@
 			* Attach event handlers for the ready state of the page
 			*/
 			if ( document.addEventListener ) {
-				//document.addEventListener( "DOMContentLoaded", _ready.ready, false );
+				document.addEventListener( "DOMContentLoaded", _ready.domIsLoaded, false );
 				window.addEventListener( "load", _ready.ready, false );
 			}
 			else if( document.attachEvent) {
+				window.attachEvent('DOMContentLoaded', _ready.domIsLoaded);
 				window.attachEvent( "onload", _ready.ready );
 			}
 		}
