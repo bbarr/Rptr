@@ -38,19 +38,20 @@ raptor.pack = (function() {
 		 * @param {Array|Boolean|Date|Math|Number|String|RegExp|Object|HTMLElement} data
 		 */
 		type : function(types, data) {
+			var match = false;
 			var test = function(type) {
 				switch(type) {
 					case 'Object':
-						if (typeof data === 'object' && data.length == undefined && data != null) return true;
+						if (typeof data === 'object' && data.length == undefined && data != null) match = true;
 					case 'HTMLElement':
-						if (data.tagName) return true;
+						if (data.tagName) match = true;
 					default:
-						if (data.constructor && data.constructor.toString().indexOf(type) !== -1) return true;		
+						if (data.constructor && data.constructor.toString().indexOf(type) !== -1) match = true;		
 				}
 			}
 			if (typeof types === 'string') test(types);
-			else for (var i = 0; i < types.length; i++) test(types[i]);
-			return false;
+			else for (var i = 0; i < types.length && !match; i++) test(types[i]);
+			return match;
 		}
 	}
 
