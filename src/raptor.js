@@ -147,6 +147,9 @@
 	*/
 	var _ready = {
 		
+		// Are we already processing the ready
+		_inProgress : false,
+		
 		// Hold the ready queue
 		_readyQueue : [],
 		
@@ -197,6 +200,9 @@
 				for(var i=0; i<_length; i++) {
 					_ready._readyQueue[i]();
 				}
+				
+				// Empty the queue now
+				_ready._readyQueue = [];
 			}
 		},
 		
@@ -205,6 +211,12 @@
 		*
 		*/
 		handleReady : function () {
+			// Exit out early if we got here from somewhere else
+			if(_ready._inProgress) {
+				return;
+			}
+			
+			_ready._inProgress = true;
 			
 			if ( document.readyState === "complete" ) {
 				_ready._isReady = true;
