@@ -1,4 +1,4 @@
-/*
+/**
 * RaptorJS
 * 
 * The raptor Library follows a first come, first serve policy of loading
@@ -99,7 +99,7 @@
 			if(!raptor.config._loadedModules[mod]) {
 				
 				var script = document.createElement("script");
-				script.src = raptor.config._moduleURI + mod + ".js";
+				script.src = raptor.config._moduleURI + 'raptor.' + mod + ".js";
 				script.type = "text/javascript";
 				document.getElementsByTagName("head")[0].appendChild(script);
 				
