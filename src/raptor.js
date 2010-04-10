@@ -13,8 +13,6 @@
 * 
 */
 
-
-
 (function(){
 
 	/*  Determine where the core file is located, and store the URI prefix
@@ -115,33 +113,7 @@
 			}
 		};
 	}
-	
-	/**
-	* Extend an object's properties, recursively
-	* handling an array of objects
-	*
-	* @param {Object} Target object to extend into
-	* @param {Object|Array} 
-	*/
-	raptor.extend = function(target, src) {
 		
-		// Extend the target by all the src
-		if(src.length) {
-			var _length = src.length;
-			for(var i=0; i<_length; i++) {
-				target = raptor.extend(target, src[i]);
-			}
-		}
-		// Extend the source properties into the target
-		else {
-			for(var name in src) {
-				target[name] = src[name];
-			}
-		}
-				
-		return target;
-	}
-	
 	/**
 	* Document ready state handler for raptor
 	*/
