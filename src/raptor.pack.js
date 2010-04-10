@@ -29,29 +29,6 @@ raptor.pack = (function() {
 		insertText : function(el, text) {
 			if (/\&\S+;/.test(text)) el.innerHTML += text;
 			else el.appendChild(document.createTextNode(text));
-		},
-		
-		/**
-		 * Tests for data type by constructor name
-		 * 
-		 * @param {Array|String} types
-		 * @param {Array|Boolean|Date|Math|Number|String|RegExp|Object|HTMLElement} data
-		 */
-		type : function(types, data) {
-			var match = false;
-			var test = function(type) {
-				switch(type) {
-					case 'Object':
-						if (typeof data === 'object' && data.length == undefined && data != null) match = true;
-					case 'HTMLElement':
-						if (data.tagName) match = true;
-					default:
-						if (data.constructor && data.constructor.toString().indexOf(type) !== -1) match = true;		
-				}
-			}
-			if (typeof types === 'string') test(types);
-			else for (var i = 0; i < types.length && !match; i++) test(types[i]);
-			return match;
 		}
 	}
 
@@ -91,15 +68,15 @@ raptor.pack = (function() {
 			}
 			
 			// parse content
-			if (util.type(['String', 'Number'], contents)) {
+			if (raptor.util.type(['String', 'Number'], contents)) {
 				util.insertText(el, contents);
 			}
-			else if (util.type('Array', contents)){
+			else if (raptor.util.type('Array', contents)){
 				for (var i = 0; i < contents.length; i++) {
-					if (util.type(['String', 'Number'], contents[i])) {
+					if (raptor.util.type(['String', 'Number'], contents[i])) {
 						util.insertText(el, contents[i], true);
 					}
-					else if (util.type('Function', contents[i])) {
+					else if (raptor.util.type('Function', contents[i])) {
 						contents[i](el); 
 					}
 					else {
@@ -107,7 +84,7 @@ raptor.pack = (function() {
 					}
 				}
 			}
-			else if (util.type(['Function'], contents)) contents(el);
+			else if (raptor.util.type(['Function'], contents)) contents(el);
 			
 			// if fragment referenced, create and/or add to existing
 			if (fragment) {
@@ -125,6 +102,18 @@ raptor.pack = (function() {
 		 */
 		nursery : function(name) {
 			return fragmentStorage[name].cloneNode(true);
+		},
+		
+		/**
+		 * Checks for "persistent" events to apply
+		 * to the element before appending.
+		 * 
+		 */
+		autoAppendChild : function(el, parent) {
+			if (typeof raptor.events === 'undefined') return false;
+			
+			 
+			parent.appendChild(el);
 		}
 	}
 })();
