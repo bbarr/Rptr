@@ -43,9 +43,6 @@ raptor.events = (function() {
 		/**
 		 * Binds an event/callback to a specific target.
 		 * 
-		 * Supports custom events which can be fired
-		 * using the below fire() method
-		 * 
 		 * @param {HTMLElement|Object|Array|Function} target
 		 * @param {String} type
 		 * @param {Function} cb
@@ -57,8 +54,6 @@ raptor.events = (function() {
 			if (typeof _events[type] === 'undefined') _events[type] = [{'target' : target, 'callbacks' : [cb]}];
 			else {
 				
-				var exists = false;
-				
 				// cycle through targets attached to this event
 				for (var targetData in _events[type]) {
 					var data = _events[type][targetData]; 
@@ -66,7 +61,7 @@ raptor.events = (function() {
 					// if target is already bound to this event, add callback to queue
 					if (data.target == target) {
 						data.callbacks.push(cb);	
-						exists = true;
+						var exists = true;
 					}
 				}
 				
