@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+	
+</head>
+<body>
+	
+	<div id="test">hi!</div>
+	<div id="test2">hi again!</div>
+	
+	<script type="text/javascript" src="/src/raptor.util.js"></script>
+	<script type="text/javascript" src="/src/raptor.pack.js"></script>
+	<script type="text/javascript" src="/src/raptor.events.js"></script>
+	<script type="text/javascript">
+		
+		$events = raptor.events;
+		
+		var obj = {
+			'detectedClick' : function() {
+				alert('this object heard that the div was clicked');
+			}
+		}
+		var div = document.getElementById('test');
+		
+		$events.add(document.getElementById('test2'), 'click', function() {
+			$events.fire({
+				'type' : 'divclicked',
+				'targets' : [obj, div]
+			});
+		});
+		
+		$events.add(obj, 'divclicked', function(data) {
+			obj.detectedClick();
+		});
+		
+		$events.add(div, 'divclicked', function(data) {
+			
+			raptor.pack.birth('div', 
+				{
+					'style' : {
+						'background' : '#ddd',
+						'border' : '1px solid #aaa',
+						'margin' : '10px'
+					}	
+				},
+				[
+					'This is a test div!',
+					function(container) {
+						for (var x = 0; x < 5; x++) {
+							raptor.pack.birth('span', {}, '... this is span number ' + x, 'spans');	
+							container.appendChild(raptor.pack.nursery('spans'));
+						}
+					},
+					raptor.pack.birth('ul', {}, 
+						[
+							raptor.pack.birth('li', {}, 'a list item'),
+							raptor.pack.birth('li', {}, 'a list item'),
+							raptor.pack.birth('li', {}, 'a list item'),
+							raptor.pack.birth('li', {}, 'a list item'),
+							raptor.pack.birth('li', {}, 'a list item')
+						]
+					)
+				],
+				'testDiv'
+			);
+			
+			for (var i = 0; i < 100; i++) {
+				div.appendChild(raptor.pack.nursery('testDiv'));
+			}
+		});
+		
+	</script>
+</body>
+</html>

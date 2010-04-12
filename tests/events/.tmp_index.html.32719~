@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+	
+</head>
+<body>
+	
+	<div id="test">hi!</div>
+	<div id="test2">hi again!</div>
+	
+	<script type="text/javascript" src="/src/raptor.js"></script>
+	<script type="text/javascript" src="/src/raptor.pack.js"></script>
+	<script type="text/javascript" src="/src/raptor.events.js"></script>
+	<script type="text/javascript">
+		
+		$events = raptor.events;
+		
+		var obj = {
+			'detectedClick' : function() {
+				alert('this object heard that the div was clicked');
+			}
+		}
+		var div = document.getElementById('test');
+		
+		$events.add(document.getElementById('test2'), 'click', function() {
+			$events.fire({
+				'type' : 'divclicked',
+				'targets' : [obj, div]
+			});
+		});
+		
+		$events.add(obj, 'divclicked', function(data) {
+			alert('clicked')
+		});
+		
+		$events.add(div, 'divclicked', function(data) {
+			alert('and clicked')
+		});
+		
+	</script>
+</body>
+</html>
