@@ -37,6 +37,35 @@
 raptor.events = (function() {
 	
 	var _events = {};
+	var _targets = [];
+	
+	var _registerEvent = function(target, type, cb) {
+		
+		var targetId = _targets.indexOf(target);
+		
+		if (targetId < 0) {
+			targetId = _targets.push(target) - 1
+			_events[targetId] = {};
+		}
+
+		(_events[targetId][type]) ? _events[targetId][type].push(cb) : _events[targetId][type] = [cb] ;
+	}
+	
+	var _unregisterEvent = function(target, type, cb) {
+		
+		var targetId = _targets.indexOf(target);
+		
+		if (cb) {
+			_events[targetId][type].splice(_events[targetId][type].indexOf(cb), 1);
+		}
+		else if (type) {
+			_events[targetId][type] = null;
+		}
+		else if (target) {
+			_targets.splice(_targets.indexOf(target), 1);
+			_events[targetId] = null;
+		}
+	}
 	
 	return {
 		
@@ -48,28 +77,21 @@ raptor.events = (function() {
 		 * @param {Function} cb
 		 */
 		'add' : function(target, type, cb) {
-			var type = 'on' + type;
-			
-			// if no events of this type exist, instantiate event type, and add event instance
-			if (typeof _events[type] === 'undefined') _events[type] = [{'target' : target, 'callbacks' : [cb]}];
-			else {
-				
-				// cycle through targets attached to this event
-				for (var targetData in _events[type]) {
-					var data = _events[type][targetData]; 
-					
-					// if target is already bound to this event, add callback to queue
-					if (data.target == target) {
-						data.callbacks.push(cb);	
-						var exists = true;
-					}
-				}
-				
-				// if event type exists, but target is not already bound, bind it
-				if (!exists) _events[type].push({'target' : target, 'callbacks' : [cb]});
-			}
-			
+			type = 'on' + type;
+			_registerEvent(target, type, cb);
 			target[type] = this.fire;
+		},
+		
+		/**
+		 * Removes by callback or event or target
+		 * 
+		 * @param {Object} target
+		 * @param {Object} type
+		 * @param {Object} cb
+		 */
+		'remove' : function(target, type, cb) {
+			if (type) type = 'on' + type;
+			_unregisterEvent(target, type || null, cb || null);
 		},
 		
 		/**
@@ -91,32 +113,26 @@ raptor.events = (function() {
 				targets = (event.targets) ? event.targets : [event.target];	
 			}
 			
-			/**
-			 * Loops through array of callbacks and executes each
-			 * passing the event/config object
-			 * 
-			 * @param {Function} cbs
-			 */
-			var fireEventSet = function(cbs) {
-				for (var i = 0; i < cbs.length; i++) cbs[i](event)
-			}
-			
-			// if events of that type exist
-			if (typeof _events[type] !== 'undefined') {
-				var events = _events[type];
+			for (var i = 0; i < targets.length; i++) {
+				var targetId = _targets.indexOf(targets[i]);
 				
-				// loop through events
-				for (var x = 0; x < events.length; x++) {
-					
-					// if multiple targets are specified, call each's callbacks
-					if (targets.length > 0) {
-						for (var i = 0; i < targets.length; i++) {
-							if (events[x].target == targets[i]) fireEventSet(events[x].callbacks); 
-						}
+				if (targetId >= 0) {
+					var events = _events[targetId][type];
+					for (var x = 0; x < events.length; x++) events[x](event);	
+				}
+			}
+		},
+		
+		'cleanse' : function() {
+			for (var targetId in _events) {
+				var target = _targets[targetId] || [];
+				if (raptor.util.type('HTMLElement', target)) {
+					var elements = document.getElementsByTagName(target.tagName);
+					var match = false;
+					for (var i = 0; i < elements.length; i++) {
+						if (elements[i]) match = true;
 					}
-					
-					// else call the all callbacks associated with all targets of that event type
-					else fireEventSet(events[x].callbacks);
+					if (!match) _unregisterEvent(target);
 				}
 			}
 		}
