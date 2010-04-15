@@ -37,34 +37,62 @@
 raptor.events = (function() {
 	
 	var _events = {};
-	var _targets = [];
+	var _targets = {};
+	var _guid = 0;
 	
+	/**
+	 * Registers event
+	 * 
+	 * @param {HTMLElement|Object|Array|Function} target
+	 * @param {String} type
+	 * @param {Function} cb
+	 */
 	var _registerEvent = function(target, type, cb) {
 		
-		var targetId = _targets.indexOf(target);
+		var targetId =_getTargetId(target);
 		
 		if (targetId < 0) {
-			targetId = _targets.push(target) - 1
+			targetId = _guid++;
+			_targets[targetId] = target;
 			_events[targetId] = {};
 		}
-
+		
 		(_events[targetId][type]) ? _events[targetId][type].push(cb) : _events[targetId][type] = [cb] ;
 	}
 	
+	/**
+	 * Unregisters targets, or target->type, or target->type->callback
+	 * 
+	 * @param {HTMLElement|Object|Array|Function} target
+	 * @param {String} type
+	 * @param {Function} cb
+	 */
 	var _unregisterEvent = function(target, type, cb) {
 		
-		var targetId = _targets.indexOf(target);
+		var targetId = _getTargetId(target);
 		
 		if (cb) {
 			_events[targetId][type].splice(_events[targetId][type].indexOf(cb), 1);
 		}
 		else if (type) {
-			_events[targetId][type] = null;
+			delete _events[targetId][type];
 		}
 		else if (target) {
-			_targets.splice(_targets.indexOf(target), 1);
-			_events[targetId] = null;
+			delete _targets[targetId];
+			for (var i in _events) if (i == targetId) delete _events[i];
 		}
+	}
+	
+	/**
+	 * Retreives the unique ID for a target
+	 * 
+	 * @param {HTMLElement|Object|Array|Function} target
+	 */
+	var _getTargetId = function(target) {
+		for (var i in _targets) {
+			if (_targets[i] == target) return i;
+		}
+		return -1;
 	}
 	
 	return {
@@ -85,9 +113,9 @@ raptor.events = (function() {
 		/**
 		 * Removes by callback or event or target
 		 * 
-		 * @param {Object} target
-		 * @param {Object} type
-		 * @param {Object} cb
+		 * @param {HTMLElement|Object|Array|Function} target
+		 * @param {String} type
+		 * @param {Function} cb
 		 */
 		'remove' : function(target, type, cb) {
 			if (type) type = 'on' + type;
@@ -114,7 +142,7 @@ raptor.events = (function() {
 			}
 			
 			for (var i = 0; i < targets.length; i++) {
-				var targetId = _targets.indexOf(targets[i]);
+				var targetId = _getTargetId(targets[i]);
 				
 				if (targetId >= 0) {
 					var events = _events[targetId][type];
@@ -123,16 +151,16 @@ raptor.events = (function() {
 			}
 		},
 		
+		/**
+		 * Cleans up event registry by detecting and removing
+		 * events for missing HTMLElements
+		 */
 		'cleanse' : function() {
 			for (var targetId in _events) {
-				var target = _targets[targetId] || [];
+				var target = _targets[targetId];
 				if (raptor.util.type('HTMLElement', target)) {
 					var elements = document.getElementsByTagName(target.tagName);
-					var match = false;
-					for (var i = 0; i < elements.length; i++) {
-						if (elements[i]) match = true;
-					}
-					if (!match) _unregisterEvent(target);
+					if (elements.indexOf(target) < 0) _unregisterEvent(target);
 				}
 			}
 		}

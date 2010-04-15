@@ -11,18 +11,24 @@ if(typeof raptor === 'undefined') {
 
 raptor.util = (function () {
 	
+	var indexOf = function (needle) {
+		var length = this.length;
+		
+		for(var i=0; i<length; i++) {
+			if(this[i] === needle) return i;
+		}
+		
+		return -1;
+	}
+	
 	// Let's prototype the indexOf for arrays
 	if(typeof Array.indexOf !== 'function') {
-		
-		Array.prototype.indexOf = function (needle) {
-			var length = this.length;
-			
-			for(var i=0; i<length; i++) {
-				if(this[i] === needle) return i;
-			}
-			
-			return -1;
-		}
+		Array.prototype.indexOf = indexOf; 
+	}
+
+	// Let's prototype the indexOf for HTMLCollections
+	if(typeof HTMLCollection.indexOf !== 'function') {
+		HTMLCollection.prototype.indexOf = indexOf;
 	}
 	
 	// Prototype the remove function for Arrays
