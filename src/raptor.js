@@ -20,7 +20,7 @@
 	var scripts = document.getElementsByTagName("script");
 	for(var s=0; s<scripts.length; s++) {
 		if(scripts[s].src.match(/raptor\.js/)) {
-			var baseURI = scripts[s].src.replace(/raptor\.js/, "");
+			var baseURI = scripts[s].src.replace(/raptor\.js.+$/, "");
 			s = scripts.length;
 		}
 	}
@@ -69,24 +69,21 @@
 	raptor.require = function(modules, options) {
 		// available options to be passed are listed below
 		var options = raptor.augment({
-			callback: null
+			callback: null,
+			loadCount : 0,	// How many modules are we loading in this require
+			toLoad : 0	// How many modules have we loaded so far
 		}, options);
 		
 		// modules can be either a string or array
 		if(typeof(modules) == "string") {
 			_load(modules);
+			options.toLoad = 1;
 		} else if(modules.length) {
-			// Hold an internal queue status of what we're requiring
-			var _internalQueue = new Array();
+			options.toLoad = modules.length;
 			for(var i=0; i<modules.length; i++) {
 				_load(modules[i]);
 			}
 		}
-		
-		function _queueHandler (mod) {
-			_internalQueue.push(mod);
-			raptor.config._scriptReady.push(mod);
-		};
 		
 		/**
 		* Internal module loader
@@ -101,13 +98,18 @@
 				script.type = "text/javascript";
 				document.getElementsByTagName("head")[0].appendChild(script);
 				
-				script.onload = script.onreadystatechange = function() {
+				script.onload = script.onreadystatechange = function() {					
 					// raptor.config._scriptReady[]
 					if(raptor.config._scriptReady.indexOf(mod) > -1) {
 						return true;
 					} else {
-						//raptor.config._scriptReady.push(mod);
-						_queueHandler(mod);
+						raptor.config._scriptReady.push(mod);
+						options.loadCount++;
+						
+						// Once all the modules for this require call are filled run callback
+						if(options.loadCount === options.toLoad) {
+							if(options.callback) options.callback();
+						}
 					}
 				}
 			}
@@ -210,9 +212,7 @@
 	};
 	
 	// Extend the raptor object for ready
-	raptor.extend(raptor, {
-		'ready' : _ready.append
-	});
+	raptor.ready = _ready.append;
 	
 	// Set up base modules found in the config
 	raptor.ready(function () {
