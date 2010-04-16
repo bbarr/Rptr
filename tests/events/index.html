@@ -21,6 +21,11 @@
 		$events.add(div, 'click', function(e) {
 			div2.innerHTML = 'hi again!';
 			$events.cleanse();
+			$events.fire('divWasClicked');
+		});
+		
+		$events.add(div, 'divWasClicked', function(e) {
+			alert('it was clicked');
 		});
 		
 		$events.add(div2, 'click', function(data) {

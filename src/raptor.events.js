@@ -134,19 +134,18 @@ raptor.events = (function() {
 			// event will either be served by the browser, or manually. window.event for IE.
 			event = event || window.event;
 			var type = (raptor.util.type('String', event)) ? 'on' + event : 'on' + event.type;
-			
+
 			// gather target(s) into an array
 			var targets = [];
-			if (event.targets || event.target) {
-				targets = (event.targets) ? event.targets : [event.target];	
-			}
+			if (event.targets || event.target) targets = (event.targets) ? event.targets : [event.target];	
+			else for (var target in _targets) targets.push(_targets[target]);
 			
 			for (var i = 0; i < targets.length; i++) {
 				var targetId = _getTargetId(targets[i]);
 				
 				if (targetId >= 0) {
 					var events = _events[targetId][type];
-					for (var x = 0; x < events.length; x++) events[x](event);	
+					if (events) for (var x = 0; x < events.length; x++) events[x](event);	
 				}
 			}
 		},
