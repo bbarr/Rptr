@@ -130,7 +130,7 @@ raptor.events = (function() {
 		 * @param {Object} event
 		 */
 		'fire' : function(event) {
-
+console.log(event)
 			// event will either be served by the browser, or manually. window.event for IE.
 			event = event || window.event;
 			var type = (raptor.util.type('String', event)) ? 'on' + event : 'on' + event.type;
