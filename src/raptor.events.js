@@ -104,17 +104,23 @@ raptor.events = (function() {
 		 * @param {String} type
 		 * @param {Function} cb
 		 */
-		'add' : function(target, type, cb) {
-			
-			if (arguments.length == 2) {				
-				cb = arguments[1];
-				type = arguments[0];
-				target = '*';
-			}
+		'add' : function(targets, type, cb) {
 			
 			type = 'on' + type;
-			_registerEvent(target, type, cb);
-			target[type] = this.fire;
+			
+			var register = function() {
+				_registerEvent(target, type, cb);
+				target[type] = this.fire;
+			}
+			
+			// if (typeOfEvent, callback);
+			if (raptor.util.type('String', target)) register('*', target, type);
+			
+			// if (arrayOfTargets, type, callback);
+			else if (raptor.util.type('Array', targets)) for (var i = 0; i < targets.length; i++) register(targets[i], type, cb);
+			
+			// if (target, type, callback)
+			else register(targets, type, cb);
 		},
 		
 		/**
