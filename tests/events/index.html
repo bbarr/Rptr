@@ -24,7 +24,7 @@
 			$events.fire('divWasClicked');
 		});
 		
-		$events.add(div, 'divWasClicked', function(e) {
+		$events.add('divWasClicked', function(e) {
 			alert('it was clicked');
 		});
 		
@@ -71,7 +71,7 @@ var start = new Date();
 			}
 
 var end = new Date();
-alert((end.getTime() - start.getTime()));			
+//alert((end.getTime() - start.getTime()));			
 			
 		});
 		
