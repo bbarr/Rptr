@@ -255,12 +255,7 @@ raptor = (function () {
 			if(typeof Array.indexOf !== 'function') {
 				Array.prototype.indexOf = indexOf; 
 			}
-
-			// Let's prototype the indexOf for HTMLCollections
-			if(typeof HTMLCollection.indexOf !== 'function') {
-				HTMLCollection.prototype.indexOf = indexOf;
-			}
-
+			
 			// Prototype the remove function for Arrays
 			if(typeof Array.remove !== 'function') {
 	

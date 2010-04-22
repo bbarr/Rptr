@@ -104,23 +104,24 @@ raptor.events = (function() {
 		 * @param {String} type
 		 * @param {Function} cb
 		 */
-		'add' : function(targets, type, cb) {
+		'add' : function(target, type, cb) {
 			
 			type = 'on' + type;
+			var _this = this;
 			
-			var register = function() {
+			var register = function(target, type, cb) {
 				_registerEvent(target, type, cb);
-				target[type] = this.fire;
+				target[type] = _this.fire;
 			}
 			
 			// if (typeOfEvent, callback);
 			if (raptor.util.type('String', target)) register('*', target, type);
 			
 			// if (arrayOfTargets, type, callback);
-			else if (raptor.util.type('Array', targets)) for (var i = 0; i < targets.length; i++) register(targets[i], type, cb);
+			else if (raptor.util.type('Array', target)) for (var i = 0; i < targets.length; i++) register(targets[i], type, cb);
 			
 			// if (target, type, callback)
-			else register(targets, type, cb);
+			else register(target, type, cb);
 		},
 		
 		/**
@@ -148,20 +149,28 @@ raptor.events = (function() {
 			event = event || window.event;
 			var type = (raptor.util.type('String', event)) ? 'on' + event : 'on' + event.type;
 
-			// gather target(s) into an array
-			var targets = [];
-			if (event.targets || event.target) targets = (event.targets) ? event.targets : [event.target];	
-			else for (var target in _targets) targets.push(_targets[target]);
+			if (event.targets) var targets = event.targets;
+			else {
+				var target = event.target || event.srcElement || '*';
+				if (target.nodeType === 3) target = target.parentNode;
+			}
 			
-			for (var i = 0; i < targets.length; i++) {
-				var targetId = _getTargetId(targets[i]);
+			if (!event.target && !event.srcElement) {
+				if (target) event.target = target;
+				else event.targets = targets;
+			}
+			
+			var handleTarget = function(target) {
+				var targetId = _getTargetId(target);
 				
 				if (targetId >= 0) {
 					var events = _events[targetId][type];
-					console.log(_events[targetId])
 					if (events) for (var x = 0; x < events.length; x++) events[x](event);	
 				}
 			}
+			
+			if (target) handleTarget(target);
+			else for (var i = 0; i < targets.length; i++) handleTarget(targets[i]);
 		},
 		
 		/**
@@ -173,7 +182,9 @@ raptor.events = (function() {
 				var target = _targets[targetId];
 				if (raptor.util.type('HTMLElement', target)) {
 					var elements = document.getElementsByTagName(target.tagName);
-					if (elements.indexOf(target) < 0) _unregisterEvent(target);
+					var match = false;
+					for (var i = 0; i < elements.length && !match; i++) if (elements[i] == target) match = true;
+					if (!match) _unregisterEvent(target);
 				}
 			}
 		}
