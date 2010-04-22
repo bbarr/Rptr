@@ -94,6 +94,9 @@ raptor.pack = (function() {
 			if (raptor.util.type(['String', 'Number'], contents)) {
 				util.insertText(el, contents);
 			}
+			else if (raptor.util.type('HTMLElement', contents)) {
+				el.appendChild(contents);
+			}
 			else if (raptor.util.type('Array', contents)){
 				for (var i = 0; i < contents.length; i++) {
 					if (raptor.util.type(['String', 'Number'], contents[i])) {
