@@ -105,11 +105,11 @@ raptor.events = (function() {
 		 * @param {Function} cb
 		 */
 		'add' : function(target, type, cb) {
-			
-			type = 'on' + type;
+						
 			var _this = this;
 			
 			var register = function(target, type, cb) {
+				type = 'on' + type;
 				_registerEvent(target, type, cb);
 				target[type] = _this.fire;
 			}
@@ -147,27 +147,40 @@ raptor.events = (function() {
 
 			// event will either be served by the browser, or manually. window.event for IE.
 			event = event || window.event;
-			var type = (raptor.util.type('String', event)) ? 'on' + event : 'on' + event.type;
+			var type = (util.type('String', event)) ? 'on' + event : 'on' + event.type;
 
+			// if targets
 			if (event.targets) var targets = event.targets;
 			else {
-				var target = event.target || event.srcElement || '*';
+				
+				var target;
+				if (event.target) {
+					target = event.target;		
+				}
+				else if (event.srcElement) {
+					event.target = target = event.srcElement;
+				}
+				else {
+					event.target = target = '*';
+				}
+				
 				if (target.nodeType === 3) target = target.parentNode;
+				
+				var id;
+				while (id = _getTargetId(target) === -1) {
+					target = target.parentNode;
+					if (target === document.body) return false;
+				}
 			}
-			
-			if (!event.target && !event.srcElement) {
-				if (target) event.target = target;
-				else event.targets = targets;
-			}
-			
+
 			var handleTarget = function(target) {
-				var targetId = _getTargetId(target);
+				var targetId = id || _getTargetId(target);
 				
 				if (targetId >= 0) {
 					var events = _events[targetId][type];
 					if (events) for (var x = 0; x < events.length; x++) events[x](event);	
 				}
-			}
+			}					
 			
 			if (target) handleTarget(target);
 			else for (var i = 0; i < targets.length; i++) handleTarget(targets[i]);
