@@ -147,7 +147,7 @@ raptor.events = (function() {
 
 			// event will either be served by the browser, or manually. window.event for IE.
 			event = event || window.event;
-			var type = (util.type('String', event)) ? 'on' + event : 'on' + event.type;
+			var type = (raptor.util.type('String', event)) ? 'on' + event : 'on' + event.type;
 
 			// if targets
 			if (event.targets) var targets = event.targets;
