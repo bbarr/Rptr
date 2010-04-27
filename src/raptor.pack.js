@@ -125,9 +125,15 @@ raptor.pack = (function() {
 		 * Returns stored documentFragment clone
 		 * 
 		 * @param {String} name
+		 * @param {Bool} is this a unique usage
 		 */
-		nursery : function(name) {
-			return fragmentStorage[name].cloneNode(true);
+		nursery : function(name, unique) {						
+			var frag = fragmentStorage[name].cloneNode(true);
+			
+			// Trash it if unique
+			if (unique) delete fragmentStorage[name];
+				
+			return frag;
 		},
 		
 		/**
@@ -137,8 +143,7 @@ raptor.pack = (function() {
 		 */
 		autoAppendChild : function(el, parent) {
 			if (typeof raptor.events === 'undefined') return false;
-			
-			 
+
 			parent.appendChild(el);
 		},
 		
