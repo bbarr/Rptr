@@ -104,11 +104,31 @@ raptor = (function () {
 						return true;
 					} else {
 						config._scriptReady.push(mod);
-						options.loadCount++;
+						options.loadCount++;												
 						
 						// Once all the modules for this require call are filled run callback
-						if(options.loadCount === options.toLoad) {
-							if(options.callback) options.callback();
+						if(options.loadCount === options.toLoad) {														
+							
+							if(options.callback) {								
+								// Ensure all modules in this require were loaded otherwise wait for them
+								var verifyLoad = function () {									
+									var isLoaded = true;
+									var _thisModule;
+									for(var i=0; i<modules.length && isLoaded; i++) {
+										_thisModule = modules[i];
+																						
+										if( typeof raptor[_thisModule] === 'undefined') {
+											isLoaded = false;											
+											setTimeout(verifyLoad, 500);
+										}
+									}	
+									
+									// Run the callback if everything is loaded
+									if(isLoaded) options.callback();
+								};
+								
+								verifyLoad();																											
+							}
 						}
 					}
 				}
@@ -276,12 +296,8 @@ raptor = (function () {
 		
 				}
 			}		
-		}
+		},
 		
-	};
-
-	var raptor = {
-			
 		/* Function parameter augmentation
 		** Andre Lewis
 		** http://earthcode.com/blog/2006/01/optional_args.html
@@ -300,6 +316,7 @@ raptor = (function () {
 			}
 			return oSelf;	
 		}
+		
 	};
 
 	_this.init();
@@ -318,7 +335,7 @@ raptor = (function () {
 		require : require,
 		util : util,
 		
-		augment : raptor.augment
+		augment : _this.augment
 	}
 	
 })();
