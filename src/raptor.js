@@ -222,17 +222,15 @@ raptor = (function () {
 			/*  Determine where the core file is located, and store the URI prefix
 			*/
 			var scripts = document.getElementsByTagName("script");
-			for(var s=0; s<scripts.length; s++) {
+			for(var s=0; s<scripts.length; s++) {				
 				if(scripts[s].src.match(/raptor\.js/)) {
-					var baseURI = scripts[s].src.replace(/raptor\.js.+$/, "");
+					var baseURI = scripts[s].src.replace(/raptor\.js*.+$/, "");					
 					s = scripts.length;
 				}
 			}
-
 			
 			config._baseURI = baseURI;
-			config._moduleURI = baseURI;
-
+			config._moduleURI = baseURI;			
 			_this.extendPrototypes();
 		},
 
