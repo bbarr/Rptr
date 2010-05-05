@@ -2,6 +2,9 @@
 if(typeof raptor === 'undefined') var raptor = {};
 
 /*
+	
+	INCLUDES SIZZLE SELECTOR ENGINE:
+
  	Copyright (c) 2009 John Resig
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -95,7 +98,7 @@ raptor.pack = (function() {
 				util.insertText(el, contents);
 			}
 			else if (raptor.util.type('HTMLElement', contents)) {
-				el.appendChild(contents);
+				this.append(contents, el);
 			}
 			else if (raptor.util.type('Array', contents)){
 				for (var i = 0; i < contents.length; i++) {
@@ -106,7 +109,7 @@ raptor.pack = (function() {
 						contents[i](el); 
 					}
 					else {
-						el.appendChild(contents[i]);
+						this.append(contents[i], el);
 					}
 				}
 			}
@@ -115,7 +118,7 @@ raptor.pack = (function() {
 			// if fragment referenced, create and/or add to existing
 			if (fragment) {
 				if (!fragmentStorage[fragment]) fragmentStorage[fragment] = document.createDocumentFragment();
-				fragmentStorage[fragment].appendChild(el);
+				this.append(el, fragmentStorage[fragment]);
 			}
 
 			return el;
@@ -141,10 +144,9 @@ raptor.pack = (function() {
 		 * to the element before appending.
 		 * 
 		 */
-		autoAppendChild : function(el, parent) {
-			if (typeof raptor.events === 'undefined') return false;
-
+		append : function(el, parent) {
 			parent.appendChild(el);
+			raptor.events.persist(el);
 		},
 		
 		/**

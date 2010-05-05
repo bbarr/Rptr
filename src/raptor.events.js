@@ -38,7 +38,25 @@ raptor.events = (function() {
 	
 	var _events = {};
 	var _targets = {};
+	var _persists = {};
 	var _guid = 0;
+	
+	/**
+	 * Registers event
+	 * 
+	 * @param {HTMLElement|Object|Array|Function} target
+	 * @param {String} type
+	 * @param {Function} cb
+	 */
+	var _registerPersist = function(query, type, cb) {
+		if (_persists[query]) {
+			(_persists[query][type]) ? _persists[query][type].push(cb) : _persists[query][type] = [cb];
+		}
+		else {
+			_persists[query] = {};
+			_persists[query][type] = [cb];
+		}
+	}
 	
 	/**
 	 * Registers event
@@ -57,7 +75,7 @@ raptor.events = (function() {
 			_events[targetId] = {};
 		}
 		
-		(_events[targetId][type]) ? _events[targetId][type].push(cb) : _events[targetId][type] = [cb] ;
+		(_events[targetId][type]) ? _events[targetId][type].push(cb) : _events[targetId][type] = [cb];
 	}
 	
 	/**
@@ -106,6 +124,7 @@ raptor.events = (function() {
 		 */
 		'add' : function(target, type, cb) {
 						
+			cb = cb || null;
 			var _this = this;
 			
 			var register = function(target, type, cb) {
@@ -113,12 +132,27 @@ raptor.events = (function() {
 				_registerEvent(target, type, cb);
 				target[type] = _this.fire;
 			}
-			
+	
 			// if (typeOfEvent, callback);
-			if (raptor.util.type('String', target)) register('*', target, type);
+			if (raptor.util.type('String', target)) {
+				if (cb) {
+					_registerPersist(target, type, cb);
+					
+					var target = raptor.pack.hunt(target);
+					for (var i = 0; i < target.length; i++) {
+						register(target[i], type, cb);
+					}
+				}
+				
+				else register('*', target, type);
+			}
 			
 			// if (arrayOfTargets, type, callback);
-			else if (raptor.util.type('Array', target)) for (var i = 0; i < targets.length; i++) register(targets[i], type, cb);
+			else if (raptor.util.type('Array', target)) {
+				for (var i = 0; i < target.length; i++) {
+					register(target[i], type, cb);
+				}
+			}
 			
 			// if (target, type, callback)
 			else register(target, type, cb);
@@ -198,6 +232,19 @@ raptor.events = (function() {
 					var match = false;
 					for (var i = 0; i < elements.length && !match; i++) if (elements[i] == target) match = true;
 					if (!match) _unregisterEvent(target);
+				}
+			}
+		},
+		
+		'persist' : function(el) {
+			for (var query in _persists) {
+				var set = raptor.pack.hunt(query);
+				if (set.indexOf(el) > -1) {
+					for (var type in _persists[query]) {
+						for (var i = 0; i < _persists[query][type].length; i++) {	
+							this.add(el, type, _persists[query][type][i]);
+						}
+					}
 				}
 			}
 		}

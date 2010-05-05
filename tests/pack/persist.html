@@ -1,0 +1,24 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+	
+</head>
+<body>
+	
+	<a href="#">click me</a>
+	
+	<script type="text/javascript" src="/src/raptor.js"></script>
+	<script type="text/javascript" src="/src/raptor.events.js"></script>
+	<script type="text/javascript" src="/src/raptor.pack.js"></script>
+	<script type="text/javascript">
+		
+		$ = raptor.pack;
+		$e = raptor.events;
+		
+		$e.add('a', 'click', function(e) {
+			$.append($.birth('a', {'href' : '#'}, 'a persistant motha effa'), document.body);
+			return false;
+		});
+	</script>
+</body>
+</html>
