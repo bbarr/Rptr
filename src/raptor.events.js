@@ -37,7 +37,7 @@
 raptor.events = (function() {
 	
 	/**
-	*	Structure:
+	*	Example structure:
 	*
 	*	_events = {
 	*		0 : {
@@ -53,7 +53,7 @@ raptor.events = (function() {
 	
 	
 	/**
-	*	Structure:
+	*	Example structure:
 	*
 	*	_targets = {
 	*		0 : HTMLElement,
@@ -63,7 +63,7 @@ raptor.events = (function() {
 	var _targets = {};
 	
 	/**
-	*	Structure:
+	*	Example structure:
 	*
 	*	_persists = {
 	*		'a.ajax' : {
@@ -225,39 +225,53 @@ raptor.events = (function() {
 			event = event || window.event;
 			var type = (raptor.util.type('String', event)) ? 'on' + event : 'on' + event.type;
 
-			// if targets
+			// if multiple targets
 			if (event.targets) var targets = event.targets;
 			else {
 				
 				var target;
+				
+				// W3C
 				if (event.target) {
 					target = event.target;		
 				}
+				
+				// IE
 				else if (event.srcElement) {
 					event.target = target = event.srcElement;
 				}
+				
+				// global event
 				else {
 					event.target = target = '*';
 				}
 				
+				// Safari bug
 				if (target.nodeType === 3) target = target.parentNode;
 				
+				// if event happens on an child element, bubble up to the appropriate parent
 				var id;
 				while (id = _getTargetId(target) === -1) {
 					target = target.parentNode;
 					if (target === document.body) return false;
 				}
 			}
-
+			
+			// fire events on a given target
 			var handleTarget = function(target) {
 				var targetId = id || _getTargetId(target);
 				
 				if (targetId >= 0) {
 					var events = _events[targetId][type];
-					if (events) for (var x = 0; x < events.length; x++) events[x](event);	
+
+					if (events) {
+						for (var x = 0; x < events.length; x++) {
+							events[x](event);
+						}
 				}
 			}					
 			
+			// call handleTarget on target(s)
 			if (target) handleTarget(target);
 			else for (var i = 0; i < targets.length; i++) handleTarget(targets[i]);
 		},
@@ -269,23 +283,31 @@ raptor.events = (function() {
 		'cleanse' : function() {
 			for (var targetId in _events) {
 				var target = _targets[targetId];
+				
+				// proceed only if the target is an HTMLElement
 				if (raptor.util.type('HTMLElement', target)) {
-					var elements = document.getElementsByTagName(target.tagName);
-					var match = false;
-					for (var i = 0; i < elements.length && !match; i++) if (elements[i] == target) match = true;
-					if (!match) _unregisterEvent(target);
+					
+					// get elements by targets tagName and remove and targets that are not longer present in document
+					var elements = raptor.pack.hunt(target.tagName);
+					if (elements.indexOf(target) === -1) _unregisterEvent(target);
 				}
 			}
 		},
 		
-		'stop' : function(e) {
-			if (e.preventDefault) e.preventDefault();
-		},
-		
+		/**
+		 * Checks a new element against persistent conditions, adding whatever events match 
+		 *
+		 * @param {HTMLElement} el
+		 */
 		'persist' : function(el) {
 			for (var query in _persists) {
 				var set = raptor.pack.hunt(query);
+				
+				// search set of elements to see if el is present
 				if (set.indexOf(el) > -1) {
+				
+					// for each event type registered to that persist, cycle through and add each type
+					// and its callbacks onto the new element
 					for (var type in _persists[query]) {
 						for (var i = 0; i < _persists[query][type].length; i++) {	
 							this.add(el, type, _persists[query][type][i]);
