@@ -36,15 +36,54 @@
 
 raptor.events = (function() {
 	
+	/**
+	*	Structure:
+	*
+	*	_events = {
+	*		0 : {
+	*			'onclick' : [cb, cb, cb]
+	*		},
+	*		3 : {
+	*			'itemClicked' : [cb],
+	*			'onchange' : [cb, cb]
+	*		}
+	*	}
+	*/
 	var _events = {};
+	
+	
+	/**
+	*	Structure:
+	*
+	*	_targets = {
+	*		0 : HTMLElement,
+	*		3 : HTMLElement
+	*	}
+	*/
 	var _targets = {};
+	
+	/**
+	*	Structure:
+	*
+	*	_persists = {
+	*		'a.ajax' : {
+	*			'onclick' : [cb, cb]
+	*		},
+	*		'div#example input:disabled' : {
+	*			'onchange' : [cb]
+	*		}
+	*	}
+	*/
 	var _persists = {};
+	
+	// this gets incremented and used as a unique ID for addition to _targets
 	var _guid = 0;
 	
 	/**
-	 * Registers event
+	 * Registers persistent event conditions.
+	 * query is a string to be used by Sizzle to check for matches in new elements
 	 * 
-	 * @param {HTMLElement|Object|Array|Function} target
+	 * @param {String} query
 	 * @param {String} type
 	 * @param {Function} cb
 	 */
@@ -61,7 +100,7 @@ raptor.events = (function() {
 	/**
 	 * Registers event
 	 * 
-	 * @param {HTMLElement|Object|Array|Function} target
+	 * @param {HTMLElement|Object} target
 	 * @param {String} type
 	 * @param {Function} cb
 	 */
@@ -104,7 +143,7 @@ raptor.events = (function() {
 	/**
 	 * Retreives the unique ID for a target
 	 * 
-	 * @param {HTMLElement|Object|Array|Function} target
+	 * @param {HTMLElement|Object} target
 	 */
 	var _getTargetId = function(target) {
 		for (var i in _targets) {
@@ -118,7 +157,7 @@ raptor.events = (function() {
 		/**
 		 * Binds an event/callback to a specific target.
 		 * 
-		 * @param {HTMLElement|Object|Array|Function} target
+		 * @param {HTMLElement|Object|String} target
 		 * @param {String} type
 		 * @param {Function} cb
 		 */
@@ -133,8 +172,10 @@ raptor.events = (function() {
 				target[type] = _this.fire;
 			}
 	
-			// if (typeOfEvent, callback);
+			// either global or persistent event is being registered
 			if (raptor.util.type('String', target)) {
+			
+				// if cb exists, then a pesistent event is being registered
 				if (cb) {
 					_registerPersist(target, type, cb);
 					
@@ -144,6 +185,7 @@ raptor.events = (function() {
 					}
 				}
 				
+				// if !cb then a global event is being registered
 				else register('*', target, type);
 			}
 			
@@ -234,6 +276,10 @@ raptor.events = (function() {
 					if (!match) _unregisterEvent(target);
 				}
 			}
+		},
+		
+		'stop' : function(e) {
+			if (e.preventDefault) e.preventDefault();
 		},
 		
 		'persist' : function(el) {
