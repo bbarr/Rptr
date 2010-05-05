@@ -1,11 +1,17 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" >
 <head>
-	
+	<style type="text/css">
+		a {display:block;}
+		div {border:1px solid #aaa;padding:20px;margin:10px 0;}
+		div a {background:#eee;margin:2px 0;padding:10px;}
+	</style>
 </head>
 <body>
 	
 	<a href="#">click me</a>
+	
+	<div><a href="#">in a div</a></div>
 	
 	<script type="text/javascript" src="/src/raptor.js"></script>
 	<script type="text/javascript" src="/src/raptor.events.js"></script>
@@ -16,9 +22,15 @@
 		$e = raptor.events;
 		
 		$e.add('a', 'click', function(e) {
-			$.append($.birth('a', {'href' : '#'}, 'a persistant motha effa'), document.body);
+			$.append($.birth('a', {'href' : '#'}, 'out of a div'), document.body);
 			return false;
 		});
+		
+		$e.add('div a', 'click', function(e) {
+			$.append($.birth('a', {'href' : '#'}, 'in a div'), $.hunt('div')[0]);
+			return false;
+		});
+		
 	</script>
 </body>
 </html>
