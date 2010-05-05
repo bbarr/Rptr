@@ -9,8 +9,7 @@
 </head>
 <body>
 	
-	<a href="#">click me</a>
-	
+	<a href="#">click me</a>	
 	<div><a href="#">in a div</a></div>
 	
 	<script type="text/javascript" src="/src/raptor.js"></script>
@@ -18,8 +17,8 @@
 	<script type="text/javascript" src="/src/raptor.pack.js"></script>
 	<script type="text/javascript">
 		
-		$ = raptor.pack;
-		$e = raptor.events;
+		var $ = raptor.pack;
+		var $e = raptor.events;
 		
 		$e.add('a', 'click', function(e) {
 			$.append($.birth('a', {'href' : '#'}, 'out of a div'), document.body);
