@@ -87,9 +87,10 @@ raptor.pack = (function() {
 						el.style[prop] = styles[prop];
 					}
 				}
-				else {
-					if (el[attr]) el[attr] = attrs[attr];
-					else el.setAttribute(attr, attrs[attr]);
+				else {			
+					if( attr === 'class') el.className = attrs[attr]; // Properly handle classes in IE
+					else if (el[attr]) el[attr] = attrs[attr];
+					else el.setAttribute(attr, attrs[attr]);	
 				}
 			}
 			
