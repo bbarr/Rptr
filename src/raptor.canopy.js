@@ -4,48 +4,30 @@
 
 raptor.canopy = (function() {
 	
-	var _config = {};
-	var _html = {};
-	var $ = raptor.pack;
+	var _overlays = {};
 	
-	var _showBackdrop = function() {
+	var overlay = function(config) {
 		
-		_frame.backdrop = $.birth('div', {'id' : 'overlay-backdrop'});
-		document.body.appendChild(_frame.backdrop);
+		this.defaults = {}
+		this.config = raptor.util.extend(this.defaults, config);
 		
-		return function() {
-			$.removeClass(_frame.backdrop, 'hide');
-		}
+		this.hasNeeds = (this.preCall) ? true : false;
 	}
 	
-	var _hideBackdrop = function() {
-		$.addClass(_frame.backdrop, 'hide');
-	}
-	
-	var _setPosition = function(x, y) {
-		if (x) _html.x = x;
-		else {
-			// waht the hell am i doing?!
+	overlay.prototype = {
+		'show' : function() {
+			
+			if (this.hasNeeds) this.preCall();
+			if (this.obtrusive) this.disablePage();
+			
+			this.setPosition();
 		}
 	}
 	
 	return {
-		'init' : function(config) {
+		init : function(config) {
 			
-			_config = config;
-			
-			if (_config.tooltip) {
-				
-			}
-		},
-		'show' : function() {
-			
-			if (_config.obtrusive) _showBackdrop();
-			
-		},
-		'hide' : function() {
-			
-			if (_config.obtrusive) _hideBackdrop();
+			return _overlays[config.name] = new Overlay(config);
 		}
 	}
 });
