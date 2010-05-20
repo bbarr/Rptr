@@ -1,0 +1,45 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+	"http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+		<title>raptor.canopy Test Center</title>
+		
+		<style type="text/css">
+			.hide {display:none;}
+			#obtrusive-backdrop {display:none;position:absolute;top:0px;width:100%;bottom:0px;opacity:.5;background:#000;}
+			.obtrusive #obtrusive-backdrop {display:block;}
+		</style>
+	</head>
+	
+	<body>
+
+		<div id="content">
+			
+		</div>
+		
+		<script type="text/javascript" src="/src/raptor.js"></script>
+		<script type="text/javascript" src="/src/raptor.pack.js"></script>
+		<script type="text/javascript" src="/src/raptor.events.js"></script>
+		<script type="text/javascript" src="/src/raptor.canopy.js"></script>
+		<script type="text/javascript">
+			
+			var $ = raptor.pack;
+			var div = document.getElementById('content');
+			
+			$.addClass('classy', div);
+			
+			var overlay = raptor.canopy.init({
+				'id' : 'alert',
+				'type' : 'obtrusive'
+			});
+			
+			overlay.show();
+			
+		</script>
+		
+	</body>
+
+</html>	
