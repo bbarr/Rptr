@@ -87,9 +87,11 @@ raptor.pack = (function() {
 						el.style[prop] = styles[prop];
 					}
 				}
-				else {
+				// Properly handle classes attributes
+				else if( attr === 'class') el.className = attrs[attr];
+				else {								
 					if (el[attr]) el[attr] = attrs[attr];
-					else el.setAttribute(attr, attrs[attr]);
+					else el.setAttribute(attr, attrs[attr]);	
 				}
 			}
 			
