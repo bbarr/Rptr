@@ -96,27 +96,28 @@ raptor.pack = (function() {
 			}
 			
 			// parse content
-			if (raptor.util.type(['String', 'Number'], contents)) {
-				util.insertText(el, contents);
-			}
-			else if (raptor.util.type('HTMLElement', contents)) {
-				this.append(contents, el);
-			}
-			else if (raptor.util.type('Array', contents)){
-				for (var i = 0; i < contents.length; i++) {
-					if (raptor.util.type(['String', 'Number'], contents[i])) {
-						util.insertText(el, contents[i], true);
-					}
-					else if (raptor.util.type('Function', contents[i])) {
-						contents[i](el); 
-					}
-					else {
-						this.append(contents[i], el);
+			if (contents) {
+				if (raptor.util.type(['String', 'Number'], contents)) {
+					util.insertText(el, contents);
+				}
+				else if (raptor.util.type('HTMLElement', contents)) {
+					this.append(contents, el);
+				}
+				else if (raptor.util.type('Array', contents)){
+					for (var i = 0; i < contents.length; i++) {
+						if (raptor.util.type(['String', 'Number'], contents[i])) {
+							util.insertText(el, contents[i], true);
+						}
+						else if (raptor.util.type('Function', contents[i])) {
+							contents[i](el); 
+						}
+						else {
+							this.append(contents[i], el);
+						}
 					}
 				}
+				else if (raptor.util.type(['Function'], contents)) contents(el);
 			}
-			else if (raptor.util.type(['Function'], contents)) contents(el);
-			
 			// if fragment referenced, create and/or add to existing
 			if (fragment) {
 				if (!fragmentStorage[fragment]) fragmentStorage[fragment] = document.createDocumentFragment();
@@ -154,7 +155,19 @@ raptor.pack = (function() {
 		/**
 		 * hunt is sizzling!
 		 */
-		hunt : window.Sizzle
+		hunt : window.Sizzle,
+		
+		hasClass : function(className, el) {
+			return (el.className.match(new RegExp('\\b' + className + '\\b'))) ? true : false;
+		},
+		
+		addClass : function(className, el) {
+			if (!this.hasClass(className, el)) el.className += ' ' + className;
+		},
+		
+		removeClass : function(className, el) {
+			if (this.hasClass(className, el)) el.className.replace(new RegExp('\\b' + className + '\\b'), '');
+		}
 	};
 
 })()
