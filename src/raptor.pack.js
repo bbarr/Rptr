@@ -130,7 +130,7 @@ raptor.pack = (function() {
 		/**
 		 * Returns stored documentFragment clone
 		 * 
-		 * @param {String} name
+		 * @param {String} namwe
 		 * @param {Bool} is this a unique usage
 		 */
 		nursery : function(name, unique) {						
@@ -158,15 +158,22 @@ raptor.pack = (function() {
 		hunt : window.Sizzle,
 		
 		hasClass : function(className, el) {
-			return (el.className.match(new RegExp('\\b' + className + '\\b'))) ? true : false;
+			return el.className.split(' ').indexOf(className) > -1;
 		},
 		
 		addClass : function(className, el) {
-			if (!this.hasClass(className, el)) el.className += ' ' + className;
+			var classes = el.className.split(' ');
+			if (!classes === '') classes = [];
+			if (classes.indexOf(className) < 0) classes.push(className);
+			el.className = classes.join(' ');
 		},
 		
 		removeClass : function(className, el) {
-			if (this.hasClass(className, el)) el.className.replace(new RegExp('\\b' + className + '\\b'), '');
+			var classes = el.className.split(' ');
+			if (!classes === '') classes = [];
+			var i = classes.indexOf(className)
+			if (i > -1) classes.splice(i, 1);
+			el.className = classes.join(' ');
 		}
 	};
 

@@ -11,15 +11,19 @@
 			.hide {display:none;}
 			#obtrusive-backdrop {display:none;position:absolute;top:0px;width:100%;bottom:0px;opacity:.5;background:#000;}
 			.obtrusive #obtrusive-backdrop {display:block;}
+			.overlay {position:absolute;z-index:10;background:#fff;}
+			#content {margin:100px;}
 		</style>
 	</head>
 	
 	<body>
 
-		<div id="content">
-			
+		<div id="content" class="a classy">
+			show overlay
 		</div>
-		
+		<div id="alert" class="overlay hide">
+			This is an overlay!
+		</div>
 		<script type="text/javascript" src="/src/raptor.js"></script>
 		<script type="text/javascript" src="/src/raptor.pack.js"></script>
 		<script type="text/javascript" src="/src/raptor.events.js"></script>
@@ -29,17 +33,16 @@
 			var $ = raptor.pack;
 			var div = document.getElementById('content');
 			
-			$.addClass('classy', div);
-			
 			var overlay = raptor.canopy.init({
 				'id' : 'alert',
-				'type' : 'obtrusive'
+				'type' : 'tooltip'
 			});
 			
-			overlay.show();
+			raptor.events.add(div, 'click', function(e) {
+				e.preventDefault();
+				overlay.show(e);
+			});
 			
 		</script>
-		
 	</body>
-
-</html>	
+</html>
