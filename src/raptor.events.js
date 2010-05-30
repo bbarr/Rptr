@@ -152,6 +152,29 @@ raptor.events = (function() {
 		return -1;
 	}
 	
+	/**
+	 *	Based on http://www.quirksmode.org script
+	 */
+
+	var _assignMousePosition = function(e) {
+		
+		var pos = {x:0,y:0};
+	
+		if (e.pageX || e.pageY) {				
+			pos.x = e.pageX;
+			pos.y = e.pageY;
+		}
+		else if (e.clientX || e.clientY) {
+			pos.x = e.clientX + doc.body.scrollLeft + doc.documentElement.scrollLeft;
+			pos.y = e.clientY + doc.body.scrollTop + doc.documentElement.scrollTop;
+		}
+		
+		e.x = pos.x;
+		e.y = pos.y;
+		
+		return e;
+	}
+	
 	return {
 		
 		/**
@@ -225,6 +248,8 @@ raptor.events = (function() {
 			event = event || window.event;
 			var type = (raptor.util.type('String', event)) ? 'on' + event : 'on' + event.type;
 
+			event = _assignMousePosition(event);
+			
 			// if multiple targets
 			if (event.targets) var targets = event.targets;
 			else {
@@ -300,18 +325,39 @@ raptor.events = (function() {
 		 *
 		 * @param {HTMLElement} el
 		 */
-		'persist' : function(el) {
+		'persist' : function(el, isContainer) {
+			
+			var _this = this;
+
 			for (var query in _persists) {
+				var activeQuery = _persists[query];
+				
 				var set = raptor.pack.hunt(query);
+				var addEvents = function(el) {
+					
+					// for each event type registered to that persist, cycle through and add each type
+					// and its callbacks onto the new element
+					for (var type in activeQuery) {
+						for (var i = 0; i < activeQuery[type].length; i++) {
+							_this.add(el, type, activeQuery[type][i]);
+						}
+					}
+				}
 				
 				// search set of elements to see if el is present
 				if (set.indexOf(el) > -1) {
+					addEvents(el);
+				}
 				
-					// for each event type registered to that persist, cycle through and add each type
-					// and its callbacks onto the new element
-					for (var type in _persists[query]) {
-						for (var i = 0; i < _persists[query][type].length; i++) {	
-							this.add(el, type, _persists[query][type][i]);
+				if (isContainer) {
+					var children = el.getElementsByTagName('*');
+					var childLength = children.length;
+					
+					for (var i = 0; i < childLength; i++) {
+						var child = children[i];
+						
+						if (set.indexOf(child) > -1) {
+							addEvents(child);
 						}
 					}
 				}
