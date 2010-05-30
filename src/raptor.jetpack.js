@@ -4,7 +4,7 @@
 * Raptor HTTP
 * Provides automatic queueing of ajax requests
 *
-* @author Damian Galarza (dglrza@gmail.com)
+* @author Damian Galarza (galarza.d@gmail.com)
 */
 
 // Silently create raptor namespace
@@ -38,16 +38,15 @@ raptor.jetpack = (function () {
 	* method (Optional) : GET|POST (Defaults to get)
 	* data (Optional) : Object or array of data to send with the request
 	* errorHandler (Optional) : Callback for errors
-	* throbber (Optional) : Callback for throbber
+	* preFire (Optional) : Function to run before running AJAX request
 	* success (Optional) : Callback for successful transmission
 	* async (Optional) : {Bool}
-	* parse {Optional} : {String} JSON
+	* receiveAs {Optional} : {String} JSON
 	*  
 	*/
 	var jetpackRequest = function (cfg) {
 		
 		// Set the URI for our ajax request; this is required
-		
 		try {
 			if(cfg.uri) {
 				this.uri = cfg.uri;
@@ -57,7 +56,6 @@ raptor.jetpack = (function () {
 				return;
 			}
 		}
-		
 		catch(ex) {};
 		
 		this.method = cfg.method || 'GET';
@@ -70,20 +68,14 @@ raptor.jetpack = (function () {
 		}
 		
 		// Set up the headers
-		if(this.method === 'POST') {
-			this.headers = new Array();
-			this.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-			this.headers['Content-length'] = this.data.length;
-		} 
-		else {
-			this.uri += '?' + this.data;
-		}
+		if(this.method === 'GET') this.uri += '?' + this.data;
 		
 		this.errorHandler = cfg.errorHandler || null;
-		this.throbber = cfg.throbber || null;
+		this.preFire = cfg.preFire || null;
 		this.success = cfg.success || null;
 		this.async = cfg.async || true;
-		this.parse = cfg.parse || null;
+		this.receiveAs = cfg.receiveAs || null;
+		this.contentType = cfg.contentType || 'application/x-www-form-urlencoded';
 		
 		/**
 		* Now that we have our configuration set up, we can send this now; or push it to the queue
@@ -149,8 +141,10 @@ raptor.jetpack = (function () {
 						// Execute user provided callback for successful transmission
 						var response = xhr.responseXML || xhr.responseText;																		
 							
-						if(currentRequest.parse === 'json') {			
-							response = raptor.evolve.xml(response);	
+						// Handle a 'receiveAs' parameter, converting the data received as needed
+						if(currentRequest.receiveAs === 'json') {
+							if(xhr.responseXML) response = parsers.xml(response);
+							else response = parsers.json.read(response);
 						}
 												
 						currentRequest.success(response);
@@ -197,11 +191,14 @@ raptor.jetpack = (function () {
 		* @param {Object} Jetpack Request
 		*/
 		send : function (jetpackRequest) {
+			jetpack._createXHR();
+
 			xhr.open(jetpackRequest.method, jetpackRequest.uri, jetpackRequest.async);
+			xhr.setRequestHeader('Content-Type', jetpackRequest.contentType);
 
 			// Run the user specified throbber function
-			if(jetpackRequest.throbber) {
-				jetpackRequest.throbber();
+			if(jetpackRequest.preFire) {
+				jetpackRequest.preFire(xhr);
 			}
 			
 			if(jetpackRequest.method === 'POST') {
@@ -236,6 +233,152 @@ raptor.jetpack = (function () {
 		}
 	};
 	
+	// XML Parser Module
+	var xmlParser = {
+		
+			/**
+			* Start a parse of an xml doc
+			*
+			* @param {Object} XML Doc Object
+			*/
+			read : function(xmlDoc) {		
+				// Find the root of the XML file	
+				var root = xmlDoc.childNodes[0];
+				return xmlParser.nodeParse(root);
+			},
+
+			/**
+			* Takes a node and parses it recursively
+			*
+			* @param {Element} Node
+			*/
+			nodeParse : function(node) {
+
+				var jsonNode = {};
+				var simpleNode = true;
+
+				// Check to see if there are any attributes we need to parse for the node
+				if(node.attributes.length > 0) {
+					simpleNode = false;
+
+					var attributes = node.attributes,
+						length = attributes.length,
+						_thisAttr;
+
+					for(var i=0; i<length; i++) {
+						_thisAttr = attributes[i];
+
+						jsonNode[_thisAttr.nodeName] = _thisAttr.nodeValue;
+					}				
+				}
+
+				// Check to see if it has child nodes to parse
+				if(node.childNodes.length > 1) {			
+					var length = node.childNodes.length,
+						_thisNode;
+
+					// Loop through child nodes
+					var _thisTagName;
+						blackList = new Array();
+
+					for(var i=0; i<length; i++) {																		
+						_thisNode = node.childNodes[i],
+						_thisTagName = _thisNode.tagName;
+
+						if(_thisTagName !== undefined) {	
+
+							// If this tagName was already processed skip this loop iteration
+							if(blackList.indexOf(_thisTagName) !== -1) {
+								continue;
+							}
+							// Check to see if this tagName is an array and populate the array for the json object
+							if(xmlParser.isArray(_thisTagName, node)) {
+								jsonNode[_thisTagName] = xmlParser.childArrParse(_thisTagName, node);
+								blackList.push(_thisTagName);
+							}
+							// Otherwise, just populate it normally
+							else {
+								jsonNode[_thisTagName] = xmlParser.nodeParse(_thisNode);
+							}
+						}
+
+					}
+				}
+				// If length was not > 1 we may have text content to parse
+				else if(node.childNodes.length === 1) {
+
+					if(simpleNode) {
+						jsonNode = node.childNodes[0].textContent;
+					}
+					else {
+						jsonNode['$t'] = node.childNodes[0].textContent;
+					}
+
+				}
+
+				return jsonNode;
+			},
+
+			/**
+			* Send a tag name and parent to parse
+			* all of the children of a specified type
+			*
+			* @param {String} Tag Name
+			* @param {Object} Parent
+			*/
+			childArrParse : function(tagName, parent) {
+				var children = parent.getElementsByTagName(tagName);
+				var arr = new Array();
+
+				var length = children.length,
+					_thisChild;
+
+				for(var i=0; i<length; i++) {
+					_thisChild = children[i];
+					arr.push(xmlParser.nodeParse(_thisChild));
+				}
+
+				return arr;
+			},
+
+			/**
+			* Check to see if there are multiple nodes with the same name in
+			* parent
+			*
+			* @param {String} Tag Name
+			* @param {Object} Parent node
+			*/
+			isArray : function(tagName, parent) {
+				return parent.getElementsByTagName(tagName).length > 1;
+			}
+	};
+	
+	/**
+	* JSON Parser module for non-xml data
+	*
+	* Attempts to use a browser's native JSON parsing abilities
+	* if it exists, otherwise degrades down to use of new Function()
+	* 
+	* TODO: JSON Stringify
+	*
+	*/
+	var jsonParser = {
+		
+		read : function (data) {
+			if(JSON && JSON.parse) { return JSON.parse(data); }
+			else return new Function( 'return ' + data )();
+		},
+		
+		stringify : function () {}
+		
+	};
+	
+	// Registry of parsers
+	var parsers = {
+		'xml' : xmlParser.read,
+		'json' : jsonParser
+	};
+	
 	return {
 		
 		/**
@@ -246,14 +389,11 @@ raptor.jetpack = (function () {
 		* See jetpackRequest
 		*/
 		engage : function (cfg) {
-			
-			// If no XHR was created earlier, we'll need to make one
-			if(!xhr) {
-				jetpack._createXHR();
-			}
-			
 			var _request = new jetpackRequest(cfg);
-		}
+		},
+		
+		// Make parsers publicly available
+		parseXML : parsers.xml
 	};
 		
 })();
