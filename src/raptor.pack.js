@@ -80,13 +80,8 @@ raptor.pack = (function() {
 			if (attrs == '') attrs = {};
 			for (var attr in attrs) {
 				
-				if (attr == 'style') {
-					
-					var styles = attrs[attr];	
-					for (var prop in styles) {
-						el.style[prop] = styles[prop];
-					}
-				}
+				if (attr == 'style') raptor.util.applyStyle(attrs[attr], el);
+				
 				// Properly handle classes attributes
 				else if( attr === 'class') el.className = attrs[attr];
 				else {								
@@ -143,16 +138,6 @@ raptor.pack = (function() {
 		},
 		
 		/**
-		 * Checks for "persistent" events to apply
-		 * to the element before appending.
-		 * 
-		 */
-		append : function(el, parent) {
-			parent.appendChild(el);
-			raptor.events.persist(el);
-		},
-		
-		/**
 		 * hunt is sizzling!
 		 */
 		hunt : window.Sizzle,
@@ -174,7 +159,33 @@ raptor.pack = (function() {
 			var i = classes.indexOf(className)
 			if (i > -1) classes.splice(i, 1);
 			el.className = classes.join(' ');
-		}
+		},
+		
+		setStyle : function(styles, el) {
+			var styleText = "";
+			for (var prop in styles) {
+				var style = styles[prop];
+				
+				styleText += prop + ":" + styles[prop] + ";";
+			}
+			
+			el.style.cssText = styleText;
+		},
+		
+		setHTML : function(html, el) {
+			el.innerHTML = html;
+			raptor.events.persist(el, true);
+		},
+		
+		/**
+		 * Checks for "persistent" events to apply
+		 * to the element before appending.
+		 * 
+		 */
+		append : function(el, parent, isContainer) {
+			parent.appendChild(el);
+			raptor.events.persist(el, isContainer);
+		},
 	};
 
 })()
