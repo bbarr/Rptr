@@ -122,7 +122,7 @@ raptor.canopy = (function() {
 	}
 	
 	raptor.ready(init);
-	
+
 	return {
 		init : function(config) {
 			return _overlays[config.id] = new Overlay(config);
