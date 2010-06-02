@@ -167,7 +167,7 @@ raptor.pack = (function() {
 			if(classes[0] === '') return;
 			
 			var i = classes.indexOf(className)
-			if (i > -1) classes.remove(i);
+			if (i > -1) classes.splice(i, 1);
 			el.className = classes.join(' ');
 		},
 		

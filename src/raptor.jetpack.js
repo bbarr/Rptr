@@ -62,13 +62,13 @@ raptor.jetpack = (function () {
 		
 		// If we're given some data to send; prepare it
 		if(cfg.data) {
-			this.data = jetpack.prepareQueryString(cfg.data);
+			this.data = '?' + jetpack.prepareQueryString(cfg.data);
 		} else {
 			this.data = '';
 		}
 		
 		// Set up the headers
-		if(this.method === 'GET') this.uri += '?' + this.data;
+		if(this.method === 'GET') this.uri += this.data;
 		
 		this.errorHandler = cfg.errorHandler || null;
 		this.preFire = cfg.preFire || null;
