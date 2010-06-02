@@ -148,16 +148,26 @@ raptor.pack = (function() {
 		
 		addClass : function(className, el) {
 			var classes = el.className.split(' ');
-			if (!classes === '') classes = [];
-			if (classes.indexOf(className) < 0) classes.push(className);
-			el.className = classes.join(' ');
+			
+			// If no other classes were applied, just set the className saving us some effort
+			if (classes[0] === '') {
+				el.className = className;
+			}
+			// Otherwise, use the array to add a new class
+			else {
+				if (classes.indexOf(className) < 0) classes.push(className);
+				el.className = classes.join(' ');
+			}
 		},
 		
 		removeClass : function(className, el) {
 			var classes = el.className.split(' ');
-			if (!classes === '') classes = [];
+			
+			// No className set, move along
+			if(classes[0] === '') return;
+			
 			var i = classes.indexOf(className)
-			if (i > -1) classes.splice(i, 1);
+			if (i > -1) classes.remove(i);
 			el.className = classes.join(' ');
 		},
 		
