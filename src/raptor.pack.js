@@ -148,14 +148,14 @@ raptor.pack = (function() {
 		
 		addClass : function(className, el) {
 			var classes = el.className.split(' ');
-			if (!classes === '') classes = [];
+			if (classes === '') classes = [];
 			if (classes.indexOf(className) < 0) classes.push(className);
 			el.className = classes.join(' ');
 		},
 		
 		removeClass : function(className, el) {
 			var classes = el.className.split(' ');
-			if (!classes === '') classes = [];
+			if (classes === '') classes = [];
 			var i = classes.indexOf(className)
 			if (i > -1) classes.splice(i, 1);
 			el.className = classes.join(' ');
