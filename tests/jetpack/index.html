@@ -22,6 +22,7 @@
 		<script type="text/javascript">
 			
 			raptor.ready(function () {
+				console.log('ready');
 								
 				var dependencies = ['jetpack'];
 			
@@ -70,7 +71,7 @@
 					}
 				}
 				
-				raptor.require(dependencies,{'callback':jetpackGo});
+				raptor.require(dependencies, jetpackGo);
 			});
 			
 		</script>
