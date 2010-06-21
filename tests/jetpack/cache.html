@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+	"http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+		<title>Raptor.Jetpack Test Center</title>
+	</head>
+	
+	<body>
+
+		<div id="content">
+			
+		</div>
+		
+		<script type="text/javascript" src="/src/raptor.js"></script>
+		<!--
+		<script type="text/javascript" src="/src/raptor.evolve.js"></script>
+		<script type="text/javascript" src="/src/raptor.jetpack.js"></script>
+		-->
+		<script type="text/javascript">
+			
+			raptor.ready(function () {
+								
+				var dependencies = ['jetpack'];
+			
+				var jetpackGo = function () {					
+					var config = {
+					    'uri' : 'endpoints/xmlEndpoint2.xml',
+					    'errorHandler' : function () { },
+					    'success' : function(response) { console.log(response); },
+					    'throbber' : function() {  },
+					    'data' : {
+					    	'myVar' : 'some-data',
+					    	'otherVar' : 'moreData',
+					    	'int' : 0
+					    },
+					    'method' : 'GET',
+					    'receiveAs' : 'json'					    
+					};
+					
+					var count = 0;
+					var interval = setInterval(function () {						
+						count++;
+						
+						raptor.jetpack.engage(config);
+						
+						if(count === 5) clearInterval(interval);
+					}, 100);																	
+				}
+				
+				raptor.require(dependencies,{'callback':jetpackGo});
+			});
+			
+		</script>
+		
+	</body>
+
+</html>	
