@@ -75,6 +75,7 @@ raptor.events = (function() {
 	*	}
 	*/
 	var _persists = {};
+	var _persisted = {};
 	
 	// this gets incremented and used as a unique ID for addition to _targets
 	var _guid = 0;
@@ -197,7 +198,7 @@ raptor.events = (function() {
 	
 			// either global or persistent event is being registered
 			if (raptor.util.type('String', target)) {
-			
+				
 				// if cb exists, then a pesistent event is being registered
 				if (cb) {
 					_registerPersist(target, type, cb);
@@ -243,7 +244,7 @@ raptor.events = (function() {
 		 * @param {Object} event
 		 */
 		'fire' : function(event) {
-
+			
 			// event will either be served by the browser, or manually. window.event for IE.
 			event = event || window.event;
 			var type = (raptor.util.type('String', event)) ? 'on' + event : 'on' + event.type;
@@ -258,7 +259,10 @@ raptor.events = (function() {
 				
 				// W3C
 				if (event.target) {
-					target = event.target;		
+					target = event.target;
+
+					// Safari bug
+					if (target.nodeType === 3) target = target.parentNode;
 				}
 				
 				// IE
@@ -271,9 +275,6 @@ raptor.events = (function() {
 					event.target = target = '*';
 				}
 				
-				// Safari bug
-				if (target.nodeType === 3) target = target.parentNode;
-				
 				// if event happens on an child element, bubble up to the appropriate parent
 				var id;
 				while (id = _getTargetId(target) === -1) {
@@ -281,14 +282,12 @@ raptor.events = (function() {
 					if (target === document.body) return false;
 				}
 			}
-			
+
 			// fire events on a given target
 			var handleTarget = function(target) {
 				var targetId = id || _getTargetId(target);
-				
 				if (targetId >= 0) {
 					var events = _events[targetId][type];
-
 					if (events) {
 						for (var x = 0; x < events.length; x++) {
 							events[x](event);
@@ -315,7 +314,17 @@ raptor.events = (function() {
 					
 					// get elements by targets tagName and remove and targets that are not longer present in document
 					var elements = raptor.pack.hunt(target.tagName);
-					if (elements.indexOf(target) === -1) _unregisterEvent(target);
+					if (elements.indexOf(target) < 0) {
+						_unregisterEvent(target);
+						
+						for (var i in _persisted) {
+							
+							var array = _persisted[i];
+							var index = array.indexOf(target);
+							
+							if (index > -1) array.splice(index, 1);
+						}
+					}
 				}
 			}
 		},
@@ -325,43 +334,41 @@ raptor.events = (function() {
 		 *
 		 * @param {HTMLElement} el
 		 */
-		'persist' : function(el, isContainer) {
-			
+		'persist' : function(el) {
+		
 			var _this = this;
+			
+			var addEvents = function(el, activeQuery, query) {
 
-			for (var query in _persists) {
-				var activeQuery = _persists[query];
-				
-				var set = raptor.pack.hunt(query);
-				var addEvents = function(el) {
-					
-					// for each event type registered to that persist, cycle through and add each type
-					// and its callbacks onto the new element
-					for (var type in activeQuery) {
-						for (var i = 0; i < activeQuery[type].length; i++) {
-							_this.add(el, type, activeQuery[type][i]);
-						}
+				if (_persisted[query] && _persisted[query].indexOf(el) > -1) return;
+			
+				// for each event type registered to that persist, cycle through and add each type
+				// and its callbacks onto the new element
+				for (var type in activeQuery) {
+					for (var i = 0; i < activeQuery[type].length; i++) {
+						_this.add(el, type, activeQuery[type][i]);
 					}
 				}
 				
-				// search set of elements to see if el is present
-				if (set.indexOf(el) > -1) {
-					addEvents(el);
-				}
-				
-				if (isContainer) {
-					var children = el.getElementsByTagName('*');
-					var childLength = children.length;
+				(_persisted[query]) ? _persisted[query].push(el) : _persisted[query] = [el];
+			}
+			
+			var runQuery = function(el) {
+				for (var query in _persists) {
+					var activeQuery = _persists[query];
+					var set = raptor.pack.hunt(query);
 					
-					for (var i = 0; i < childLength; i++) {
-						var child = children[i];
-						
-						if (set.indexOf(child) > -1) {
-							addEvents(child);
-						}
-					}
+					// search set of elements to see if el is present
+					if (set.indexOf(el) > -1) addEvents(el, activeQuery, query);
 				}
 			}
-		}
+			
+			runQuery(el);
+			
+			var children = el.getElementsByTagName('*');
+			var childLength = children.length;
+			for (var i = 0; i < childLength; i++) runQuery(children[i]);
+		},
+		persists : _persists
 	}
 })();

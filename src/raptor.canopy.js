@@ -43,9 +43,12 @@ raptor.canopy = (function() {
 		
 		// if overlay doens't exist in the document, generate from collection of templates
 		if (!this.el) _util.buildFrame(this);
-
+		
+		var content = raptor.pack.hunt('.content', this.el);
+		this.contentArea = (content[0]) ? content[0] : this.el; 
+		
 		if (config.callback) this.callback = config.callback;
-		this.cache = config.cache || true;
+		this.cache = (config.cache == false) ? false : true;
 	}
 	
 	Overlay.prototype = {
@@ -72,7 +75,7 @@ raptor.canopy = (function() {
 				this.callback(this);
 				
 				// finally, if cache is set to true, destroy the callback as it won't be used again
-				if (this.cache) this.callback = null; 
+				if (this.cache) this.callback = null;
 			}
 		},
 		
@@ -108,7 +111,17 @@ raptor.canopy = (function() {
 					style.top = '0px';
 				}
 			}
-
+			
+			var showing = 1;
+			for (var o in _overlays) {
+				var overlay = _overlays[o].el;
+				if (!raptor.pack.hasClass('hide', overlay)) {
+					var z = overlay.style.zIndex;
+					if (z >= showing) showing = ++z;
+				}
+			}
+			style['z-index'] = showing;
+			
 			raptor.pack.setStyle(style, el);
 		}
 	}
@@ -122,7 +135,7 @@ raptor.canopy = (function() {
 	}
 	
 	raptor.ready(init);
-
+	
 	return {
 		init : function(config) {
 			return _overlays[config.id] = new Overlay(config);

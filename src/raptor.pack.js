@@ -77,16 +77,17 @@ raptor.pack = (function() {
 			var el = util.newElement(tag);
 			
 			// set attributes
-			if (attrs == '') attrs = {};
-			for (var attr in attrs) {
-				
-				if (attr == 'style') this.setStyle(attrs[attr], el);
-				
-				// Properly handle classes attributes
-				else if( attr === 'class') el.className = attrs[attr];
-				else {								
-					if (el[attr]) el[attr] = attrs[attr];
-					else el.setAttribute(attr, attrs[attr]);	
+			if (attrs) {
+				for (var attr in attrs) {
+					
+					if (attr == 'style') raptor.util.applyStyle(attrs[attr], el);
+					
+					// Properly handle classes attributes
+					else if( attr === 'class') el.className = attrs[attr];
+					else {								
+						if (el[attr]) el[attr] = attrs[attr];
+						else el.setAttribute(attr, attrs[attr]);	
+					}
 				}
 			}
 			
@@ -96,7 +97,7 @@ raptor.pack = (function() {
 					util.insertText(el, contents);
 				}
 				else if (raptor.util.type('HTMLElement', contents)) {
-					this.append(contents, el);
+					el.appendChild(contents);
 				}
 				else if (raptor.util.type('Array', contents)){
 					for (var i = 0; i < contents.length; i++) {
@@ -107,7 +108,7 @@ raptor.pack = (function() {
 							contents[i](el); 
 						}
 						else {
-							this.append(contents[i], el);
+							el.appendChild(contents[i]);
 						}
 					}
 				}
@@ -116,7 +117,7 @@ raptor.pack = (function() {
 			// if fragment referenced, create and/or add to existing
 			if (fragment) {
 				if (!fragmentStorage[fragment]) fragmentStorage[fragment] = document.createDocumentFragment();
-				this.append(el, fragmentStorage[fragment]);
+				fragmentStorage[fragment].appendChild(el);
 			}
 
 			return el;
@@ -129,12 +130,16 @@ raptor.pack = (function() {
 		 * @param {Bool} is this a unique usage
 		 */
 		nursery : function(name, unique) {						
-			var frag = fragmentStorage[name].cloneNode(true);
+			var frag = fragmentStorage[name];
 			
-			// Trash it if unique
-			if (unique) delete fragmentStorage[name];
+			if (frag) {
+				frag = frag.cloneNode(true);
 				
-			return frag;
+				// Trash it if unique
+				if (unique) delete fragmentStorage[name];
+			}
+			
+			return frag || false;
 		},
 		
 		/**
@@ -148,24 +153,14 @@ raptor.pack = (function() {
 		
 		addClass : function(className, el) {
 			var classes = el.className.split(' ');
-			
-			// If no other classes were applied, just set the className saving us some effort
-			if (classes[0] === '') {
-				el.className = className;
-			}
-			// Otherwise, use the array to add a new class
-			else {
-				if (classes.indexOf(className) < 0) classes.push(className);
-				el.className = classes.join(' ');
-			}
+			if (classes === '') classes = [];
+			if (classes.indexOf(className) < 0) classes.push(className);
+			el.className = classes.join(' ');
 		},
 		
 		removeClass : function(className, el) {
 			var classes = el.className.split(' ');
-			
-			// No className set, move along
-			if(classes[0] === '') return;
-			
+			if (classes === '') classes = [];
 			var i = classes.indexOf(className)
 			if (i > -1) classes.splice(i, 1);
 			el.className = classes.join(' ');
@@ -184,7 +179,10 @@ raptor.pack = (function() {
 		
 		setHTML : function(html, el) {
 			el.innerHTML = html;
-			raptor.events.persist(el, true);
+			
+			setTimeout(function() {
+				raptor.events.persist(el);
+			}, 500);
 		},
 		
 		/**
@@ -192,9 +190,19 @@ raptor.pack = (function() {
 		 * to the element before appending.
 		 * 
 		 */
-		append : function(el, parent, isContainer) {
-			parent.appendChild(el);
-			raptor.events.persist(el, isContainer);
+		append : function(el, existing, means) {
+			means = means || '';
+			switch(means) {
+				case 'replace' : existing.parentNode.replaceChild(el, existing);
+					break;
+				case 'before' : existing.parentNode.insertBefore(el, existing);
+					break;
+				default : existing.appendChild(el);
+			}
+			
+			setTimeout(function() {
+				raptor.events.persist(el);
+			}, 500);
 		},
 	};
 
