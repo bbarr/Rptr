@@ -28,6 +28,8 @@ raptor.jetpack = (function () {
 	// Hold a timeout
 	var queueTimeout = null;
 	
+	var cache = {};
+	
 	/**
 	* Create a jetpack request object which we can popuplate
 	* for queueing requests
@@ -40,6 +42,7 @@ raptor.jetpack = (function () {
 	* errorHandler (Optional) : Callback for errors
 	* preFire (Optional) : Function to run before running AJAX request
 	* success (Optional) : Callback for successful transmission
+	* cache (Optional) : Cache GET requests, defaults to true
 	* async (Optional) : {Bool}
 	* receiveAs {Optional} : {String} JSON
 	*  
@@ -62,13 +65,22 @@ raptor.jetpack = (function () {
 		
 		// If we're given some data to send; prepare it
 		if(cfg.data) {
-			this.data = '?' + jetpack.prepareQueryString(cfg.data);
+			this.data = jetpack.prepareQueryString(cfg.data);
 		} else {
 			this.data = '';
 		}
 		
-		// Set up the headers
-		if(this.method === 'GET') this.uri += this.data;
+		// Set up method specific values
+		if(this.method === 'GET') {
+			this.uri += '?' + this.data;
+			
+			this.cache = cfg.cache !== false;
+			
+		//	if(cfg.cache !== false) this.cache = true;			
+		}		
+		else {									
+			this.cache = cfg.cache || false;
+		}
 		
 		this.errorHandler = cfg.errorHandler || null;
 		this.preFire = cfg.preFire || null;
@@ -142,11 +154,14 @@ raptor.jetpack = (function () {
 						var response = xhr.responseXML || xhr.responseText;																		
 							
 						// Handle a 'receiveAs' parameter, converting the data received as needed
-						if(currentRequest.receiveAs === 'json') {
+						if(currentRequest.receiveAs === 'json') {							
 							if(xhr.responseXML) response = parsers.xml(response);
-							else response = parsers.json.read(response);
+							else response = parsers.json.read(response);					
 						}
-												
+						
+						// Cache the response if we are supposed to
+						if(currentRequest.cache) cache[currentRequest.uri] = response;	
+											
 						currentRequest.success(response);
 					}
 					
@@ -201,15 +216,31 @@ raptor.jetpack = (function () {
 				jetpackRequest.preFire(xhr);
 			}
 			
-			if(jetpackRequest.method === 'POST') {
-				data = jetpackRequest.data;
-			}
-			else {
-				data = '';
-			}
+			var cachedResponse;
 			
-			xhr.send(data);
+			console.log(jetpackRequest.cache);
+			
+			// Check if cache is set to true and a cache exists for this URI
+			if( jetpackRequest.cache && (cachedResponse = cache[jetpackRequest.uri]) ) {
+				if(jetpackRequest.success) {
+					jetpackRequest.success(cachedResponse);
+					jetpack.finishRequest();
+				}
+			} 
+			// Otherwise we should go ahead and send the request
+			else {
+				if(jetpackRequest.method === 'POST') {
+					data = jetpackRequest.data;
+				}
+				else {
+					data = '';
+				}										
+				
+				xhr.send(data);
+			}
+														
 		},
+		
 		
 		/**
 		* Finish up the request
