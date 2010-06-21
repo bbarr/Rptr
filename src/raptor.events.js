@@ -193,13 +193,16 @@ raptor.events = (function() {
 				return;
 			}
 			
-			raptor.events.add(document, 'DOMContentLoaded', fn);
+			raptor.events.add(document, 'DOMContentLoaded', function() {
+				_loaded = true;
+				fn();	
+			});
 			
 			if (document.readyState) {
 				if (!timer) {
 					var timer = setTimeout(function() {
 						if (document.readyState === 'complete') {
-							raptor.events.fire(document, 'DOMContentLoaded');
+							if (!_loaded) raptor.events.fire(document, 'DOMContentLoaded');
 							clearTimeout(timer);
 							timer = null;
 						}
