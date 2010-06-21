@@ -174,7 +174,7 @@ raptor.events = (function() {
 		e.y = pos.y;
 		
 		return e;
-	}
+	};
 	
 	return {
 		
