@@ -81,7 +81,7 @@ raptor.events = (function() {
 	var _guid = 0;
 	
 	// Store whether or not the document is ready
-	var docReady = false;
+	var _loaded = false;
 	
 	/**
 	 * Registers persistent event conditions.
@@ -187,15 +187,24 @@ raptor.events = (function() {
 		* @param {Function} Callback
 		*/
 		'ready' : function (fn) {										
-			// If the documentReady was already called we can go ahead and execute now
-			if(docReady) fn();
-			else if(document.readyState === 'complete') {				
-				docReady = true;
-				fn();				
-			} 
-			else {				
-				raptor.events.add(document, 'DOMContentLoaded', fn);
-				//raptor.events.add(window, 'load', fn);
+			
+			if (_loaded) {
+				fn();
+				return;
+			}
+			
+			raptor.events.add(document, 'DOMContentLoaded', fn);
+			
+			if (document.readyState) {
+				if (!timer) {
+					var timer = setTimeout(function() {
+						if (document.readyState === 'complete') {
+							raptor.events.fire(document, 'DOMContentLoaded');
+							clearTimeout(timer);
+							timer = null;
+						}
+					}, 10);
+				}
 			}
 		},
 		
