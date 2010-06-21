@@ -16,7 +16,7 @@
 		loadedModules: [],
 		scriptReady: [], // temp fix for opera using both onload and onreadystatechange
 		baseModules: [] // Array of modules loaded as part of raptor's core
-	}
+	};
  
 	_init = function() {
 		
@@ -33,23 +33,75 @@
 		_config.moduleURI = baseURI;			
 		
 		_extendPrototypes();	
-	}
+	};
 	
 	_extendPrototypes = function() {
-	
-	}
+		var indexOf = function (needle) {
+			var length = this.length;
+
+			for(var i=0; i<length; i++) {
+				if(this[i] === needle) return i;
+			}
+
+			return -1;
+		}
+
+		// Let's prototype the indexOf for arrays
+		if(typeof Array.indexOf !== 'function') {
+			Array.prototype.indexOf = indexOf; 
+		}
+
+		// Prototype the remove function for Arrays
+		if(typeof Array.remove !== 'function') {
+
+			/*
+			* @param {Int} Index
+			*/
+			Array.prototype.remove = function(index) {
+
+				if(index + 1 > this.length || index < 0) return this;
+
+				var left, right;
+
+				if(index > 0) left = this.slice(0, index);
+				else return this.slice(1, this.length);				
+
+				if(index < this.length) right = this.slice(index+1, this.length) 
+				else return left;
+
+				return left.concat(right);										
+
+			}
+		}		
+	};
  
 	api = {
 		
-		ready : function(fun) {
-			if (!raptor.events) {
-				raptor.require('events', {callback : function () {
+				
+		/**
+		* Set up the shortcut to raptor.ready from
+		* raptor.events
+		*
+		* @param {Function} Ready callback
+		*/
+		ready : function(fn) {						
+						
+			if (raptor.events) {
+				api.ready = raptor.events.ready;
+				api.ready(fn);
+			}
+			// If events wasn't loaded yet, we'll go ahead and load it now
+			else {				
+				api.require('events', function () {					
 					api.ready = raptor.events.ready;
-					api.ready(fun);
-				}});
+					api.ready(fn);
+				});
 			}
 		},
 		
+		/**
+		* Various utility functions
+		*/
 		util : {
 			
 			/**
@@ -106,11 +158,11 @@
 			*
 			* @param {String} Module we're loading
 			*/
-			var load = function(mod) {
+			function load (mod) {
 				if (!_config.loadedModules[mod]) {
 
 					var script = document.createElement("script");
-					script.src = config._moduleURI + 'raptor.' + mod + ".js";
+					script.src = _config.moduleURI + 'raptor.' + mod + ".js";
 					script.type = "text/javascript";
 					
 					document.getElementsByTagName("head")[0].appendChild(script);
@@ -124,19 +176,19 @@
 							loadCount++;												
 							
 							// Once all the modules for this require call are filled run callback
-							if(loadCount === toLoad) {														
-								
-								if (options.callback) {								
+							if(loadCount === toLoad) {																						
+								if (callback) {					
 									
 									// Ensure all modules in this require were loaded otherwise wait for them
-									var verifyLoad = function () {									
-										
+									var verifyLoad = function () {																			
 										var isLoaded = true;
 										var _thisModule;
 										
+										if (typeof modules === 'string') modules = [modules];
+										
 										for (var i = 0; i < modules.length && isLoaded; i++) {
 											
-											_thisModule = modules[i];
+											_thisModule = modules[i];											
 																							
 											if (typeof raptor[_thisModule] === 'undefined') {
 												isLoaded = false;				
@@ -155,107 +207,12 @@
 					}
 				}
 			};	
-		},
-		
-		/**
-		* 
-		*/
-		ready : {
-
-			// Hold our ready queue
-			_readyQueue : [],
-
-			// Cache whether the DOM is ready
-			_isReady : false,
-
-			// Flag to ensure we only attach ready listeners once
-			_readyInitialized : false,
-
-			/**
-			* Push a callback to the ready queue
-			*
-			* @param {Function} Callback
-			*/
-			push : function (cb) {
-
-				if(! ready._readyInitialized) ready.initReady();
-							
-				if(ready._isReady) {
-					cb();
-					return;
-				} else {
-					ready._readyQueue.push(cb);
-				}
-				
-			},
-
-			/**
-			* Attach event listeners for ready
-			*/
-			initReady : function () {
-
-				if(ready._readyInitialized) return;
-				
-				ready._readyInitialized = true;
-
-				if ( document.readyState === "complete" ) {
-					_ready._isReady = true;
-					return _ready.ready();
-				}
-				
-				/**
-				* Attach event handlers for the ready state of the page
-				*/
-				if ( document.addEventListener ) {
-					document.addEventListener( "DOMContentLoaded", ready.processReady, false );
-					window.addEventListener( "load", ready.processReady, false );
-				}
-				else if( document.attachEvent) {
-					window.attachEvent('DOMContentLoaded', ready.processReady);
-					window.attachEvent( "onload", ready.processReady);
-				}
-				
-			},
-
-			/**
-			* Our readystate callback
-			*/
-			processReady : function () {
-				// Cleanup functions for the document ready method
-				if ( document.addEventListener ) {
-					document.removeEventListener( "DOMContentLoaded", ready.processReady, false );
-					ready.runQueue();
-				} else if ( document.attachEvent ) {
-					// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
-					if ( document.readyState === "complete" ) {
-						document.detachEvent( "onreadystatechange", ready.processReady );
-						ready.runQueue();
-					}
-				}
-			},
-
-			/**
-			* Go ahead and execute functions that are in the ready queue
-			*/
-			runQueue : function () {
-				var q = ready._readyQueue;
-				var _length = q.length;
-
-				if(q === 0) return;
-				
-				var _thisQ;
-				for(var i=0; i<_length; i++) {
-					_thisQ = q[i];
-
-					if(typeof _thisQ === 'function') {
-						_thisQ();
-					}
-				}
-				
-				ready._readyQueue = [];
-			}
 		}
-	}
- 
+	};
+	
+	// Ready? Go!
+	_init();
+	
 	return api;
+	
  })();

@@ -75,10 +75,13 @@ raptor.events = (function() {
 	*	}
 	*/
 	var _persists = {};
-	var _persisted = {};
+	var _persisted = {};		
 	
 	// this gets incremented and used as a unique ID for addition to _targets
 	var _guid = 0;
+	
+	// Store whether or not the document is ready
+	var docReady = false;
 	
 	/**
 	 * Registers persistent event conditions.
@@ -146,7 +149,7 @@ raptor.events = (function() {
 	 * 
 	 * @param {HTMLElement|Object} target
 	 */
-	var _getTargetId = function(target) {
+	var _getTargetId = function(target) {		
 		for (var i in _targets) {
 			if (_targets[i] == target) return i;
 		}
@@ -179,6 +182,24 @@ raptor.events = (function() {
 	return {
 		
 		/**
+		* Queue up methods to run when the document is ready
+		*
+		* @param {Function} Callback
+		*/
+		'ready' : function (fn) {										
+			// If the documentReady was already called we can go ahead and execute now
+			if(docReady) fn();
+			else if(document.readyState === 'complete') {				
+				docReady = true;
+				fn();				
+			} 
+			else {				
+				raptor.events.add(document, 'DOMContentLoaded', fn);
+				//raptor.events.add(window, 'load', fn);
+			}
+		},
+		
+		/**
 		 * Binds an event/callback to a specific target.
 		 * 
 		 * @param {HTMLElement|Object|String} target
@@ -191,7 +212,7 @@ raptor.events = (function() {
 			var _this = this;
 			
 			var register = function(target, type, cb) {
-				type = 'on' + type;
+				if(type !== 'DOMContentLoaded') type = 'on' + type;
 				_registerEvent(target, type, cb);
 				target[type] = _this.fire;
 			}
@@ -244,12 +265,19 @@ raptor.events = (function() {
 		 * @param {Object} event
 		 */
 		'fire' : function(event) {
-			
+									
 			// event will either be served by the browser, or manually. window.event for IE.
 			event = event || window.event;
-			var type = (raptor.util.type('String', event)) ? 'on' + event : 'on' + event.type;
+			
+			var type
+			if(event.type !== 'DOMContentLoaded') {
+				type = (raptor.util.type('String', event)) ? 'on' + event : 'on' + event.type;
+			}
+			else {
+				type = 'DOMContentLoaded';
+			}
 
-			event = _assignMousePosition(event);
+			event = _assignMousePosition(event);					
 			
 			// if multiple targets
 			if (event.targets) var targets = event.targets;
@@ -273,22 +301,24 @@ raptor.events = (function() {
 				// global event
 				else {
 					event.target = target = '*';
-				}
+				}								
 				
 				// if event happens on an child element, bubble up to the appropriate parent
-				var id;
-				while (id = _getTargetId(target) === -1) {
+				var id;			
+				while (id = _getTargetId(target) === -1 && target !== document) {
 					target = target.parentNode;
 					if (target === document.body) return false;
 				}
-			}
+				
+				if(type === 'onload' && target === document) target = window;				
+			}	
 
 			// fire events on a given target
-			var handleTarget = function(target) {
+			var handleTarget = function(target) {				
 				var targetId = id || _getTargetId(target);
 				if (targetId >= 0) {
-					var events = _events[targetId][type];
-					if (events) {
+					var events = _events[targetId][type];					
+					if (events) {						
 						for (var x = 0; x < events.length; x++) {
 							events[x](event);
 						}
@@ -369,6 +399,7 @@ raptor.events = (function() {
 			var childLength = children.length;
 			for (var i = 0; i < childLength; i++) runQuery(children[i]);
 		},
+		
 		persists : _persists
 	}
 })();
