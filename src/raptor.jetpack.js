@@ -44,7 +44,7 @@ raptor.jetpack = (function () {
 	* success (Optional) : Callback for successful transmission
 	* cache (Optional) : Cache GET requests, defaults to true
 	* async (Optional) : {Bool}
-	* receiveAs {Optional} : {String} JSON
+	* json {Optional} : {Bool} Should we parse the data as JSON
 	*  
 	*/
 	var jetpackRequest = function (cfg) {
@@ -86,7 +86,7 @@ raptor.jetpack = (function () {
 		this.preFire = cfg.preFire || null;
 		this.success = cfg.success || null;
 		this.async = cfg.async || true;
-		this.receiveAs = cfg.receiveAs || null;
+		this.json = cfg.json || false;
 		this.contentType = cfg.contentType || 'application/x-www-form-urlencoded';
 		
 		/**
@@ -154,7 +154,7 @@ raptor.jetpack = (function () {
 						var response = xhr.responseXML || xhr.responseText;																		
 							
 						// Handle a 'receiveAs' parameter, converting the data received as needed
-						if(currentRequest.receiveAs === 'json') {							
+						if(currentRequest.json) {							
 							if(xhr.responseXML) response = parsers.xml(response);
 							else response = parsers.json.read(response);					
 						}
