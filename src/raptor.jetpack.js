@@ -424,7 +424,8 @@ raptor.jetpack = (function () {
 		},
 		
 		// Make parsers publicly available
-		parseXML : parsers.xml
+		parseXML : parsers.xml,		
+		parseJSON : parsers.json
 	};
 		
 })();
