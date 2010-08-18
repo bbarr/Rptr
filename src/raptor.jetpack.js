@@ -218,8 +218,6 @@ raptor.jetpack = (function () {
 			
 			var cachedResponse;
 			
-			console.log(jetpackRequest.cache);
-			
 			// Check if cache is set to true and a cache exists for this URI
 			if( jetpackRequest.cache && (cachedResponse = cache[jetpackRequest.uri]) ) {
 				if(jetpackRequest.success) {
@@ -305,7 +303,7 @@ raptor.jetpack = (function () {
 				var simpleNode = true;
 
 				// Check to see if there are any attributes we need to parse for the node
-				if(node.attributes.length > 0) {
+				if(node.attributes && node.attributes.length > 0) {
 					simpleNode = false;
 
 					var attributes = node.attributes,
