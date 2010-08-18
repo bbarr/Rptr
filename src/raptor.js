@@ -134,25 +134,29 @@
 				active : false,
 				
 				add : function(obj) {
-					objects.push(raptor.util.profiler._create_instance(obj));
+					var profiled_object = api.util.profiler._create_instance(obj);
+					api.util.profiler.objects.push(profiled_object);
+					return profiled_object;
 				},
 				
 				start : function() {
-					if (!raptor.util.profiler.active) {
-						raptor.util.profiler.active = true;
-						console.profile();
+					if (!api.util.profiler.active) {
+						console.log(api.util.profiler.active, ' and is starting profiling');
+						api.util.profiler.active = true;
+						//console.time();
 					}
 				},
 				
 				stop : function() {
-					if (raptor.util.profiler.active) {
-						raptor.util.profiler.active = false;
-						console.profileEnd();
+					if (api.util.profiler.active) {
+						console.log(api.util.profiler.active, ' and is ending profiling');
+						api.util.profiler.active = false;
+						//console.timeEnd();
 					}
 				},
 				
 				_create_instance : function(obj) {
-					
+					console.log(obj);
 					var new_class = function() {};
 					var new_object = new new_class();
 					
@@ -160,9 +164,12 @@
 					for (var key in obj) {
 						prop = obj[key];
 						if (typeof prop === 'function') {
-							raptor.util.profilers.start();
-							new_class.prototype[key] = prop;
-							raptor.util.profiler.stop();
+							new_class.prototype[key] = function() {
+								api.util.profiler.start();
+								console.log('applying ' + key);
+								prop.apply(new_object, arguments);
+								api.util.profiler.stop();
+							}
 						}
 						else new_object[key] = prop;
 					}
