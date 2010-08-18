@@ -141,36 +141,38 @@
 				
 				start : function() {
 					if (!api.util.profiler.active) {
-						console.log(api.util.profiler.active, ' and is starting profiling');
+						console.log('start timing');
 						api.util.profiler.active = true;
-						//console.time();
+						console.profile();
 					}
 				},
 				
 				stop : function() {
 					if (api.util.profiler.active) {
-						console.log(api.util.profiler.active, ' and is ending profiling');
+						console.log('stop timing');
 						api.util.profiler.active = false;
-						//console.timeEnd();
+						console.profileEnd();
 					}
 				},
 				
 				_create_instance : function(obj) {
-					console.log(obj);
+				
 					var new_class = function() {};
 					var new_object = new new_class();
 					
-					var prop;
-					for (var key in obj) {
-						prop = obj[key];
-						if (typeof prop === 'function') {
-							new_class.prototype[key] = function() {
-								api.util.profiler.start();
-								console.log('applying ' + key);
-								prop.apply(new_object, arguments);
-								api.util.profiler.stop();
-							}
+					var create_method = function(_this, method, name) {
+						return function() {
+							console.log('profiling ' + name);
+							api.util.profiler.start();
+							var result = method.apply(_this, arguments);
+							api.util.profiler.stop();
+							return result;
 						}
+					}
+					
+					for (var key in obj) {
+						var prop = obj[key];
+						if (typeof prop === 'function') new_class.prototype[key] = create_method(new_object, prop, key);
 						else new_object[key] = prop;
 					}
 					
