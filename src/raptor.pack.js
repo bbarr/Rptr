@@ -159,11 +159,20 @@ raptor.pack = (function() {
 		},
 		
 		removeClass : function(className, el) {
-			var classes = el.className.split(' ');
-			if (classes === '') classes = [];
-			var i = classes.indexOf(className)
-			if (i > -1) classes.splice(i, 1);
-			el.className = classes.join(' ');
+			
+			var _removeClass = function(el) {
+				var classes = el.className.split(' ');
+				if (classes === '') classes = [];
+				var i = classes.indexOf(className)
+				if (i > -1) classes.splice(i, 1);
+				el.className = classes.join(' ');
+			}
+			
+			if (raptor.util.type('Array', el)) {
+				for (var i = 0, len = el.length; i < len; i++) _removeClass(el);
+			}
+			else _removeClass(el);
+			
 		},
 		
 		setStyle : function(styles, el) {

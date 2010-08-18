@@ -193,18 +193,18 @@ raptor.events = (function() {
 				return;
 			}
 			
-			raptor.events.add(document, 'DOMContentLoaded', function() {
-				_loaded = true;
-				fn();	
-			});
+			raptor.events.add(document, 'DOMContentLoaded', fn);
 			
 			if (document.readyState) {
 				if (!timer) {
 					var timer = setTimeout(function() {
 						if (document.readyState === 'complete') {
-							if (!_loaded) raptor.events.fire(document, 'DOMContentLoaded');
-							clearTimeout(timer);
-							timer = null;
+							if (!_loaded) {
+								_loaded = true;
+								raptor.events.fire(document, 'DOMContentLoaded');
+								clearTimeout(timer);
+								timer = null;
+							}
 						}
 					}, 10);
 				}
@@ -282,7 +282,7 @@ raptor.events = (function() {
 			event = event || window.event;
 			
 			var type
-			if(event.type !== 'DOMContentLoaded') {
+			if(event.type !== 'DOMContentLoaded' && event.type) {
 				type = (raptor.util.type('String', event)) ? 'on' + event : 'on' + event.type;
 			}
 			else {
@@ -290,7 +290,7 @@ raptor.events = (function() {
 			}
 
 			event = _assignMousePosition(event);					
-			
+
 			// if multiple targets
 			if (event.targets) var targets = event.targets;
 			else {
@@ -310,6 +310,13 @@ raptor.events = (function() {
 					event.target = target = event.srcElement;
 				}
 				
+				else if (event === document) {
+					event = {
+						target : document
+					}
+					target = event.target;
+				}
+				
 				// global event
 				else {
 					event.target = target = '*';
@@ -317,20 +324,20 @@ raptor.events = (function() {
 				
 				// if event happens on an child element, bubble up to the appropriate parent
 				var id;			
-				while (id = _getTargetId(target) === -1 && target !== document) {
+				while (id = _getTargetId(target) === -1 && target !== document && target !== '*') {
 					target = target.parentNode;
-					if (target === document.body) return false;
+					if (target == document.body) return false;
 				}
-				
-				if(type === 'onload' && target === document) target = window;				
+
+				if(type === 'onload' && target === document) target = window;	
 			}	
 
 			// fire events on a given target
 			var handleTarget = function(target) {				
 				var targetId = id || _getTargetId(target);
 				if (targetId >= 0) {
-					var events = _events[targetId][type];					
-					if (events) {						
+					var events = _events[targetId][type];			
+					if (events) {
 						for (var x = 0; x < events.length; x++) {
 							events[x](event);
 						}

@@ -24,7 +24,7 @@
 		var scripts = document.getElementsByTagName("script");
 		for(var s=0; s<scripts.length; s++) {				
 			if(scripts[s].src.match(/raptor\.js/)) {
-				var baseURI = scripts[s].src.replace(/raptor\.js*.+$/, "");					
+				var baseURI = scripts[s].src.replace(/RaptorJS.+$/, "");	
 				s = scripts.length;
 			}
 		}
@@ -162,7 +162,7 @@
 				if (!_config.loadedModules[mod]) {
 
 					var script = document.createElement("script");
-					script.src = _config.moduleURI + 'raptor.' + mod + ".js";
+					script.src = _config.moduleURI + mod + ".js";
 					script.type = "text/javascript";
 					
 					document.getElementsByTagName("head")[0].appendChild(script);
@@ -192,10 +192,10 @@
 																							
 											if (typeof raptor[_thisModule] === 'undefined') {
 												isLoaded = false;				
-												setTimeout(verifyLoad, 500);
+												//setTimeout(verifyLoad, 500);
 											}
 										}	
-										
+										isLoaded = true;
 										// Run the callback if everything is loaded
 										if (isLoaded) callback();
 									};
