@@ -272,10 +272,26 @@ raptor.jetpack = (function () {
 			*
 			* @param {Object} XML Doc Object
 			*/
-			read : function(xmlDoc) {		
-				// Find the root of the XML file	
-				var root = xmlDoc.childNodes[0];
-				return xmlParser.nodeParse(root);
+            read : function(xmlDoc) {		
+				/*
+				* Find a valid start of an XML document in case a comment
+				* is the first node found
+				*/
+				var root;
+				
+				var len = xmlDoc.childNodes.length;				
+				var node;
+				for(var i=0; i<len; i++) {
+					node = xmlDoc.childNodes[i];
+					
+					if(!raptor.util.type('Comment', node)) {						
+						root = node;
+						break;
+					}
+				}																
+				
+				if(root) return xmlParser.nodeParse(root);
+				else return false;
 			},
 
 			/**
