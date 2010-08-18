@@ -127,24 +127,48 @@
 				return match;
 			},
 			
-			profile_object : function(obj) {
+			profiler : {
 				
-				var new_object = {};
+				objects : [],
 				
-				var prop;
-				for (var key in obj) {
-					prop = obj[key];
-					if (typeof prop === 'function') new_object[key] = function() {
-						console.log('starting ' + key);
+				active : false,
+				
+				add : function(obj) {
+					objects.push(raptor.util.profiler._create_instance(obj));
+				},
+				
+				start : function() {
+					if (!raptor.util.profiler.active) {
+						raptor.util.profiler.active = true;
 						console.profile();
-						prop.apply(obj, arguments);
-						console.profileEnd();
-						console.log('ending ' + key);
 					}
-					else new_object[key] = prop;
-				}
+				},
 				
-				return new_object;
+				stop : function() {
+					if (raptor.util.profiler.active) {
+						raptor.util.profiler.active = false;
+						console.profileEnd();
+					}
+				},
+				
+				_create_instance : function(obj) {
+					
+					var new_class = function() {};
+					var new_object = new new_class();
+					
+					var prop;
+					for (var key in obj) {
+						prop = obj[key];
+						if (typeof prop === 'function') {
+							raptor.util.profilers.start();
+							new_class.prototype[key] = prop;
+							raptor.util.profiler.stop();
+						}
+						else new_object[key] = prop;
+					}
+					
+					return new_object;
+				}
 			}
 		},
 		

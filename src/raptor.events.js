@@ -229,21 +229,21 @@ raptor.events = (function() {
 				target[type] = _this.fire;
 			}
 	
-			// either global or persistent event is being registered
-			if (raptor.util.type('String', target)) {
-				
-				// if cb exists, then a pesistent event is being registered
-				if (cb) {
+			// if cb exists, then a pesistent event is being registered, or a count is being applied to a subscription
+			if (cb) {
+				if (raptor.util.type('Function', cb)) {
 					_registerPersist(target, type, cb);
-					
+				
 					var target = raptor.pack.hunt(target);
 					for (var i = 0; i < target.length; i++) {
 						register(target[i], type, cb);
 					}
 				}
-				
-				// if !cb then a global event is being registered
-				else register('*', target, type);
+				else register('*', target, function(e) {
+					this.fire_count = this.fire_count || 0;
+					this.fire_count++;
+					if (this.fire_count === cb) type(e);
+				});
 			}
 			
 			// if (arrayOfTargets, type, callback);
