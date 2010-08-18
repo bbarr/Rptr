@@ -92,7 +92,7 @@
 			}
 			// If events wasn't loaded yet, we'll go ahead and load it now
 			else {				
-				api.require('events', function () {					
+				api.require('RaptorJS/src/raptor.events', function () {					
 					api.ready = raptor.events.ready;
 					api.ready(fn);
 				});
