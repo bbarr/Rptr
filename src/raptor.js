@@ -125,6 +125,26 @@
 				if (typeof types === 'string') test(types);
 				else for (var i = 0; i < types.length && !match; i++) test(types[i]);
 				return match;
+			},
+			
+			profile_object : function(obj) {
+				
+				var new_object = {};
+				
+				var prop;
+				for (var key in obj) {
+					prop = obj[key];
+					if (typeof prop === 'function') new_object[key] = function() {
+						console.log('starting ' + key);
+						console.profile();
+						prop.apply(obj, arguments);
+						console.profileEnd();
+						console.log('ending ' + key);
+					}
+					else new_object[key] = prop;
+				}
+				
+				return new_object;
 			}
 		},
 		
