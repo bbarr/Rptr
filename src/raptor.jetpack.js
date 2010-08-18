@@ -218,8 +218,6 @@ raptor.jetpack = (function () {
 			
 			var cachedResponse;
 			
-			console.log(jetpackRequest.cache);
-			
 			// Check if cache is set to true and a cache exists for this URI
 			if( jetpackRequest.cache && (cachedResponse = cache[jetpackRequest.uri]) ) {
 				if(jetpackRequest.success) {
