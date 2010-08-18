@@ -197,13 +197,13 @@ raptor.events = (function() {
 			
 			if (document.readyState) {
 				if (!timer) {
-					var timer = setTimeout(function() {
+					var timer = setInterval(function() {
 						if (document.readyState === 'complete') {
 							if (!_loaded) {
 								_loaded = true;
-								raptor.events.fire(document, 'DOMContentLoaded');
-								clearTimeout(timer);
+								clearInterval(timer);
 								timer = null;
+								raptor.events.fire({'target' : document, 'type' : 'DOMContentLoaded'});
 							}
 						}
 					}, 10);
@@ -230,20 +230,25 @@ raptor.events = (function() {
 			}
 	
 			// if cb exists, then a pesistent event is being registered, or a count is being applied to a subscription
-			if (cb) {
-				if (raptor.util.type('Function', cb)) {
-					_registerPersist(target, type, cb);
-				
-					var target = raptor.pack.hunt(target);
-					for (var i = 0; i < target.length; i++) {
-						register(target[i], type, cb);
+			if (raptor.util.type('String', target)) {
+				if (cb) {
+					if (raptor.util.type('Function', cb)) {
+						_registerPersist(target, type, cb);
+					
+						var target = raptor.pack.hunt(target);
+						for (var i = 0; i < target.length; i++) {
+							register(target[i], type, cb);
+						}
 					}
+					else register('*', target, function(e) {
+						this.fire_count = this.fire_count || 0;
+						this.fire_count++;
+						if (this.fire_count === cb) type(e);
+					});
 				}
-				else register('*', target, function(e) {
-					this.fire_count = this.fire_count || 0;
-					this.fire_count++;
-					if (this.fire_count === cb) type(e);
-				});
+				else {
+					register('*', target, type);
+				}
 			}
 			
 			// if (arrayOfTargets, type, callback);
@@ -277,12 +282,12 @@ raptor.events = (function() {
 		 * @param {Object} event
 		 */
 		'fire' : function(event) {
-									
+										
 			// event will either be served by the browser, or manually. window.event for IE.
 			event = event || window.event;
 			
 			var type
-			if(event.type !== 'DOMContentLoaded' && event.type) {
+			if(event.type !== 'DOMContentLoaded') {
 				type = (raptor.util.type('String', event)) ? 'on' + event : 'on' + event.type;
 			}
 			else {
@@ -290,7 +295,7 @@ raptor.events = (function() {
 			}
 
 			event = _assignMousePosition(event);					
-
+			
 			// if multiple targets
 			if (event.targets) var targets = event.targets;
 			else {
@@ -336,14 +341,15 @@ raptor.events = (function() {
 			var handleTarget = function(target) {				
 				var targetId = id || _getTargetId(target);
 				if (targetId >= 0) {
-					var events = _events[targetId][type];			
+					var events = _events[targetId][type];
+					
 					if (events) {
 						for (var x = 0; x < events.length; x++) {
 							events[x](event);
 						}
 					}
 				}
-			}					
+			}
 			
 			// call handleTarget on target(s)
 			if (target) handleTarget(target);
@@ -417,8 +423,6 @@ raptor.events = (function() {
 			var children = el.getElementsByTagName('*');
 			var childLength = children.length;
 			for (var i = 0; i < childLength; i++) runQuery(children[i]);
-		},
-		
-		persists : _persists
+		}
 	}
 })();

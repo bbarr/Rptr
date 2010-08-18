@@ -289,7 +289,7 @@ raptor.jetpack = (function () {
 				var simpleNode = true;
 
 				// Check to see if there are any attributes we need to parse for the node
-				if(node.attributes.length > 0) {
+				if(node.attributes && node.attributes.length > 0) {
 					simpleNode = false;
 
 					var attributes = node.attributes,
