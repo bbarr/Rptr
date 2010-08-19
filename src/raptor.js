@@ -133,36 +133,43 @@
 				active : false,
 				
 				add : function(obj) {
-					objects.push(raptor.util.profiler._create_instance(obj));
+					var profiled_object = api.util.profiler._create_instance(obj);
+					api.util.profiler.objects.push(profiled_object);
+					return profiled_object;
 				},
 				
-				start : function() {
-					if (!raptor.util.profiler.active) {
-						raptor.util.profiler.active = true;
+				_start : function() {
+					if (!api.util.profiler.active) {
+						api.util.profiler.active = true;
 						console.profile();
 					}
 				},
 				
-				stop : function() {
-					if (raptor.util.profiler.active) {
-						raptor.util.profiler.active = false;
+				_stop : function() {
+					if (api.util.profiler.active) {
+						api.util.profiler.active = false;
 						console.profileEnd();
 					}
 				},
 				
 				_create_instance : function(obj) {
-					
+				
 					var new_class = function() {};
 					var new_object = new new_class();
 					
-					var prop;
-					for (var key in obj) {
-						prop = obj[key];
-						if (typeof prop === 'function') {
-							raptor.util.profilers.start();
-							new_class.prototype[key] = prop;
-							raptor.util.profiler.stop();
+					var create_method = function(_this, method, name) {
+						return function() {
+							console.log('profiling ' + name);
+							api.util.profiler._start();
+							var result = method.apply(_this, arguments);
+							api.util.profiler._stop();
+							return result;
 						}
+					}
+					
+					for (var key in obj) {
+						var prop = obj[key];
+						if (typeof prop === 'function') new_class.prototype[key] = create_method(new_object, prop, key);
 						else new_object[key] = prop;
 					}
 					
