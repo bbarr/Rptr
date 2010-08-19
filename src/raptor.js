@@ -13,7 +13,7 @@
 	_config = {
 		baseURI: '', // raptor assumes modules are located within the base directory unless otherwise specified via raptor.setModulePath();
 		moduleURI: '',
-		loadedModules: [],
+		loaded_scripts: [],
 		scriptReady: [], // temp fix for opera using both onload and onreadystatechange
 		baseModules: [] // Array of modules loaded as part of raptor's core
 	};
@@ -24,15 +24,14 @@
 		var scripts = document.getElementsByTagName("script");
 		for(var s=0; s<scripts.length; s++) {				
 			if(scripts[s].src.match(/raptor\.js/)) {
-				var baseURI = scripts[s].src.replace(/RaptorJS.+$/, "");	
+				var script_path = scripts[s].src.replace(/RaptorJS.+$/, "");	
 				s = scripts.length;
 			}
 		}
 		
-		_config.baseURI = baseURI;
-		_config.moduleURI = baseURI;			
+		_config.script_path = script_path;			
 		
-		_extendPrototypes();	
+		_extendPrototypes();
 	};
 	
 	_extendPrototypes = function() {
@@ -74,7 +73,7 @@
 			}
 		}		
 	};
- 
+	
 	api = {
 		
 				
@@ -173,84 +172,135 @@
 		},
 		
 		/**
-		 * Module and dependency loading mechanism
-		 * 
-		 * Usage Examples:
-		 * raptor.require('path/to/module', { callback: someFunction });
-		 * raptor.require(['path/moduleA', 'path/moduleB'], { callback: someFunction });
-		 *
-		 * @param {Array|String} modules
-		 * @param {Function} callback
-		 */
-		require : function (modules, callback) {
-			
-			var toLoad = 0;
-			var loadCount = 0;
-			
-			// modules can be either a string or array
-			if (typeof modules === 'string') {
-				toLoad = 1;
-				load(modules);
-			} 
-			else if (modules.length) {
-				toLoad = modules.length;
-				for (var i = 0; i < toLoad; i++) load(modules[i]);
-			}
-			
-			/**
-			* Internal module loader
-			*
-			* @param {String} Module we're loading
-			*/
-			function load (mod) {
-				if (!_config.loadedModules[mod]) {
+		* Dynamic JavaScript loader
+		* 
+		* @dependency raptor.events.js
+		*
+		* @param {Array|String} Scripts to load
+		* @param {Function} Callback to execute after loading modules
+		*/
+		
+		require : function(modules, callback) {
+		
+		    var _cache = {};
+		    
+            var _util = {
+                
+                /**
+                * Create a new script tag for this module
+                *
+                * @param {String} Module Path
+                */
+                create_script : function(module) {
+                
+                    var script = document.createElement('script');
+                    script.setAttribute('type', 'text/javascript');                                       
+                    script.setAttribute('src', _config.script_path + module + '.js');                    
+                    
+                    _config.loaded_scripts.push(module);
 
-					var script = document.createElement("script");
-					script.src = _config.moduleURI + mod + ".js";
-					script.type = "text/javascript";
-					
-					document.getElementsByTagName("head")[0].appendChild(script);
+                    return script;
+                },
+                
+                /**
+                * Monitor load completion of a script
+                * attaches either an onreadystatechange or onload method
+                * to the script depending on browser support
+                *
+                * Once a script is loaded the script_loaded method will
+                * be called
+                *
+                * @param {HTMLElement} Script we're loading onto the page
+                */
+                monitor_completion : function() {
+                    return (document.createElement('script').readyState)
+                    ? 
+                        function(script) {
+                            script.onreadystatechange = function() {
+                                if (script.readyState == 'complete') {
+                                    _util.script_loaded();
+                                }
+                            }
+                        }
+                    : 
+                        function(script) {
+                            script.onload = function() {
+                                _util.script_loaded();
+                            }
+                        };
+                }(),
+                
+                /**
+                * Method called once a script is finished loading to
+                * handle callback and queueing if necessary
+                */
+                script_loaded : function() {
+                    
+                    // If we're loading many scripts we need to fire off the script_loaded method
+                    // in order to handle the queue and execute the callback for the queue once
+                    // all modules have been loaded
+                    if (_cache.loading_many) {
+                        _util.script_loaded = function() { raptor.events.fire('script_loaded') };
+                        _util.script_loaded();
+                    }
+                    // Otherwise just run the callback now that the single script is ready
+                    else callback();
+                }
+                
+            };
 
-					script.onload = script.onreadystatechange = function() {					
-						
-						// raptor.config._scriptReady[]
-						if (_config.scriptReady.indexOf(mod) > -1) return true;
-						else {
-							_config.scriptReady.push(mod);
-							loadCount++;												
-							
-							// Once all the modules for this require call are filled run callback
-							if(loadCount === toLoad) {																						
-								if (callback) {					
-									
-									// Ensure all modules in this require were loaded otherwise wait for them
-									var verifyLoad = function () {																			
-										var isLoaded = true;
-										var _thisModule;
-										
-										if (typeof modules === 'string') modules = [modules];
-										
-										for (var i = 0; i < modules.length && isLoaded; i++) {
-											
-											_thisModule = modules[i];											
-																							
-											if (typeof raptor[_thisModule] === 'undefined') {
-												isLoaded = false;				
-												//setTimeout(verifyLoad, 500);
-											}
-										}	
-										isLoaded = true;
-										// Run the callback if everything is loaded
-										if (isLoaded) callback();
-									};
-									
-									verifyLoad();																									
-								}
-							}
-						}
-					}
-				}
-			};	
+            /**
+            * Load in a single module
+            *
+            * @param {String} Module Path
+            */
+		    var _load_single = function(module) {
+		    
+		        // Check and ensure that a module was not already loaded before
+		        // if it was, make sure to run the script_loaded event
+		        // to properly continue the queue progress and leave
+		        if (_config.loaded_scripts.indexOf(module) > -1) {
+                    raptor.events.fire('script_loaded');
+		            return;
+		        }                
+                
+                // Create the script for this module
+		        var script = _util.create_script(module);
+		        
+		        // Setup the load monitoring method and append the script to the page
+                _util.monitor_completion(script);
+                
+                document.body.appendChild(script);
+		    }
+            
+            /**
+            * Handle loading many modules at once, creating a 
+            * queue to run through and load each one individually
+            * executing the callback once ALL modules are ready
+            *
+            * @param {Array} Modules to load
+            */
+		    var _load_many = function(modules) {
+                
+		        var loading_many = _cache.loading_many = true;
+		        var modules_length = modules.length;
+		        
+		        // Event to fire the callback once we're sure all
+		        // modules in the array have been loaded
+		        raptor.events.add('script_loaded', function(e) {
+		            callback(e);
+		            raptor.events.remove('script_loaded');
+		        }, modules_length);
+		        
+		        // Loop through and load modules one at a time
+		        for(var i=0; i < modules_length; i++) _load_single(modules[i]);
+		    }
+		    
+		    if (typeof modules === 'string') _load_single(modules);
+		    else {
+		        if (!raptor.events) api.require('RaptorJS/src/events', function() { api.require(modules, callback) });
+		        else _load_many(modules);
+		    }
 		}
 	};
 	
