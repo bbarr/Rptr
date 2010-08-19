@@ -139,14 +139,14 @@
 					return profiled_object;
 				},
 				
-				start : function() {
+				_start : function() {
 					if (!api.util.profiler.active) {
 						api.util.profiler.active = true;
 						console.profile();
 					}
 				},
 				
-				stop : function() {
+				_stop : function() {
 					if (api.util.profiler.active) {
 						api.util.profiler.active = false;
 						console.profileEnd();
@@ -161,9 +161,9 @@
 					var create_method = function(_this, method, name) {
 						return function() {
 							console.log('profiling ' + name);
-							api.util.profiler.start();
+							api.util.profiler._start();
 							var result = method.apply(_this, arguments);
-							api.util.profiler.stop();
+							api.util.profiler._stop();
 							return result;
 						}
 					}
