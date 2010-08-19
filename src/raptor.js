@@ -141,7 +141,6 @@
 				
 				start : function() {
 					if (!api.util.profiler.active) {
-						console.log('start timing');
 						api.util.profiler.active = true;
 						console.profile();
 					}
@@ -149,7 +148,6 @@
 				
 				stop : function() {
 					if (api.util.profiler.active) {
-						console.log('stop timing');
 						api.util.profiler.active = false;
 						console.profileEnd();
 					}
