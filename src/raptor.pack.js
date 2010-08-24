@@ -169,7 +169,7 @@ raptor.pack = (function() {
 			}
 			
 			if (raptor.util.type('Array', el)) {
-				for (var i = 0, len = el.length; i < len; i++) _removeClass(el);
+				for (var i = 0, len = el.length; i < len; i++) _removeClass(el[i]);
 			}
 			else _removeClass(el);
 			
