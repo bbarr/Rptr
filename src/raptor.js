@@ -305,7 +305,7 @@
 		    
 		    if (typeof modules === 'string') _load_single(modules);
 		    else {
-		        if (!raptor.events) api.require('RaptorJS/src/events', function() { api.require(modules, callback) });
+		        if (!raptor.events) api.require('RaptorJS/src/raptor.events', function() { api.require(modules, callback) });
 		        else _load_many(modules);
 		    }
 		}
