@@ -277,7 +277,9 @@
 		        // Setup the load monitoring method and append the script to the page
                 _util.monitor_completion(script);
                 
-                document.body.appendChild(script);
+				var head = _cache.head;
+				if (!head) head = _cache.head = document.getElementsByTagName('head')[0];
+                head.appendChild(script);
 		    }
             
             /**
