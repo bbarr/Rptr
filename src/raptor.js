@@ -318,4 +318,9 @@
 	
 	return api;
 	
- })();
+})();
+
+if (!$) {
+	$ = raptor;
+	$u = raptor.util;
+}

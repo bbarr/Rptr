@@ -216,3 +216,5 @@ raptor.pack = (function() {
 	};
 
 })()
+
+if ($ === raptor) $p = raptor.pack;
