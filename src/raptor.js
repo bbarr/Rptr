@@ -188,7 +188,7 @@
 		*/
 		
 		require : function(modules, callback) {
-		
+	
 		    var _cache = {};
 		    
             var _util = {
@@ -320,7 +320,7 @@
 	
 })();
 
-if (!$) {
+if (typeof $ === 'undefined') {
 	$ = raptor;
 	$u = raptor.util;
 }

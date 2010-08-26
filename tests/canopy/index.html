@@ -21,9 +21,7 @@
 		<div id="content" class="a classy">
 			show overlay
 		</div>
-		<div id="alert" class="overlay hide">
-			This is an overlay!
-		</div>
+		
 		<script type="text/javascript" src="/src/raptor.js"></script>
 		<script type="text/javascript" src="/src/raptor.pack.js"></script>
 		<script type="text/javascript" src="/src/raptor.events.js"></script>
@@ -35,7 +33,7 @@
 			
 			var overlay = raptor.canopy.init({
 				'id' : 'alert',
-				'type' : 'tooltip'
+				'type' : 'obtrusive'
 			});
 			
 			raptor.events.add(div, 'click', function(e) {
