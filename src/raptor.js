@@ -219,22 +219,25 @@
                 *
                 * @param {HTMLElement} Script we're loading onto the page
                 */
-                monitor_completion : function() {
-                    return (document.createElement('script').readyState)
-                    ? 
-                        function(script) {
+                monitor_completion : function(script) {
+                    if (script.readyState) {
+                        _util.monitor_completion = function(script) {
                             script.onreadystatechange = function() {
                                 if (script.readyState == 'complete') {
                                     _util.script_loaded();
                                 }
                             }
                         }
-                    : 
-                        function(script) {
+					}
+					else {
+                        _util.monitor_completion = function(script) {
                             script.onload = function() {
                                 _util.script_loaded();
                             }
                         };
+					}
+					
+					_util.monitor_completion(script);
                 }(),
                 
                 /**
@@ -320,7 +323,7 @@
 	
 })();
 
-if (!$) {
+if (typeof $ === 'undefined') {
 	$ = raptor;
 	$u = raptor.util;
 }
