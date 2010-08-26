@@ -238,7 +238,7 @@
 					}
 					
 					_util.monitor_completion(script);
-                }(),
+                },
                 
                 /**
                 * Method called once a script is finished loading to
