@@ -10,7 +10,7 @@
 	
 	<script type="text/javascript" src="/src/raptor.js"></script>
 	<script type="text/javascript" src="/src/raptor.pack.js"></script>
-	<script type="text/javascript" src="/src/raptor.events.js"></script>
+	<script type="text/javascript" src="/src/events.js"></script>
 	<script type="text/javascript">
 		
 		$events = raptor.events;
@@ -30,7 +30,7 @@
 		
 		$events.add(div2, 'click', function(data) {
 
-var start = new Date();
+		var start = new Date();
 
 			var content = raptor.pack.birth('div', 
 				{

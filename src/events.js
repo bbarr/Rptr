@@ -1,4 +1,4 @@
-raptor.events = (function() {
+raptor._events = (function() {
 	
 	// private
 	var _events, _util;
@@ -8,7 +8,7 @@ raptor.events = (function() {
 	
 	// utility functions for event management
 	_util = {
-		create_type : function(type) {
+		format_event_type : function(type) {
  			return (type === 'DOMContentLoaded') ? type : 'on' + type;
 		},
 		find_events : function(target, collection) {
@@ -26,7 +26,7 @@ raptor.events = (function() {
 			collection : [],	
 			add : function(target, type, cb) {
 				var collection = _events.browser.collection;
-				type = _util.create_type(type);
+				type = _util.format_event_type(type);
 				var event_set = _util.find_events(target, collection);
 				if (event_set) {
 					var existing_events = events[target_id];

@@ -91,7 +91,7 @@
 			}
 			// If events wasn't loaded yet, we'll go ahead and load it now
 			else {				
-				api.require('RaptorJS/src/raptor.events', function () {					
+				api.require('raptor.events', function () {					
 					api.ready = raptor.events.ready;
 					api.ready(fn);
 				});
@@ -188,7 +188,7 @@
 		*/
 		
 		require : function(modules, callback) {
-	
+			
 		    var _cache = {};
 		    
             var _util = {
@@ -310,7 +310,7 @@
 		    
 		    if (typeof modules === 'string') _load_single(modules);
 		    else {
-		        if (!raptor.events) api.require('RaptorJS/src/raptor.events', function() { api.require(modules, callback) });
+		        if (!raptor.events) api.require('raptor.events', function() { api.require(modules, callback) });
 		        else _load_many(modules);
 		    }
 		}
