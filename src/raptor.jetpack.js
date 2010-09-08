@@ -443,3 +443,5 @@ raptor.jetpack = (function () {
 	};
 		
 })();
+
+if ($ === raptor) $j = raptor.jetpack;

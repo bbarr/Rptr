@@ -6,7 +6,7 @@ raptor.canopy = (function() {
 		'templates' : {
 			'standard' : raptor.pack.birth('div', {'class' : 'overlay standard-overlay hide'}, 
 				[
-					raptor.pack.birth('a', {'href' : '#', 'class' : 'close-overlay'}, 'close'),
+					raptor.pack.birth('a', {'href' : '#', 'class' : 'close-overlay'}, 'close this miguel!!!???'),
 					raptor.pack.birth('div', {'class' : 'content loading'}, 'loading..')
 				]
 			)
@@ -31,7 +31,6 @@ raptor.canopy = (function() {
 		'buildFrame' : function(overlay) {
 			overlay.el = (overlay.template) ? _html.templates[overlay.template].cloneNode(true) : _html.templates.standard.cloneNode(true);
 			overlay.el.setAttribute('id', overlay.id);
-			
 			raptor.pack.append(overlay.el, document.body, true);
 		}
 	}
@@ -143,3 +142,5 @@ raptor.canopy = (function() {
 		overlays : _overlays
 	}
 })();
+
+if ($ === raptor) $c = raptor.canopy;

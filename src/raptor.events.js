@@ -426,3 +426,5 @@ raptor.events = (function() {
 		}
 	}
 })();
+
+if ($ === raptor) $e = raptor.events;

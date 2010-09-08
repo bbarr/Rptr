@@ -188,7 +188,7 @@
 		*/
 		
 		require : function(modules, callback) {
-		
+	
 		    var _cache = {};
 		    
             var _util = {
@@ -219,23 +219,26 @@
                 *
                 * @param {HTMLElement} Script we're loading onto the page
                 */
-                monitor_completion : function() {
-                    return (document.createElement('script').readyState)
-                    ? 
-                        function(script) {
+                monitor_completion : function(script) {
+                    if (script.readyState) {
+                        _util.monitor_completion = function(script) {
                             script.onreadystatechange = function() {
                                 if (script.readyState == 'complete') {
                                     _util.script_loaded();
                                 }
                             }
                         }
-                    : 
-                        function(script) {
+					}
+					else {
+                        _util.monitor_completion = function(script) {
                             script.onload = function() {
                                 _util.script_loaded();
                             }
                         };
-                }(),
+					}
+					
+					_util.monitor_completion(script);
+                },
                 
                 /**
                 * Method called once a script is finished loading to
@@ -277,7 +280,9 @@
 		        // Setup the load monitoring method and append the script to the page
                 _util.monitor_completion(script);
                 
-                document.body.appendChild(script);
+				var head = _cache.head;
+				if (!head) head = _cache.head = document.getElementsByTagName('head')[0];
+                head.appendChild(script);
 		    }
             
             /**
@@ -305,7 +310,7 @@
 		    
 		    if (typeof modules === 'string') _load_single(modules);
 		    else {
-		        if (!raptor.events) api.require('RaptorJS/src/events', function() { api.require(modules, callback) });
+		        if (!raptor.events) api.require('RaptorJS/src/raptor.events', function() { api.require(modules, callback) });
 		        else _load_many(modules);
 		    }
 		}
@@ -316,4 +321,9 @@
 	
 	return api;
 	
- })();
+})();
+
+if (typeof $ === 'undefined') {
+	$ = raptor;
+	$u = raptor.util;
+}

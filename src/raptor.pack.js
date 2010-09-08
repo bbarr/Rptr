@@ -80,7 +80,7 @@ raptor.pack = (function() {
 			if (attrs) {
 				for (var attr in attrs) {
 					
-					if (attr == 'style') raptor.util.applyStyle(attrs[attr], el);
+					if (attr == 'style') raptor.pack.setStyle(attrs[attr], el);
 					
 					// Properly handle classes attributes
 					else if( attr === 'class') el.className = attrs[attr];
@@ -216,3 +216,5 @@ raptor.pack = (function() {
 	};
 
 })()
+
+if ($ === raptor) $p = raptor.pack;
