@@ -36,15 +36,16 @@ raptor.canopy = (function() {
 	}
 	
 	var Overlay = function(config) {
+	
 		this.id = config.id;
 		this.type = config.type || 'unobtrusive';
 		this.el = document.getElementById(this.id);
-		
+				
 		// if overlay doens't exist in the document, generate from collection of templates
 		if (!this.el) _util.buildFrame(this);
 		
 		var content = raptor.pack.hunt('.content', this.el);
-		this.contentArea = (content[0]) ? content[0] : this.el; 
+		this.contentArea = (content[0]) ? content[0] : this.el;
 		
 		if (config.callback) this.callback = config.callback;
 		this.cache = (config.cache == false) ? false : true;
@@ -71,7 +72,7 @@ raptor.canopy = (function() {
 			
 			// if there is a callback, execute it, so it can populate the overlay or whatever else it wants to do
 			if (this.callback) {
-				this.callback(this);
+				this.callback(this, e);
 				
 				// finally, if cache is set to true, destroy the callback as it won't be used again
 				if (this.cache) this.callback = null;
@@ -139,6 +140,18 @@ raptor.canopy = (function() {
 		init : function(config) {
 			return _overlays[config.id] = new Overlay(config);
 		},
+		
+		/**
+		* Provides a public method for adding templates to the canopy
+		* templates collection for later use
+		*
+		* @param {String} Template Name
+		* @param {HTMLElement} Element which makes up the template
+		*/
+		add_template : function (name, el) {
+            _html.templates[name] = el;
+		},
+		
 		overlays : _overlays
 	}
 })();
