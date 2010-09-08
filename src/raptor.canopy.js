@@ -2,14 +2,16 @@ raptor.canopy = (function() {
 	
 	var _overlays = {};
 	
-	var _html = {
+	var _html = {	
 		'templates' : {
-			'standard' : raptor.pack.birth('div', {'class' : 'overlay standard-overlay hide'}, 
-				[
-					raptor.pack.birth('a', {'href' : '#', 'class' : 'close-overlay'}, 'close this miguel!!!???'),
-					raptor.pack.birth('div', {'class' : 'content loading'}, 'loading..')
-				]
-			)
+			'standard' : function () {
+			    return raptor.pack.birth('div', {'class' : 'overlay standard-overlay hide'},
+				    [
+					    raptor.pack.birth('a', {'href' : '#', 'class' : 'close-overlay'}, 'close this miguel!!!???'),
+    					raptor.pack.birth('div', {'class' : 'content loading'}, 'loading..')
+	    			]
+                )
+    		}
 		}
 	};
 	
@@ -29,17 +31,19 @@ raptor.canopy = (function() {
 		},
 		
 		'buildFrame' : function(overlay) {
-			overlay.el = (overlay.template) ? _html.templates[overlay.template].cloneNode(true) : _html.templates.standard.cloneNode(true);
+			overlay.el = (overlay.template) ? _html.templates[overlay.template]().cloneNode(true) : _html.templates.standard().cloneNode(true);
 			overlay.el.setAttribute('id', overlay.id);
 			raptor.pack.append(overlay.el, document.body, true);
 		}
 	}
 	
 	var Overlay = function(config) {
-	
+	    
 		this.id = config.id;
 		this.type = config.type || 'unobtrusive';
 		this.el = document.getElementById(this.id);
+		
+		this.template = config.template;		
 				
 		// if overlay doens't exist in the document, generate from collection of templates
 		if (!this.el) _util.buildFrame(this);
