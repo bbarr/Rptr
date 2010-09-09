@@ -1,78 +1,29 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" >
 <head>
-	
+
 </head>
 <body>
 	
-	<div id="test">hi!</div>
-	<div id="test2">hi again!</div>
+	<div id="click">hi!</div>
+	<span>hi again!</span>
 	
 	<script type="text/javascript" src="/src/raptor.js"></script>
 	<script type="text/javascript" src="/src/raptor.pack.js"></script>
 	<script type="text/javascript" src="/src/events.js"></script>
 	<script type="text/javascript">
 		
-		$events = raptor.events;
-
-		var div = document.getElementById('test');
-		var div2 = document.getElementById('test2');
+		var $e = raptor._events;
+		var div = document.getElementById('click');
 		
-		$events.add(div, 'click', function(e) {
-			div2.innerHTML = 'hi again!';
-			$events.cleanse();
-			$events.fire('divWasClicked');
+		$e.add(div, 'click', function(e) {
+			var el = $p.birth('span', {}, 'this was created by a click');
+			$p.append(el, document.body);
+			$e.apply_persistence(el);
 		});
 		
-		$events.add('divWasClicked', function(e) {
-			alert('it was clicked');
-		});
-		
-		$events.add(div2, 'click', function(data) {
-
-		var start = new Date();
-
-			var content = raptor.pack.birth('div', 
-				{
-					'style' : {
-						'background' : '#ddd',
-						'border' : '1px solid #aaa',
-						'margin' : '10px'
-					}	
-				},
-				[
-					'This is a test div!',
-					function(container) {
-						for (var x = 0; x < 5; x++) {
-							container.appendChild(raptor.pack.birth('span', {}, '... this is span number ' + x));
-						}
-					},
-					raptor.pack.birth('ul', {}, 
-						[
-							raptor.pack.birth('li', {}, 'a list item'),
-							raptor.pack.birth('li', {}, 'a list item'),
-							raptor.pack.birth('li', {}, 'a list item'),
-							raptor.pack.birth('li', {}, 'a list item'),
-							raptor.pack.birth('li', {}, 'a list item')
-						]
-					)
-				]
-			);
-			
-			for (var i = 0; i < 100; i++) {
-				div2.appendChild(content.cloneNode(true));
-			}
-			
-			var spans = document.getElementsByTagName('span');
-			for (var i = 0; i < spans.length; i++) {
-				$events.add(spans[i], 'click', function(e) {
-					alert('span clicked');
-				});
-			}
-
-var end = new Date();
-//alert((end.getTime() - start.getTime()));			
-			
+		$e.add('span', 'mouseover', function(e) {
+			console.log(e.target);
 		});
 		
 	</script>

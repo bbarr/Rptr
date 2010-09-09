@@ -188,10 +188,6 @@ raptor.pack = (function() {
 		
 		setHTML : function(html, el) {
 			el.innerHTML = html;
-			
-			setTimeout(function() {
-				raptor.events.persist(el);
-			}, 500);
 		},
 		
 		/**
@@ -208,11 +204,7 @@ raptor.pack = (function() {
 					break;
 				default : existing.appendChild(el);
 			}
-			
-			setTimeout(function() {
-				raptor.events.persist(el);
-			}, 500);
-		},
+		}
 	};
 
 })()
