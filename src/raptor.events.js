@@ -1,7 +1,7 @@
 raptor.events = (function() {
 	
 	// private
-	var _dom, _persistant, _custom , _util, _loaded;
+	var _dom, _persistant, _custom , _util;
 	
 	// public
 	var api;
@@ -29,10 +29,10 @@ raptor.events = (function() {
 				this.collection.push(new_target_event);
 			}
 			
-			target[type] = this.fire;
+			target[type] = api.fire;
 		},
 		fire : function(event) {
-
+			
 			var data = _dom.generate_data(event);
 			
 			var target_events = _dom.find_events_by_target(data.target);
@@ -42,6 +42,39 @@ raptor.events = (function() {
 			if (!callbacks) return false;
 
 			for (var i = 0, len = callbacks.length; i < len; i++) callbacks[i](data);
+		},
+		remove : function(target, type, cb) {
+			var collection = this.collection;
+			var match = true;
+			if (!type) {
+				for (var i in collection) {
+					if (collection[i].target === target) {
+						this.collection.remove(collection[i]);
+						match = true;
+					}
+				}
+			}
+			else if (!cb) {
+				for (var i in collection) {
+					if (collection[i].target === target) {
+						if (collection[i].types[type]) {
+							delete collection[i].types[type];
+							match = true;
+						}
+					}	
+				}
+			}
+			else {
+				for (var i in collection) {
+					if (collection[i].target === target) {
+						if (collection[i].types[type].indexOf(cb) > -1) {
+							collection[i].types[type].remove(cb); 
+							match = true;
+						}
+					}	
+				}
+			}
+			return match;
 		},
 		generate_data : function(event) {
 			var custom_event = { 'dom' : event };
@@ -78,8 +111,39 @@ raptor.events = (function() {
 			var current_set = $p.hunt(query);
 			api.add(current_set, type, cb);
 		},
-		remove : function(query) {
-			this.collection.remove(query);
+		remove : function(query, type, cb) {
+			var collection = this.collection;
+			var match = false;
+			if (!type) {
+				console.log('there is no type');
+				for (var i in collection) {
+					if (collection[i].query === query) {
+						this.collection = this.collection.splice(i, 1);
+						match = true;
+					}
+				}
+			}
+			else if (!cb) {
+				for (var i in collection) {
+					if (collection[i].query === query) {
+						if (collection[i].types[type]) {
+							delete collection[i].types[type];
+							match = true;
+						}
+					}	
+				}
+			}
+			else {
+				for (var i in collection) {
+					if (collection[i].query === query) {
+						if (collection[i].types[type].indexOf(cb) > -1) {
+							collection[i].types[type].remove(cb);
+							match = true;
+						}
+					}
+				}
+			}
+			return match;
 		}
 	}
 	
@@ -104,11 +168,19 @@ raptor.events = (function() {
 					for (var i = 0, len = events.length; i < len; i++) events[i](data);
 				}
 			}
+		},
+		remove : function(name, cb) {
+			if (!this.collection[name]) return false;
+			if (!cb) delete this.collection[name];
+			else this.collection[name].remove(cb);
+			return true;
 		}
 	}
 	
 	api = {
-	
+		dom : _dom.collection,
+		persistent : _persistent.collection,
+		custom : _custom.collection,
         /**
 		* Queue up methods to run when the document is ready
 		*
@@ -116,7 +188,7 @@ raptor.events = (function() {
 		*/
 		ready : function (fn) {										
 						
-			if (_loaded) {
+			if (this.loaded) {
 				fn();
 				return;
 			}
@@ -127,11 +199,11 @@ raptor.events = (function() {
 				if (!timer) {
 					var timer = setInterval(function() {
 						if (document.readyState === 'complete') {
-							if (!_loaded) {
-								_loaded = true;
+							if (!api.loaded) {
+								api.loaded = true;
 								clearInterval(timer);
 								timer = null;
-								_dom.fire({'target' : document, 'type' : 'DOMContentLoaded'});
+								api.fire({'target' : document, 'type' : 'DOMContentLoaded'});
 							}
 						}
 					}, 10);
@@ -154,9 +226,22 @@ raptor.events = (function() {
 			}
 			else _custom.add(target, type);
 		},
-		remove : function(target, type, cb) {},
+		remove : function(target, type, cb) {
+			if (cb) {
+				(typeof target === 'string') ? _persistent.remove(target, type, cb) : _dom.remove(target, type, cb);
+			}
+			else {
+				if (_custom.remove(target, type)) return;
+				console.log('no custom events to remove');
+				if (_persistent.remove(target, type)) return;
+				console.log('no persistent events to remove');
+				if (_dom.remove(target, type)) return;
+				console.log('no dom events to remove');
+			}
+		},
 		fire : function(target, data) {
 			if (typeof target === 'string') _custom.fire(target, data);
+			else _dom.fire(target);
 		},
 		apply_persistence : function(el) {
 

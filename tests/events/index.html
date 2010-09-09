@@ -10,20 +10,22 @@
 	
 	<script type="text/javascript" src="/src/raptor.js"></script>
 	<script type="text/javascript" src="/src/raptor.pack.js"></script>
-	<script type="text/javascript" src="/src/events.js"></script>
+	<script type="text/javascript" src="/src/raptor.events.js"></script>
 	<script type="text/javascript">
 		
-		var $e = raptor._events;
-		var div = document.getElementById('click');
-		
-		$e.add(div, 'click', function(e) {
-			var el = $p.birth('span', {}, 'this was created by a click');
-			$p.append(el, document.body);
-			$e.apply_persistence(el);
-		});
-		
-		$e.add('span', 'mouseover', function(e) {
-			console.log(e.target);
+		$.ready(function() {
+			var $e = raptor.events;
+			var div = document.getElementById('click');
+			
+			$e.add(div, 'click', function(e) {
+				$e.remove('span');
+			});
+			
+			$e.add('span', 'mouseover', function(e) {
+				console.log(e.target);
+			});
+			
+			console.log($e.persistent);
 		});
 		
 	</script>
