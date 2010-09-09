@@ -43,7 +43,13 @@ raptor.canopy = (function() {
 		this.type = config.type || 'unobtrusive';
 		this.el = document.getElementById(this.id);
 		
-		this.template = config.template;		
+		// Are we following the mouse around on move
+		this.follow = config.follow;
+		
+		// Offset for positioning
+		this.offset = config.offset || { x: 0, y:0 };
+		
+		this.template = config.template;
 				
 		// if overlay doens't exist in the document, generate from collection of templates
 		if (!this.el) _util.buildFrame(this);
@@ -58,7 +64,7 @@ raptor.canopy = (function() {
 	Overlay.prototype = {
 		
 		'show' : function(e) {
-			
+									
 			// if element exists and is showing, don't try show/build it again
 			if (this.el && !raptor.pack.hasClass('hide', this.el)) return false;
 			
@@ -68,8 +74,7 @@ raptor.canopy = (function() {
 			// show backdrop for obtrusive overlays
 			if (this.type === 'obtrusive') _util.toggleObtrusive();
 			
-			raptor.pack.removeClass('hide', this.el);
-			
+			raptor.pack.removeClass('hide', this.el);	
 			
 			// position it dynamically based on content size, or click location for tooltips
 			this.position();
@@ -81,15 +86,18 @@ raptor.canopy = (function() {
 				// finally, if cache is set to true, destroy the callback as it won't be used again
 				if (this.cache) this.callback = null;
 			}
+			
+			//if (this.follow) $e.add(window, 'mousemove', this.position);
 		},
 		
 		'hide' : function() {
 			raptor.pack.addClass('hide', this.el);
 			if (this.type === 'obtrusive') _util.toggleObtrusive();
+			
+			//if (this.follow) $e.remove(document.body, 'mousemove', this.position);
 		},
 		
 		'position' : function() {
-			
 			var el = this.el;
 			var event = this.triggerEvent;
 			var style = {};
@@ -99,9 +107,9 @@ raptor.canopy = (function() {
 			var clientWidth = document.documentElement.clientWidth;
 
 			if (this.type === 'tooltip') {
-				if (event.x && event.y) {
-					style.left = event.x + 'px';
-					style.top = event.y + 'px';
+				if (event.x && event.y) {		   
+					style.left = (event.x + this.offset.x) + 'px';
+					style.top = (event.y + this.offset.y) + 'px';
 				}
 			}
 			else {
@@ -159,5 +167,4 @@ raptor.canopy = (function() {
 		overlays : _overlays
 	}
 })();
-
 if ($ === raptor) $c = raptor.canopy;
