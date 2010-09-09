@@ -1,193 +1,121 @@
-/**
- * RAPTOR EVENTS - 'cause raptors do stuff
- * 
- * Supports custom events.
- * 
- * Example:
- *   
- *   - Subscriber - 
- *   raptor.events.add(module, 'paperlessAccepted', function(data) {
- *     // do stuff with the data object
- *   });
- *   
- *   - Publisher -
- *   // fires on all paperlessAccepted bound targets
- *   raptor.events.fire('paperlessAccepted');
- *   
- *   OR
- *   
- *   // fires on all paperlessAccepted bound targets with additional data
- *   raptor.events.fire({
- *     type : 'paperlessAccepted',
- *     foo : 'some data'
- *   });
- *   
- *   OR
- *   
- *   // fires only on target
- *   raptor.events.fire({
- *     type : 'paperlessAccepted',
- *     target : module,
- *     // for multiple targets
- *     // targets : [module, div]
- *   });
- * 
- */
-
 raptor.events = (function() {
 	
-	/**
-	*	Example structure:
-	*
-	*	_events = {
-	*		0 : {
-	*			'onclick' : [cb, cb, cb]
-	*		},
-	*		3 : {
-	*			'itemClicked' : [cb],
-	*			'onchange' : [cb, cb]
-	*		}
-	*	}
-	*/
-	var _events = {};
+	// private
+	var _dom, _persistant, _custom , _util, _loaded;
 	
-	
-	/**
-	*	Example structure:
-	*
-	*	_targets = {
-	*		0 : HTMLElement,
-	*		3 : HTMLElement
-	*	}
-	*/
-	var _targets = {};
-	
-	/**
-	*	Example structure:
-	*
-	*	_persists = {
-	*		'a.ajax' : {
-	*			'onclick' : [cb, cb]
-	*		},
-	*		'div#example input:disabled' : {
-	*			'onchange' : [cb]
-	*		}
-	*	}
-	*/
-	var _persists = {};
-	var _persisted = {};		
-	
-	// this gets incremented and used as a unique ID for addition to _targets
-	var _guid = 0;
-	
-	// Store whether or not the document is ready
-	var _loaded = false;
-	
-	/**
-	 * Registers persistent event conditions.
-	 * query is a string to be used by Sizzle to check for matches in new elements
-	 * 
-	 * @param {String} query
-	 * @param {String} type
-	 * @param {Function} cb
-	 */
-	var _registerPersist = function(query, type, cb) {
-		if (_persists[query]) {
-			(_persists[query][type]) ? _persists[query][type].push(cb) : _persists[query][type] = [cb];
-		}
-		else {
-			_persists[query] = {};
-			_persists[query][type] = [cb];
-		}
-	}
-	
-	/**
-	 * Registers event
-	 * 
-	 * @param {HTMLElement|Object} target
-	 * @param {String} type
-	 * @param {Function} cb
-	 */
-	var _registerEvent = function(target, type, cb) {
+	// public
+	var api;
 		
-		var targetId =_getTargetId(target);
-		
-		if (targetId < 0) {
-			targetId = _guid++;
-			_targets[targetId] = target;
-			_events[targetId] = {};
+	// utility functions for event management
+	_util = {    		    
+		format_type : function(type) {
+ 			return (type === 'DOMContentLoaded' || /^on/.test(type)) ? type : 'on' + type;
 		}
-		
-		(_events[targetId][type]) ? _events[targetId][type].push(cb) : _events[targetId][type] = [cb];
-	}
-	
-	/**
-	 * Unregisters targets, or target->type, or target->type->callback
-	 * 
-	 * @param {HTMLElement|Object|Array|Function} target
-	 * @param {String} type
-	 * @param {Function} cb
-	 */
-	var _unregisterEvent = function(target, type, cb) {
-		
-		var targetId = _getTargetId(target);
-		
-		if (cb) {
-			_events[targetId][type].splice(_events[targetId][type].indexOf(cb), 1);
-		}
-		else if (type) {
-			delete _events[targetId][type];
-		}
-		else if (target) {
-			delete _targets[targetId];
-			for (var i in _events) if (i == targetId) delete _events[i];
-		}
-	}
-	
-	/**
-	 * Retreives the unique ID for a target
-	 * 
-	 * @param {HTMLElement|Object} target
-	 */
-	var _getTargetId = function(target) {		
-		for (var i in _targets) {
-			if (_targets[i] == target) return i;
-		}
-		return -1;
-	}
-	
-	/**
-	 *	Based on http://www.quirksmode.org script
-	 */
-
-	var _assignMousePosition = function(e) {
-		
-		var pos = {x:0,y:0};
-	
-		if (e.pageX || e.pageY) {				
-			pos.x = e.pageX;
-			pos.y = e.pageY;
-		}
-		else if (e.clientX || e.clientY) {
-			pos.x = e.clientX + doc.body.scrollLeft + doc.documentElement.scrollLeft;
-			pos.y = e.clientY + doc.body.scrollTop + doc.documentElement.scrollTop;
-		}
-		
-		e.x = pos.x;
-		e.y = pos.y;
-		
-		return e;
 	};
 	
-	return {
-		
-		/**
+	_dom = {
+		collection : [],
+		add : function(target, type, cb) {
+			
+			type = _util.format_type(type);
+			
+			var target_events = this.find_events_by_target(target);
+			if (target_events) {
+				(target_events[type]) ? target_events[type].push(cb) : target_events[type] = [cb]; 
+			}
+			else {
+				var new_target_event = { 'target' : target, 'types' : {} };
+				new_target_event.types[type] = [cb];
+				this.collection.push(new_target_event);
+			}
+			
+			target[type] = this.fire;
+		},
+		fire : function(event) {
+
+			var data = _dom.generate_data(event);
+			
+			var target_events = _dom.find_events_by_target(data.target);
+			if (!target_events) return false;
+			
+			var callbacks = target_events.types[data.type];
+			if (!callbacks) return false;
+
+			for (var i = 0, len = callbacks.length; i < len; i++) callbacks[i](data);
+		},
+		generate_data : function(event) {
+			var custom_event = { 'dom' : event };
+			custom_event['target'] = event.target || event.srcElement;
+			custom_event['type'] = _util.format_type(event.type);
+			custom_event['preventDefault'] = event.preventDefault || function() { event.cancelBubble = true };
+			return custom_event;
+		},
+		find_events_by_target : function(target) {
+			var collection = this.collection;
+			for (var i in collection) {
+				var set = collection[i];
+				if (set.target === target) return set;
+			}
+		}
+	}
+	
+	_persistent = {
+		collection : [],
+		add : function(query, type, cb) {
+			
+			type = _util.format_type(type);
+			
+			var existing_query = this.collection[query];
+			if (existing_query) {
+				(existing_query[type]) ? existing_query[type].push(cb) : existing_query.types[type] = [cb];
+			}
+			else {
+				var new_persistent_event = { 'query' : query, 'types' : {} }
+				new_persistent_event.types[type] = [cb];
+				this.collection.push(new_persistent_event);
+			}
+			
+			var current_set = $p.hunt(query);
+			api.add(current_set, type, cb);
+		},
+		remove : function(query) {
+			this.collection.remove(query);
+		}
+	}
+	
+	_custom = {
+		collection : {},
+		add : function(name, cb) {
+			var collection = this.collection;
+			var match = false;
+			for (var i in collection) {
+				if (i === name) {
+					match = true;
+					this.collection[name].push(cb);
+				}
+			}
+			if (!match) this.collection[name] = [cb];
+		},
+		fire : function(name, data) {
+			var collection = this.collection;
+			for (var i in collection) {
+				if (i === name) {
+					var events = collection[i];
+					for (var i = 0, len = events.length; i < len; i++) events[i](data);
+				}
+			}
+		}
+	}
+	
+	api = {
+	
+        /**
 		* Queue up methods to run when the document is ready
 		*
 		* @param {Function} Callback
 		*/
-		'ready' : function (fn) {										
-			
+		ready : function (fn) {										
+						
 			if (_loaded) {
 				fn();
 				return;
@@ -203,228 +131,63 @@ raptor.events = (function() {
 								_loaded = true;
 								clearInterval(timer);
 								timer = null;
-								raptor.events.fire({'target' : document, 'type' : 'DOMContentLoaded'});
+								_dom.fire({'target' : document, 'type' : 'DOMContentLoaded'});
 							}
 						}
 					}, 10);
 				}
 			}
-		},
-		
-		/**
-		 * Binds an event/callback to a specific target.
-		 * 
-		 * @param {HTMLElement|Object|String} target
-		 * @param {String} type
-		 * @param {Function} cb
-		 */
-		'add' : function(target, type, cb) {
-						
-			cb = cb || null;
-			var _this = this;
-			
-			var register = function(target, type, cb) {
-				if(type !== 'DOMContentLoaded') type = 'on' + type;
-				_registerEvent(target, type, cb);
-				target[type] = _this.fire;
-			}
+		},	
 	
-			// if cb exists, then a pesistent event is being registered, or a count is being applied to a subscription
-			if (raptor.util.type('String', target)) {
-				if (cb) {
-					if (raptor.util.type('Function', cb)) {
-						_registerPersist(target, type, cb);
-					
-						var target = raptor.pack.hunt(target);
-						for (var i = 0; i < target.length; i++) {
-							register(target[i], type, cb);
-						}
-					}
-					else register('*', target, function(e) {
-						this.fire_count = this.fire_count || 0;
-						this.fire_count++;
-						if (this.fire_count === cb) type(e);
-					});
+		add : function(target, type, cb) {
+			if (cb) {
+				if (typeof target === 'string') {
+					if (typeof cb === 'function') _persistent.add(target, type, cb);
+					else _custom.add(target, type, cb);
 				}
 				else {
-					register('*', target, type);
-				}
-			}
-			
-			// if (arrayOfTargets, type, callback);
-			else if (raptor.util.type('Array', target)) {
-				for (var i = 0; i < target.length; i++) {
-					register(target[i], type, cb);
-				}
-			}
-			
-			// if (target, type, callback)
-			else register(target, type, cb);
-		},
-		
-		/**
-		 * Removes by callback or event or target
-		 * 
-		 * @param {HTMLElement|Object|Array|Function} target
-		 * @param {String} type
-		 * @param {Function} cb
-		 */
-		'remove' : function(target, type, cb) {
-			if (type) type = 'on' + type;
-			_unregisterEvent(target, type || null, cb || null);
-		},
-		
-		/**
-		 * Fires event(s)
-		 * 
-		 * Event param gets passed to all subscriber callbacks
-		 * 
-		 * @param {Object} event
-		 */
-		'fire' : function(event) {
-										
-			// event will either be served by the browser, or manually. window.event for IE.
-			event = event || window.event;
-			
-			var type
-			if(event.type !== 'DOMContentLoaded') {
-				type = (raptor.util.type('String', event)) ? 'on' + event : 'on' + event.type;
-			}
-			else {
-				type = 'DOMContentLoaded';
-			}
-
-			event = _assignMousePosition(event);					
-			
-			// if multiple targets
-			if (event.targets) var targets = event.targets;
-			else {
-				
-				var target;
-				
-				// W3C
-				if (event.target) {
-					target = event.target;
-
-					// Safari bug
-					if (target.nodeType === 3) target = target.parentNode;
-				}
-				
-				// IE
-				else if (event.srcElement) {
-					event.target = target = event.srcElement;
-				}
-				
-				else if (event === document) {
-					event = {
-						target : document
+					if ($u.type('Array', target)) {
+						for (var i = 0, len = target.length; i < len; i++) _dom.add(target[i], type, cb);
 					}
-					target = event.target;
+					else _dom.add(target, type, cb);
 				}
-				
-				// global event
-				else {
-					event.target = target = '*';
-				}								
-				
-				// if event happens on an child element, bubble up to the appropriate parent
-				var id;			
-				while (id = _getTargetId(target) === -1 && target !== document && target !== '*') {
-					target = target.parentNode;
-					if (target == document.body) return false;
-				}
+			}
+			else _custom.add(target, type);
+		},
+		remove : function(target, type, cb) {},
+		fire : function(target, data) {
+			if (typeof target === 'string') _custom.fire(target, data);
+		},
+		apply_persistence : function(el) {
 
-				if(type === 'onload' && target === document) target = window;	
-			}	
-
-			// fire events on a given target
-			var handleTarget = function(target) {				
-				var targetId = id || _getTargetId(target);
-				if (targetId >= 0) {
-					var events = _events[targetId][type];
-					
-					if (events) {
-						for (var x = 0; x < events.length; x++) {
-							events[x](event);
-						}
+			var _apply = function(test_el, persistent_event) {
+				var types = persistent_event.types;
+				for (var type in types) {
+					var callbacks = types[type];
+					for (var i = 0, len = callbacks.length; i < len; i++) {
+						api.add(test_el, type, callbacks[i]);
 					}
 				}
 			}
-			
-			// call handleTarget on target(s)
-			if (target) handleTarget(target);
-			else for (var i = 0; i < targets.length; i++) handleTarget(targets[i]);
-		},
 		
-		/**
-		 * Cleans up event registry by detecting and removing
-		 * events for missing HTMLElements
-		 */
-		'cleanse' : function() {
-			for (var targetId in _events) {
-				var target = _targets[targetId];
-				
-				// proceed only if the target is an HTMLElement
-				if (raptor.util.type('HTMLElement', target)) {
-					
-					// get elements by targets tagName and remove and targets that are not longer present in document
-					var elements = raptor.pack.hunt(target.tagName);
-					if (elements.indexOf(target) < 0) {
-						_unregisterEvent(target);
-						
-						for (var i in _persisted) {
-							
-							var array = _persisted[i];
-							var index = array.indexOf(target);
-							
-							if (index > -1) array.splice(index, 1);
-						}
-					}
-				}
-			}
-		},
-		
-		/**
-		 * Checks a new element against persistent conditions, adding whatever events match 
-		 *
-		 * @param {HTMLElement} el
-		 */
-		'persist' : function(el) {
-		
-			var _this = this;
-			
-			var addEvents = function(el, activeQuery, query) {
-
-				if (_persisted[query] && _persisted[query].indexOf(el) > -1) return;
-			
-				// for each event type registered to that persist, cycle through and add each type
-				// and its callbacks onto the new element
-				for (var type in activeQuery) {
-					for (var i = 0; i < activeQuery[type].length; i++) {
-						_this.add(el, type, activeQuery[type][i]);
-					}
-				}
-				
-				(_persisted[query]) ? _persisted[query].push(el) : _persisted[query] = [el];
-			}
-			
-			var runQuery = function(el) {
-				for (var query in _persists) {
-					var activeQuery = _persists[query];
-					var set = raptor.pack.hunt(query);
-					
-					// search set of elements to see if el is present
-					if (set.indexOf(el) > -1) addEvents(el, activeQuery, query);
+			var _test = function(test_el) {
+				for (var i = 0, len = persistent_events.length; i < len; i++) {
+					var persistent_event = persistent_events[i];
+					if ($p.hunt(persistent_event.query).indexOf(test_el) > -1) _apply(test_el, persistent_event);
 				}
 			}
 			
-			runQuery(el);
+			var persistent_events = _persistent.collection;
+			
+			_test(el);
 			
 			var children = el.getElementsByTagName('*');
-			var childLength = children.length;
-			for (var i = 0; i < childLength; i++) runQuery(children[i]);
-		}
+			for (var i = 0, len = children.length; i < len; i++) _test(children[i]);
+		},
+		clear_missing : function() {}
 	}
+	
+	return api;
 })();
 
 if ($ === raptor) $e = raptor.events;
