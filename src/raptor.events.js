@@ -115,10 +115,9 @@ raptor.events = (function() {
 			var collection = this.collection;
 			var match = false;
 			if (!type) {
-				console.log('there is no type');
 				for (var i in collection) {
 					if (collection[i].query === query) {
-						this.collection = this.collection.splice(i, 1);
+						this.collection.remove(i);
 						match = true;
 					}
 				}
@@ -232,11 +231,8 @@ raptor.events = (function() {
 			}
 			else {
 				if (_custom.remove(target, type)) return;
-				console.log('no custom events to remove');
 				if (_persistent.remove(target, type)) return;
-				console.log('no persistent events to remove');
 				if (_dom.remove(target, type)) return;
-				console.log('no dom events to remove');
 			}
 		},
 		fire : function(target, data) {
