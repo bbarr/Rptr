@@ -18,12 +18,16 @@
 			var div = document.getElementById('click');
 			
 			$e.add(div, 'click', function(e) {
-				$e.remove('span');
+				var el = $p.birth('span', {}, 'another span');
+				document.body.appendChild(el);
+				$e.apply_persistence(el);
 			});
 			
 			$e.add('span', 'mouseover', function(e) {
 				console.log(e.target);
 			});
+			
+			
 		});
 		
 	</script>
