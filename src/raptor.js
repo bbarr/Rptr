@@ -35,9 +35,6 @@
 	};
 	
 	_extendPrototypes = function() {
-		var indexOf = function (needle) {
-			
-		}
 
 		// Let's prototype the indexOf for arrays
 		if(typeof Array.indexOf !== 'function') {
@@ -51,8 +48,9 @@
 
 		// Prototype the remove function for Arrays
 		if(typeof Array.remove !== 'function') {
-			Array.prototype.remove = function(index) {
-				return (index < length || index >= 0) ? this.splice.call(this, index, 1) : this;
+			Array.prototype.remove = function(index) {			    
+                if (index < length || index >= 0) this.splice.call(this, index, 1);			    
+			    return this;
 			}
 		}		
 	};
