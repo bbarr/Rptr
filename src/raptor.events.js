@@ -21,23 +21,23 @@ raptor.events = (function() {
 			
 			var target_events = this.find_events_by_target(target);
 			if (target_events) {
-				(target_events[type]) ? target_events[type].push(cb) : target_events[type] = [cb]; 
+				(target_events.types[type]) ? target_events.types[type].push(cb) : target_events.types[type] = [cb]; 
 			}
 			else {
 				var new_target_event = { 'target' : target, 'types' : {} };
 				new_target_event.types[type] = [cb];
 				this.collection.push(new_target_event);
 			}
-			
+
 			target[type] = api.fire;
 		},
 		fire : function(event) {
-			
-			var data = _dom.generate_data(event);
-			
+
+			var data = _dom.generate_data(event);						
 			var target_events = _dom.find_events_by_target(data.target);
+						
 			if (!target_events) return false;
-			
+
 			var callbacks = target_events.types[data.type];
 			if (!callbacks) return false;
 
@@ -79,15 +79,17 @@ raptor.events = (function() {
 		generate_data : function(event) {
 			var custom_event = { 'dom' : event };
 			custom_event['target'] = event.target || event.srcElement;
-			custom_event['type'] = _util.format_type(event.type);
-			custom_event['preventDefault'] = event.preventDefault || function() { event.cancelBubble = true };
+			custom_event['type'] = _util.format_type(event.type);			
+			custom_event['preventDefault'] = (event.preventDefault) ? function() { event.preventDefault(); } : function() { event.cancelBubble = true };
+   			custom_event['x'] = event.pageX || event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+    	    custom_event['y'] = event.pageY || event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
 			return custom_event;
 		},
 		find_events_by_target : function(target) {
 			var collection = this.collection;
-			for (var i in collection) {
-				var set = collection[i];
-				if (set.target === target) return set;
+			for (var i = 0, len = collection.length; i < len; i++) {
+    			var set = collection[i];
+    			if (set.target === target) return set;
 			}
 		}
 	}
@@ -148,9 +150,27 @@ raptor.events = (function() {
 	
 	_custom = {
 		collection : {},
-		add : function(name, cb) {
+		
+		/**
+        * @param {String} Name of custom event
+        * @param {Function} Callback to run
+        * @param {Integer} Number of fires required to execute cb
+        */
+		add : function(name, cb, count) {
 			var collection = this.collection;
 			var match = false;
+            
+			if (count) {
+			    var old_cb = cb;
+			    
+			    cb = function(e) {
+                    this.fire_count = this.fire_count || 0;
+                    this.fire_count++;
+                    
+                    if (this.fire_count === count) old_cb(e);
+			    }
+			}
+			
 			for (var i in collection) {
 				if (i === name) {
 					match = true;
@@ -177,9 +197,7 @@ raptor.events = (function() {
 	}
 	
 	api = {
-		dom : _dom.collection,
-		persistent : _persistent.collection,
-		custom : _custom.collection,
+
         /**
 		* Queue up methods to run when the document is ready
 		*
