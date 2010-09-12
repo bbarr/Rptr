@@ -22,8 +22,8 @@
 		
 		//  Determine where the core file is located, and store the URI prefix
 		var scripts = document.getElementsByTagName("script");
-		for(var s=0; s<scripts.length; s++) {				
-			if(scripts[s].src.match(/raptor\.js/)) {
+		for (var s = 0, len = scripts.length; s < length; s++) {				
+			if (scripts[s].src.match(/raptor\.js/)) {
 				var script_path = scripts[s].src.replace(/RaptorJS.+$/, "");	
 				s = scripts.length;
 			}
@@ -57,6 +57,12 @@
 	
 	api = {
 		
+		extend_api : function(new_api) {
+			var api = this;
+			for (var method in new_api) {
+				if (!api[method]) api[method] = new_api[method];
+			}
+		},
 				
 		/**
 		* Set up the shortcut to raptor.ready from
@@ -80,85 +86,28 @@
 		},
 		
 		/**
-		* Various utility functions
-		*/
-		util : {
-			
-			/**
-			 * Tests for data type by constructor name
-			 * 
-			 * @param {Array|String} types
-			 * @param {*} data
-			 */
-			type : function(types, data) {
-				var match = false;
-				var test = function(type) {
-					switch(type) {
-						case 'Object':
-							if (typeof data === 'object' && data.length == undefined && data != null) match = true;
-						case 'HTMLElement':
-							if (data.tagName) match = true;
-						default:
-							if (data.constructor && data.constructor.toString().indexOf(type) !== -1) match = true;		
-					}
-				}
-				if (typeof types === 'string') test(types);
-				else for (var i = 0; i < types.length && !match; i++) test(types[i]);
-				return match;
-			},
-			
-			profiler : {
-				
-				objects : [],
-				
-				active : false,
-				
-				add : function(obj) {
-					var profiled_object = api.util.profiler._create_instance(obj);
-					api.util.profiler.objects.push(profiled_object);
-					return profiled_object;
-				},
-				
-				_start : function() {
-					if (!api.util.profiler.active) {
-						api.util.profiler.active = true;
-						console.profile();
-					}
-				},
-				
-				_stop : function() {
-					if (api.util.profiler.active) {
-						api.util.profiler.active = false;
-						console.profileEnd();
-					}
-				},
-				
-				_create_instance : function(obj) {
-				
-					var new_class = function() {};
-					var new_object = new new_class();
-					
-					var create_method = function(_this, method, name) {
-						return function() {
-							console.log('profiling ' + name);
-							api.util.profiler._start();
-							var result = method.apply(_this, arguments);
-							api.util.profiler._stop();
-							return result;
-						}
-					}
-					
-					for (var key in obj) {
-						var prop = obj[key];
-						if (typeof prop === 'function') new_class.prototype[key] = create_method(new_object, prop, key);
-						else new_object[key] = prop;
-					}
-					
-					return new_object;
+		 * Tests for data type by constructor name
+		 * 
+		 * @param {Array|String} types
+		 * @param {*} data
+		 */
+		type : function(types, data) {
+			var match = false;
+			var test = function(type) {
+				switch(type) {
+					case 'Object':
+						if (typeof data === 'object' && data.length == undefined && data != null) match = true;
+					case 'HTMLElement':
+						if (data.tagName) match = true;
+					default:
+						if (data.constructor && data.constructor.toString().indexOf(type) !== -1) match = true;		
 				}
 			}
+			if (typeof types === 'string') test(types);
+			else for (var i = 0; i < types.length && !match; i++) test(types[i]);
+			return match;
 		},
-		
+				
 		/**
 		* Dynamic JavaScript loader
 		* 
@@ -299,12 +248,6 @@
 	
 	// Ready? Go!
 	_init();
-	
-	return api;
-	
-})();
 
-if (typeof $ === 'undefined') {
-	$ = raptor;
-	$u = raptor.util;
-}
+	return api;
+})();
