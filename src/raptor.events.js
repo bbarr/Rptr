@@ -1,4 +1,4 @@
-raptor.events = (function() {
+(function() {
 	
 	// private
 	var _dom, _persistant, _custom , _util;
@@ -29,7 +29,7 @@ raptor.events = (function() {
 				this.collection.push(new_target_event);
 			}
 
-			target[type] = api.fire;
+			target[type] = api.alarm;
 		},
 		fire : function(event) {
 
@@ -228,14 +228,14 @@ raptor.events = (function() {
 			}
 		},	
 	
-		add : function(target, type, cb) {
+		lash : function(target, type, cb) {
 			if (cb) {
 				if (typeof target === 'string') {
 					if (typeof cb === 'function') _persistent.add(target, type, cb);
 					else _custom.add(target, type, cb);
 				}
 				else {
-					if ($u.type('Array', target)) {
+					if (raptor.type('Array', target)) {
 						for (var i = 0, len = target.length; i < len; i++) _dom.add(target[i], type, cb);
 					}
 					else _dom.add(target, type, cb);
@@ -243,7 +243,8 @@ raptor.events = (function() {
 			}
 			else _custom.add(target, type);
 		},
-		remove : function(target, type, cb) {
+		
+		unlash : function(target, type, cb) {
 			if (cb) {
 				(typeof target === 'string') ? _persistent.remove(target, type, cb) : _dom.remove(target, type, cb);
 			}
@@ -253,11 +254,13 @@ raptor.events = (function() {
 				if (_dom.remove(target, type)) return;
 			}
 		},
-		fire : function(target, data) {
+		
+		alarm : function(target, data) {
 			if (typeof target === 'string') _custom.fire(target, data);
 			else _dom.fire(target);
 		},
-		apply_persistence : function(el) {
+		
+		scan_for_life : function(el) {
 
 			var _apply = function(test_el, persistent_event) {
 				var types = persistent_event.types;
@@ -282,11 +285,8 @@ raptor.events = (function() {
 			
 			var children = el.getElementsByTagName('*');
 			for (var i = 0, len = children.length; i < len; i++) _test(children[i]);
-		},
-		clear_missing : function() {}
+		}
 	}
 	
-	return api;
+	if (raptor) raptor.extend(api);
 })();
-
-if ($ === raptor) $e = raptor.events;

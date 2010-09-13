@@ -5,84 +5,78 @@
  var raptor = (function() {
 	
 	// private
-	var _config, _init, _extendPrototypes; 
+	var _config, _init; 
 	
 	// public
 	var api;
 	
 	_config = {
-		baseURI: '', // raptor assumes modules are located within the base directory unless otherwise specified via raptor.setModulePath();
-		moduleURI: '',
-		loaded_scripts: [],
-		scriptReady: [], // temp fix for opera using both onload and onreadystatechange
-		baseModules: [] // Array of modules loaded as part of raptor's core
+		loaded_scripts : [],
+		script_path : '',
+		raptor_path : ''
 	};
  
 	_init = function() {
 		
 		//  Determine where the core file is located, and store the URI prefix
-		var scripts = document.getElementsByTagName("script");
-		for (var s = 0, len = scripts.length; s < length; s++) {				
-			if (scripts[s].src.match(/raptor\.js/)) {
-				var script_path = scripts[s].src.replace(/RaptorJS.+$/, "");	
-				s = scripts.length;
+		var scripts = document.getElementsByTagName("script"),
+			possible_script_dirs = ['scripts/', 'js/', 'javascripts/', 'script/', 'javascript/'],
+			script_path, raptor_path;
+		for (var s = 0, len = scripts.length; s < len; s++) {				
+			var src = scripts[s].src;
+			if (src.match(/raptor\.js/)) {
+				var raptor_path = src.replace(/raptor\..+$/, "");
+				for (var i = 0, iLen = possible_script_dirs.length; i < iLen; i++) {
+					var possible = possible_script_dirs[i];
+					if (src.indexOf(possible) > -1) script_path = src.split(possible)[0] + possible;
+				}
 			}
 		}
-		
-		_config.script_path = script_path;			
-		
-		_extendPrototypes();
+
+		_config.script_path = script_path || raptor_path;
+		_config.raptor_path = raptor_path;
 	};
 	
-	_extendPrototypes = function() {
-
-		// Let's prototype the indexOf for arrays
-		if(typeof Array.indexOf !== 'function') {
-			Array.prototype.indexOf = function(needle) {
-				for (var i = 0, len = this.length; i < length; i++) {
-					if (this[i] === needle) return i;
-				}
-				return -1;
-			} 
-		}
-
-		// Prototype the remove function for Arrays
-		if(typeof Array.remove !== 'function') {
-			Array.prototype.remove = function(index) {			    
-                if (index < length || index >= 0) this.splice.call(this, index, 1);			    
-			    return this;
+	// prototype indexOf for arrays
+	if(typeof Array.indexOf !== 'function') {
+		Array.prototype.indexOf = function(needle) {
+			for (var i = 0, len = this.length; i < length; i++) {
+				if (this[i] === needle) return i;
 			}
-		}		
-	};
+			return -1;
+		} 
+	}
+
+	// Prototype remove for arrays
+	if(typeof Array.remove !== 'function') {
+		Array.prototype.remove = function(index) {			    
+            if (index < length || index >= 0) this.splice.call(this, index, 1);			    
+		    return this;
+		}
+	}
 	
 	api = {
 		
-		extend_api : function(new_api) {
-			var api = this;
+		extend : function(new_api) {
 			for (var method in new_api) {
-				if (!api[method]) api[method] = new_api[method];
+				if (!this[method]) this[method] = new_api[method];
 			}
 		},
-				
+		
+		set_script_path : function(path) {
+			_config.script_path = path;
+		},
+		
 		/**
 		* Set up the shortcut to raptor.ready from
 		* raptor.events
 		*
 		* @param {Function} Ready callback
 		*/
-		ready : function(fn) {						
-						
-			if (raptor.events) {
-				api.ready = raptor.events.ready;
-				api.ready(fn);
-			}
-			// If events wasn't loaded yet, we'll go ahead and load it now
-			else {				
-				api.require('RaptorJS/src/raptor.events', function () {					
-					api.ready = raptor.events.ready;
-					api.ready(fn);
-				});
-			}
+		ready : function(fn) {
+			api.require('RaptorJS/src/raptor.events', function () {
+				raptor.ready(fn);
+			});
 		},
 		
 		/**
@@ -119,8 +113,8 @@
 		
 		require : function(modules, callback) {
 			
-		    var _cache = {};
-		    
+			var _cache = {};
+
             var _util = {
                 
                 /**
@@ -180,7 +174,7 @@
                     // in order to handle the queue and execute the callback for the queue once
                     // all modules have been loaded
                     if (_cache.loading_many) {
-                        _util.script_loaded = function() { raptor.events.fire('script_loaded') };
+                        _util.script_loaded = function() { raptor.alarm('script_loaded') };
                         _util.script_loaded();
                     }
                     // Otherwise just run the callback now that the single script is ready
@@ -200,7 +194,7 @@
 		        // if it was, make sure to run the script_loaded event
 		        // to properly continue the queue progress and leave
 		        if (_config.loaded_scripts.indexOf(module) > -1) {
-                    raptor.events.fire('script_loaded');
+                    raptor.alarm('script_loaded');
 		            return;
 		        }                
                 
@@ -229,9 +223,9 @@
 		        
 		        // Event to fire the callback once we're sure all
 		        // modules in the array have been loaded
-		        raptor.events.add('script_loaded', function(e) {
+		        raptor.lash('script_loaded', function(e) {
 		            callback(e);
-		            raptor.events.remove('script_loaded');
+		            raptor.unlash('script_loaded');
 		        }, modules_length);
 		        
 		        // Loop through and load modules one at a time
@@ -240,7 +234,7 @@
 		    
 		    if (typeof modules === 'string') _load_single(modules);
 		    else {
-		        if (!raptor.events) api.require('RaptorJS/src/raptor.events', function() { api.require(modules, callback) });
+		        if (!raptor.lash) api.require('raptor.events', function() { api.require(modules, callback) });
 		        else _load_many(modules);
 		    }
 		}

@@ -7,12 +7,7 @@
 * @author Damian Galarza (galarza.d@gmail.com)
 */
 
-// Silently create raptor namespace
-if(typeof raptor === 'undefined') {
-	var raptor = {};
-}
-
-raptor.jetpack = (function () {
+(function () {
 	
 	var xhr = null;
 	
@@ -424,7 +419,7 @@ raptor.jetpack = (function () {
 		'json' : jsonParser
 	};
 	
-	return {
+	var api = {
 		
 		/**
 		* Enage the jetpack!
@@ -441,7 +436,6 @@ raptor.jetpack = (function () {
 		parseXML : parsers.xml,		
 		parseJSON : parsers.json
 	};
-		
+	
+	if (raptor) raptor.extend(api);	
 })();
-
-if ($ === raptor) $j = raptor.jetpack;

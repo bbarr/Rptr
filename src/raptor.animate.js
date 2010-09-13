@@ -1,4 +1,4 @@
-raptor.animate = (function() {
+(function() {
 	
 	var api;
 	
@@ -74,5 +74,5 @@ raptor.animate = (function() {
 		
 	}
 	
-	return api;
+	if (raptor) raptor.extend(api);
 })();

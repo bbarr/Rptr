@@ -1,6 +1,3 @@
-// Silently create raptor namespace
-if(typeof raptor === 'undefined') var raptor = {};
-
 /*
 	
 	INCLUDES SIZZLE SELECTOR ENGINE:
@@ -29,21 +26,25 @@ if(typeof raptor === 'undefined') var raptor = {};
 
 (function() {
 
-	var nodeStorage = {};
-	var fragmentStorage = {};
+	// private
+	var _util, _nodes, _fragments;
 	
+	// public
 	var api;
 	
-	var util = {
+	_nodes = {};
+	_fragments = {};
+	
+	_util = {
 		
 		/**
 		 * Creates Element and adds to storage or clones existing
 		 * 
 		 * @param {String} tag
 		 */
-		newElement : function(tag) {
-			if (!nodeStorage[tag]) nodeStorage[tag] = document.createElement(tag);
-			return nodeStorage[tag].cloneNode(true);	
+		new_element : function(tag) {
+			if (!_nodes[tag]) _nodes[tag] = document.createElement(tag);
+			return _nodes[tag].cloneNode(true);	
 		},
 		
 		/**
@@ -54,7 +55,7 @@ if(typeof raptor === 'undefined') var raptor = {};
 		 * @param {HTMLElement} el
 		 * @param {String} string
 		 */
-		insertText : function(el, text) {
+		insert_text : function(el, text) {
 			if (/\&\S+;/.test(text)) el.innerHTML += text;
 			else el.appendChild(document.createTextNode(text));
 		}
@@ -76,13 +77,13 @@ if(typeof raptor === 'undefined') var raptor = {};
 		birth : function(tag, attrs, contents, fragment) {
 			
 			// creates new element, or clones existing
-			var el = util.newElement(tag);
+			var el = _util.new_element(tag);
 			
 			// set attributes
 			if (raptor.type('Object', attrs)) {
 				for (var attr in attrs) {
 					
-					if (attr == 'style') raptor.pack.setStyle(attrs[attr], el);
+					if (attr == 'style') raptor.pack.set_style(attrs[attr], el);
 					
 					// Properly handle classes attributes
 					else if( attr === 'class') el.className = attrs[attr];
@@ -97,7 +98,7 @@ if(typeof raptor === 'undefined') var raptor = {};
 			// parse content
 			if (contents) {
 				if (raptor.type(['String', 'Number'], contents)) {
-					util.insertText(el, contents);
+					_util.insert_text(el, contents);
 				}
 				else if (raptor.type('HTMLElement', contents)) {
 					el.appendChild(contents);
@@ -105,9 +106,9 @@ if(typeof raptor === 'undefined') var raptor = {};
 				else if (raptor.type('Array', contents)){
 					for (var i = 0; i < contents.length; i++) {
 						if (raptor.type(['String', 'Number'], contents[i])) {
-							util.insertText(el, contents[i], true);
+							_util.insert_text(el, contents[i], true);
 						}
-						else if (raptor.type('Function', contents[i])) {
+						else if (typeof contents[i] === 'function') {
 							contents[i](el); 
 						}
 						else {
@@ -115,12 +116,12 @@ if(typeof raptor === 'undefined') var raptor = {};
 						}
 					}
 				}
-				else if (raptor.type(['Function'], contents)) contents(el);
+				else if (typeof contents === 'function') contents(el);
 			}
 			// if fragment referenced, create and/or add to existing
 			if (fragment) {
-				if (!fragmentStorage[fragment]) fragmentStorage[fragment] = document.createDocumentFragment();
-				fragmentStorage[fragment].appendChild(el);
+				if (!_fragments[fragment]) _fragments[fragment] = document.createDocumentFragment();
+				_fragments[fragment].appendChild(el);
 			}
 
 			return el;
@@ -133,13 +134,13 @@ if(typeof raptor === 'undefined') var raptor = {};
 		 * @param {Bool} is this a unique usage
 		 */
 		nursery : function(name, unique) {						
-			var frag = fragmentStorage[name];
+			var frag = _fragments[name];
 			
 			if (frag) {
 				frag = frag.cloneNode(true);
 				
 				// Trash it if unique
-				if (unique) delete fragmentStorage[name];
+				if (unique) delete _fragments[name];
 			}
 			
 			return frag || false;
@@ -150,46 +151,48 @@ if(typeof raptor === 'undefined') var raptor = {};
 		 */
 		hunt : window.Sizzle,
 		
-		hasClass : function(className, el) {
-			return el.className.split(' ').indexOf(className) > -1;
+		has_class : function(class_name, el) {
+			return el.className.split(' ').indexOf(class_name) > -1;
 		},
 		
-		addClass : function(className, el) {
-			var classes = el.className.split(' ');
-			if (classes === '') classes = [];
-			if (classes.indexOf(className) < 0) classes.push(className);
-			el.className = classes.join(' ');
-		},
-		
-		removeClass : function(className, el) {
+		add_class : function(class_name, el) {
 			
-			var _removeClass = function(el) {
+			var _add_class = function(el) {
 				var classes = el.className.split(' ');
 				if (classes === '') classes = [];
-				var i = classes.indexOf(className)
+				if (classes.indexOf(class_name) < 0) classes.push(class_name);
+				el.className = classes.join(' ');
+			}
+			
+			if (raptor.type('Array', el)) {
+				for (var i = 0, len = el.length; i < len; i++) _add_class(el[i]);
+			}
+			else _add_class(el);
+		},
+		
+		remove_class : function(class_name, el) {
+			
+			var _remove_class = function(el) {
+				var classes = el.className.split(' ');
+				if (classes === '') classes = [];
+				var i = classes.indexOf(class_name)
 				if (i > -1) classes.splice(i, 1);
 				el.className = classes.join(' ');
 			}
 			
 			if (raptor.type('Array', el)) {
-				for (var i = 0, len = el.length; i < len; i++) _removeClass(el[i]);
+				for (var i = 0, len = el.length; i < len; i++) _remove_class(el[i]);
 			}
-			else _removeClass(el);
-			
+			else _remove_class(el);
 		},
 		
-		setStyle : function(styles, el) {
-			var styleText = "";
-			for (var prop in styles) {
-				var style = styles[prop];
-				
-				styleText += prop + ":" + styles[prop] + ";";
-			}
-			
-			el.style.cssText = styleText;
+		set_style : function(styles, el) {
+			var style_text = "";
+			for (var prop in styles) style_text += prop + ":" + styles[prop] + ";";
+			el.style.cssText = style_text;
 		},
 		
-		setHTML : function(html, el) {
+		set_html : function(html, el) {
 			el.innerHTML = html;
 		},
 		
@@ -210,5 +213,5 @@ if(typeof raptor === 'undefined') var raptor = {};
 		}
 	};
 
-	raptor.extend_api(api);
+	if (raptor) raptor.extend(api);
 })();

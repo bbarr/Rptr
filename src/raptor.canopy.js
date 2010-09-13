@@ -1,14 +1,14 @@
-raptor.canopy = (function() {
+(function() {
 	
 	var _overlays = {};
 	
 	var _html = {	
 		'templates' : {
 			'standard' : function () {
-			    return raptor.pack.birth('div', {'class' : 'overlay standard-overlay hide'},
+			    return raptor.birth('div', {'class' : 'overlay standard-overlay hide'},
 				    [
-					    raptor.pack.birth('a', {'href' : '#', 'class' : 'close-overlay'}, 'close this miguel!!!???'),
-    					raptor.pack.birth('div', {'class' : 'content loading'}, 'loading..')
+					    raptor.birth('a', {'href' : '#', 'class' : 'close-overlay'}, 'close this miguel!!!???'),
+    					raptor.birth('div', {'class' : 'content loading'}, 'loading..')
 	    			]
                 )
     		}
@@ -22,18 +22,18 @@ raptor.canopy = (function() {
 			var body = document.body;
 			
 			if (!document.getElementById('obtrusive-backdrop')) {
-				var backdrop = raptor.pack.birth('div', {'id' : 'obtrusive-backdrop'});
+				var backdrop = raptor.birth('div', {'id' : 'obtrusive-backdrop'});
 				body.appendChild(backdrop);
 			}
 			
-			if (raptor.pack.hasClass('obtrusive', body)) raptor.pack.removeClass('obtrusive', body);
-			else raptor.pack.addClass('obtrusive', body);
+			if (raptor.has_class('obtrusive', body)) raptor.remove_class('obtrusive', body);
+			else raptor.add_class('obtrusive', body);
 		},
 		
 		'buildFrame' : function(overlay) {
 			overlay.el = (overlay.template) ? _html.templates[overlay.template]().cloneNode(true) : _html.templates.standard().cloneNode(true);
 			overlay.el.setAttribute('id', overlay.id);
-			raptor.pack.append(overlay.el, document.body, true);
+			raptor.append(overlay.el, document.body, true);
 		}
 	}
 	
@@ -54,7 +54,7 @@ raptor.canopy = (function() {
 		// if overlay doens't exist in the document, generate from collection of templates
 		if (!this.el) _util.buildFrame(this);
 		
-		var content = raptor.pack.hunt('.content', this.el);
+		var content = raptor.hunt('.content', this.el);
 		this.contentArea = (content[0]) ? content[0] : this.el;
 		
 		if (config.callback) this.callback = config.callback;
@@ -66,7 +66,7 @@ raptor.canopy = (function() {
 		'show' : function(e) {
 									
 			// if element exists and is showing, don't try show/build it again
-			if (this.el && !raptor.pack.hasClass('hide', this.el)) return false;
+			if (this.el && !raptor.has_class('hide', this.el)) return false;
 			
 			// preserve event if there is one
 			this.triggerEvent = e || {};
@@ -74,7 +74,7 @@ raptor.canopy = (function() {
 			// show backdrop for obtrusive overlays
 			if (this.type === 'obtrusive') _util.toggleObtrusive();
 			
-			raptor.pack.removeClass('hide', this.el);	
+			raptor.remove_class('hide', this.el);	
 			
 			// position it dynamically based on content size, or click location for tooltips
 			this.position();
@@ -91,7 +91,7 @@ raptor.canopy = (function() {
 		},
 		
 		'hide' : function() {
-			raptor.pack.addClass('hide', this.el);
+			raptor.add_class('hide', this.el);
 			if (this.type === 'obtrusive') _util.toggleObtrusive();
 			
 			//if (this.follow) $e.remove(document.body, 'mousemove', this.position);
@@ -127,28 +127,26 @@ raptor.canopy = (function() {
 			var showing = 1;
 			for (var o in _overlays) {
 				var overlay = _overlays[o].el;
-				if (!raptor.pack.hasClass('hide', overlay)) {
+				if (!raptor.has_class('hide', overlay)) {
 					var z = overlay.style.zIndex;
 					if (z >= showing) showing = ++z;
 				}
 			}
 			style['z-index'] = showing;
 			
-			raptor.pack.setStyle(style, el);
+			raptor.set_style(style, el);
 		}
 	}
 	
 	var init = function() {
-		raptor.events.add('.close-overlay', 'click', function(e) {
+		raptor.lash('.close-overlay', 'click', function(e) {
 			e.preventDefault();
 			var overlayID = e.target.parentNode.getAttribute('id');
 			_overlays[overlayID].hide();
 		});
 	}
 	
-	raptor.ready(init);
-	
-	return {
+	var api = {
 		init : function(config) {
 			return _overlays[config.id] = new Overlay(config);
 		},
@@ -166,5 +164,9 @@ raptor.canopy = (function() {
 		
 		overlays : _overlays
 	}
+	
+	if (raptor) {
+		raptor.extend(api);
+		raptor.ready(init);
+	}
 })();
-if ($ === raptor) $c = raptor.canopy;
