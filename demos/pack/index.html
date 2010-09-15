@@ -7,69 +7,21 @@
 	
 	<div id="test"></div>
 	
-	<script type="text/javascript" src="/src/raptor.pack.js"></script>
-	<script type="text/javascript" src="/src/raptor.util.js"></script>
-	<script type="text/javascript">
-		var start = new Date();
-		
-		var one = raptor.pack.birth('div', 
-		
-			// Attributes
-			{
-				'class' : 'sweet',
-				'style' : {
-					'height' : '200px',
-					'background' : '#878787'
-				}
-			}, 
-		
-			// content
-			[
-				'content!!!',
-				'and more &amp; content!!!',
-				raptor.pack.birth('span', {}, 'What do you think of my snazzy span?'),
-				raptor.pack.birth('a', 
-					{
-						'href' : '#',
-						'title' : 'a title',
-						'rel' : 'relationship',
-						'style' : {
-							'display' : 'block'
-						}
-					}, 
-					'With crazy stuff &amp; html entities!'
-				)
-			], 
-			
-		// fragment	
-		'testFrag');
-		
-		var two = raptor.pack.birth('div', {'class' : 'sweet'}, [
-			'content!!!',
-			'and more &amp; content!!!',
-			raptor.pack.birth('span', {}, 'What do you think of my snazzy span?'),
-			raptor.pack.birth('p', {}, 'With crazy stuff &amp; html entities!')
-		], 'testFrag');
-		var three = raptor.pack.birth('div', {'class' : 'sweet'}, [
-			'content!!!',
-			'and more &amp; content!!!',
-			raptor.pack.birth('span', {}, 'What do you think of my snazzy span?'),
-			raptor.pack.birth('p', {}, 'With crazy stuff &amp; html entities!')
-		], 'testFrag');
-		var four = raptor.pack.birth('div', {'class' : 'sweet'}, [
-			'content!!!',
-			'and more &amp; content!!!',
-			raptor.pack.birth('span', {}, 'What do you think of my snazzy span?'),
-			raptor.pack.birth('p', {}, 'With crazy stuff &amp; html entities!')
-		], 'testFrag');
+	<script type="text/javascript" src="../../src/raptor.js"></script>
 
-		for (var i = 0; i < 1000; i++) {
-			document.getElementById('test').appendChild(raptor.pack.nursery('testFrag'));
-		}
-		
-		var end = new Date();
-		
-		alert((end.getTime() - start.getTime()));
+	<script type="text/javascript">
+	
+		raptor.require(['raptor.pack', 'raptor.events', 'raptor.animate', 'raptor.canopy', 'raptor.jetpack'], function() {
+			
+			var div = raptor.birth('div', 'test content');
+			raptor.append(div, document.body);
+			raptor.add_class('classy', div);
+			
+			raptor.lash(div, 'click', function(e) {
+				console.log('hi');
+			});
+			
+		});
 		
 	</script>
 </body>
