@@ -147,7 +147,7 @@
 	}
 	
 	var api = {
-		init : function(config) {
+		build_canopy : function(config) {
 			return _overlays[config.id] = new Overlay(config);
 		},
 		

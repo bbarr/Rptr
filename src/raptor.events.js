@@ -110,8 +110,8 @@
 				this.collection.push(new_persistent_event);
 			}
 			
-			var current_set = $p.hunt(query);
-			api.add(current_set, type, cb);
+			var current_set = raptor.hunt(query);
+			api.lash(current_set, type, cb);
 		},
 		remove : function(query, type, cb) {
 			var collection = this.collection;
@@ -210,7 +210,7 @@
 				return;
 			}
 			
-			raptor.events.add(document, 'DOMContentLoaded', fn);
+			raptor.lash(document, 'DOMContentLoaded', fn);
 			
 			if (document.readyState) {
 				if (!timer) {
@@ -220,7 +220,7 @@
 								api.loaded = true;
 								clearInterval(timer);
 								timer = null;
-								api.fire({'target' : document, 'type' : 'DOMContentLoaded'});
+								api.alarm({'target' : document, 'type' : 'DOMContentLoaded'});
 							}
 						}
 					}, 10);
@@ -267,7 +267,7 @@
 				for (var type in types) {
 					var callbacks = types[type];
 					for (var i = 0, len = callbacks.length; i < len; i++) {
-						api.add(test_el, type, callbacks[i]);
+						api.lash(test_el, type, callbacks[i]);
 					}
 				}
 			}
@@ -275,7 +275,7 @@
 			var _test = function(test_el) {
 				for (var i = 0, len = persistent_events.length; i < len; i++) {
 					var persistent_event = persistent_events[i];
-					if ($p.hunt(persistent_event.query).indexOf(test_el) > -1) _apply(test_el, persistent_event);
+					if (raptor.hunt(persistent_event.query).indexOf(test_el) > -1) _apply(test_el, persistent_event);
 				}
 			}
 			

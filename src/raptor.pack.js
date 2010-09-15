@@ -83,7 +83,7 @@
 			if (raptor.type('Object', attrs)) {
 				for (var attr in attrs) {
 					
-					if (attr == 'style') raptor.pack.set_style(attrs[attr], el);
+					if (attr == 'style') api.set_style(attrs[attr], el);
 					
 					// Properly handle classes attributes
 					else if( attr === 'class') el.className = attrs[attr];

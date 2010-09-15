@@ -19,22 +19,17 @@
 	_init = function() {
 		
 		//  Determine where the core file is located, and store the URI prefix
-		var scripts = document.getElementsByTagName("script"),
-			possible_script_dirs = ['scripts/', 'js/', 'javascripts/', 'script/', 'javascript/'],
-			script_path, raptor_path;
+		var scripts = document.getElementsByTagName("script"), 
+		    raptor_path;
+
 		for (var s = 0, len = scripts.length; s < len; s++) {				
 			var src = scripts[s].src;
 			if (src.match(/raptor\.js/)) {
-				var raptor_path = src.replace(/raptor\..+$/, "");
-				for (var i = 0, iLen = possible_script_dirs.length; i < iLen; i++) {
-					var possible = possible_script_dirs[i];
-					if (src.indexOf(possible) > -1) script_path = src.split(possible)[0] + possible;
-				}
+				var raptor_path = src.replace(/raptor\..+$/, '');				
 			}
 		}
-
-		_config.script_path = script_path || raptor_path;
-		_config.raptor_path = raptor_path;
+                
+		_config.script_path = _config.raptor_path = raptor_path;
 	};
 	
 	// prototype indexOf for arrays
@@ -59,7 +54,7 @@
 		
 		extend : function(new_api) {
 			for (var method in new_api) {
-				if (!this[method]) this[method] = new_api[method];
+                this[method] = new_api[method];
 			}
 		},
 		
@@ -74,7 +69,7 @@
 		* @param {Function} Ready callback
 		*/
 		ready : function(fn) {
-			api.require('RaptorJS/src/raptor.events', function () {
+            api.require('raptor.events', function () {
 				raptor.ready(fn);
 			});
 		},
@@ -111,8 +106,7 @@
 		* @param {Function} Callback to execute after loading modules
 		*/
 		
-		require : function(modules, callback) {
-			
+		require : function(modules, callback) {		
 			var _cache = {};
 
             var _util = {
@@ -123,10 +117,12 @@
                 * @param {String} Module Path
                 */
                 create_script : function(module) {
-                
+                    // Are we loading a raptor module or custom script?
+                    var load_path = (module.indexOf('raptor.') > -1) ? _config.raptor_path : _config.script_path;
+                                                        
                     var script = document.createElement('script');
                     script.setAttribute('type', 'text/javascript');                                       
-                    script.setAttribute('src', _config.script_path + module + '.js');                    
+                    script.setAttribute('src', load_path + module + '.js');
                     
                     _config.loaded_scripts.push(module);
 
@@ -189,12 +185,12 @@
             * @param {String} Module Path
             */
 		    var _load_single = function(module) {
-		    
+                
 		        // Check and ensure that a module was not already loaded before
 		        // if it was, make sure to run the script_loaded event
 		        // to properly continue the queue progress and leave
-		        if (_config.loaded_scripts.indexOf(module) > -1) {
-                    raptor.alarm('script_loaded');
+		        if (_config.loaded_scripts.indexOf(module) > -1) {		           
+                    _util.script_loaded();
 		            return;
 		        }                
                 
@@ -217,7 +213,6 @@
             * @param {Array} Modules to load
             */
 		    var _load_many = function(modules) {
-                
 		        var loading_many = _cache.loading_many = true;
 		        var modules_length = modules.length;
 		        
@@ -231,7 +226,7 @@
 		        // Loop through and load modules one at a time
 		        for(var i=0; i < modules_length; i++) _load_single(modules[i]);
 		    }
-		    
+            
 		    if (typeof modules === 'string') _load_single(modules);
 		    else {
 		        if (!raptor.lash) api.require('raptor.events', function() { api.require(modules, callback) });

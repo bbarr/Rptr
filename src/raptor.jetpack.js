@@ -42,7 +42,7 @@
 	* json {Optional} : {Bool} Should we parse the data as JSON
 	*  
 	*/
-	var jetpackRequest = function (cfg) {
+	var JetpackRequest = function (cfg) {
 		
 		// Set the URI for our ajax request; this is required
 		try {
@@ -277,7 +277,7 @@
 				for(var i=0; i<len; i++) {
 					node = xmlDoc.childNodes[i];
 					
-					if(!raptor.util.type('Comment', node)) {						
+					if(!raptor.type('Comment', node)) {						
 						root = node;
 						break;
 					}
@@ -428,8 +428,8 @@
 		* @param {Object} Configuration for the request 
 		* See jetpackRequest
 		*/
-		engage : function (cfg) {
-			var _request = new jetpackRequest(cfg);
+		jetpack_engage : function (cfg) {
+			var _request = new JetpackRequest(cfg);
 		},
 		
 		// Make parsers publicly available
