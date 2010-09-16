@@ -31,11 +31,12 @@
 
 			target[type] = api.alarm;
 		},
-		fire : function(event) {
+		fire : function(event, ie_current_target) {
 
+			event = event || window.event;
 			var data = _dom.generate_data(event);						
-			var target_events = _dom.find_events_by_target(data.target);
-						
+			var target_events = _dom.find_events_by_target(event.currentTarget || ie_current_target);
+
 			if (!target_events) return false;
 
 			var callbacks = target_events.types[data.type];
@@ -80,7 +81,7 @@
 			var custom_event = { 'dom' : event };
 			custom_event['target'] = event.target || event.srcElement;
 			custom_event['type'] = _util.format_type(event.type);			
-			custom_event['preventDefault'] = (event.preventDefault) ? function() { event.preventDefault(); } : function() { event.cancelBubble = true };
+			custom_event['preventDefault'] = (event.preventDefault) ? function() { event.preventDefault(); } : function() { event.returnValue = false };
    			custom_event['x'] = event.pageX || event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
     	    custom_event['y'] = event.pageY || event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
 			return custom_event;
@@ -220,7 +221,7 @@
 								api.loaded = true;
 								clearInterval(timer);
 								timer = null;
-								api.alarm({'target' : document, 'type' : 'DOMContentLoaded'});
+								api.alarm({'currentTarget' : document, 'type' : 'DOMContentLoaded'});
 							}
 						}
 					}, 10);
@@ -257,7 +258,7 @@
 		
 		alarm : function(target, data) {
 			if (typeof target === 'string') _custom.fire(target, data);
-			else _dom.fire(target);
+			else _dom.fire(target, this);
 		},
 		
 		scan_for_life : function(el) {
