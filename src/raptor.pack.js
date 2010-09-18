@@ -80,7 +80,7 @@
 			var el = _util.new_element(tag);
 			
 			// set attributes
-			if (raptor.type('Object', attrs)) {
+			if (attrs && raptor.type('Object', attrs)) {
 				for (var attr in attrs) {
 					
 					if (attr == 'style') api.set_style(attrs[attr], el);
