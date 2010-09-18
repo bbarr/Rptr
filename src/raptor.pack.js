@@ -80,7 +80,7 @@
 			var el = _util.new_element(tag);
 			
 			// set attributes
-			if (raptor.type('Object', attrs)) {
+			if (attrs && raptor.type('Object', attrs)) {
 				for (var attr in attrs) {
 					
 					if (attr == 'style') api.set_style(attrs[attr], el);
@@ -194,6 +194,7 @@
 		
 		set_html : function(html, el) {
 			el.innerHTML = html;
+			raptor.scan_for_life(el);
 		},
 		
 		/**
@@ -210,6 +211,7 @@
 					break;
 				default : existing.appendChild(el);
 			}
+			raptor.scan_for_life(el);
 		}
 	};
 
