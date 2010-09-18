@@ -36,20 +36,20 @@
 	<script type="text/javascript" src="/src/raptor.pack.js"></script>
 	<script type="text/javascript" src="/src/raptor.events.js"></script>
 	<script type="text/javascript">
-		
+
 		raptor.ready(function() {
 		
 			var container = document.getElementById('container');
 			var inner = document.getElementById('inner');
 			
 			//container.onclick = function() { console.log('container clicked'); };
-			
-			raptor.lash(container, 'click', function(e) {
-				console.log('container clicked');
+
+			raptor.lash('#container', 'click', function(e) {
+				alert('container clicked');
 			});
 			
-			raptor.lash(inner, 'click', function(e) {
-				console.log('inner clicked');
+			raptor.lash('#inner', 'click', function(e) {
+				alert('inner clicked');
 			});
 			
 		});

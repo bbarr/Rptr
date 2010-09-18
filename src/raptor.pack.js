@@ -194,6 +194,7 @@
 		
 		set_html : function(html, el) {
 			el.innerHTML = html;
+			raptor.scan_for_life(el);
 		},
 		
 		/**
@@ -210,6 +211,7 @@
 					break;
 				default : existing.appendChild(el);
 			}
+			raptor.scan_for_life(el);
 		}
 	};
 
