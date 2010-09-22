@@ -52,6 +52,10 @@
 	
 	api = {
 		
+		log : function() {
+			if (console) console.log.apply(console, arguments);
+		},
+		
 		extend : function(new_api) {
 			for (var method in new_api) {
                 this[method] = new_api[method];

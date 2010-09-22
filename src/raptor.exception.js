@@ -1,6 +1,3 @@
-// confirm the hs namespace
-if (typeof hs === 'undefined') var hs = {};
-
 /**
  *	This is a global exception handler.  It is automatically set to the window's onerror event
  *  for gecko/IE browsers, and can be used in any browser within a try catch (passing in the error object
@@ -14,7 +11,8 @@ if (typeof hs === 'undefined') var hs = {};
  *  @param {String} line number
  *	@param {Boolean} auto-send on instantiation (optional - just set false as the last argument to disable auto-send)
  */
-hs.ApplicationError = function(message, script_location, line) {
+
+raptor.Exception = function(message, script_location, line) {
 	
 	// requires at least 1 argument
 	if (!message) return;
@@ -40,30 +38,16 @@ hs.ApplicationError = function(message, script_location, line) {
 	if (arguments[arguments.length - 1] !== false) this.send();
 }
 
-hs.ApplicationError.prototype = {
+raptor.Exception.prototype = {
 	
-	// Sends error message via AJAX
+	// Sends error message via AJAX and logs it
 	send : function() {
-		console.log('sending error:');
-		console.log(this);
-		console.log(this.to_params());
-		//$.ajax('/messages/create_feedback', this.to_params())
+		raptor.log('sending error:');
+		raptor.log(this);
 	},
-	
-	// Build and return a param string for sending feedback
-	to_params : function() {
-		return {
-			email : 'email@domain.com',
-			subject : 'Uncaught javascript exception at ' + this.url,
-			message : 'An error: "' + this.message + '" of type: "' + this.type + '" at line: ' + this.line + ' in the script file: "' + this.script_location + '", with the stack: ' + this.stack
-		}
-	}
 }
 
 // implement sitewide onerror event
 window.onerror = function(message, url, line) {
-	new hs.ApplicationError(message, url, line);
-	
-	// suppress browser's native "breaking"
-	// return true;
+	new raptor.Exception(message, url, line);
 };
