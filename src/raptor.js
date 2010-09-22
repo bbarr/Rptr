@@ -25,11 +25,10 @@
 		for (var s = 0, len = scripts.length; s < len; s++) {				
 			var src = scripts[s].src;
 			if (src.match(/raptor\.js/)) {
-				alert(src);
 				var raptor_path = src.replace(/raptor\.js$/, '');				
 			}
 		}
-        alert(raptor_path);
+
 		_config.script_path = _config.raptor_path = raptor_path;
 	};
 	
