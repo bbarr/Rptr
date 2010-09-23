@@ -87,19 +87,35 @@
 				if (this.cache) this.callback = null;
 			}
 			
-			//if (this.follow) $e.add(window, 'mousemove', this.position);
+			if (this.follow) this.start_following();
 		},
 		
 		'hide' : function() {
 			raptor.add_class('hide', this.el);
 			if (this.type === 'obtrusive') _util.toggleObtrusive();
-			
-			//if (this.follow) $e.remove(document.body, 'mousemove', this.position);
+			if (this.follow) this.stop_following();
 		},
 		
-		'position' : function() {
+		'_following_method' : function(e, _this) {
+			_this.el.style.left = e.x + _this.offset.x + 'px';
+			_this.el.style.top = e.y + _this.offset.y + 'px';
+		},
+		
+		'start_following' : function() {
+			var _this = this;
+			raptor.lash(window, 'mousemove', function(e) {
+				_this._following_method(e, _this);
+			});
+		},
+		
+		'stop_following' : function() {
+			raptor.unlash(window, 'mousemove', this._following_method);
+		},
+		
+		'position' : function(event) {
+
 			var el = this.el;
-			var event = this.triggerEvent;
+			var event = event || this.triggerEvent;
 			var style = {};
 			var width = el.scrollWidth;
 			var height = el.scrollHeight;
