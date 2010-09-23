@@ -128,20 +128,19 @@
 		},
 		
 		/**
-		 * Returns stored documentFragment clone
+		 * Returns the stored fragment if unique is true,
+		 * otherwise returns a clone of the fragment
 		 * 
 		 * @param {String} namwe
 		 * @param {Bool} is this a unique usage
 		 */
 		nursery : function(name, unique) {						
 			var frag = _fragments[name];
-			
-			if (frag) {
-				frag = frag.cloneNode(true);
-				
-				// Trash it if unique
-				if (unique) delete _fragments[name];
-			}
+		    			
+            if (frag) {                
+                if (unique) delete _fragments[name];
+                else frag = _frag.cloneNode(true);
+            }
 			
 			return frag || false;
 		},
