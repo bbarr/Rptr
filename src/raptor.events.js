@@ -48,7 +48,7 @@
 			var collection = this.collection;
 			var match = true;
 			if (!type) {
-				for (var i in collection) {
+				for (var i = 0, len = collection.length; i < len; i++) {
 					if (collection[i].target === target) {
 						this.collection.remove(collection[i]);
 						match = true;
@@ -56,7 +56,7 @@
 				}
 			}
 			else if (!cb) {
-				for (var i in collection) {
+				for (var i = 0, len = collection.length; i < len; i++) {
 					if (collection[i].target === target) {
 						if (collection[i].types[type]) {
 							delete collection[i].types[type];
@@ -66,7 +66,7 @@
 				}
 			}
 			else {
-				for (var i in collection) {
+				for (var i = 0, len = collection.length; i < len; i++) {
 					if (collection[i].target === target) {
 						if (collection[i].types[type].indexOf(cb) > -1) {
 							collection[i].types[type].remove(cb); 
