@@ -28,15 +28,14 @@
 		<script type="text/javascript" src="/src/raptor.canopy.js"></script>
 		<script type="text/javascript">
 			
-			var $ = raptor.pack;
 			var div = document.getElementById('content');
 			
-			var overlay = raptor.canopy.init({
+			var overlay = raptor.build_canopy({
 				'id' : 'alert',
 				'type' : 'obtrusive'
 			});
 			
-			raptor.events.add(div, 'click', function(e) {
+			raptor.lash(div, 'click', function(e) {
 				e.preventDefault();
 				overlay.show(e);
 			});

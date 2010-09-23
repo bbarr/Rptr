@@ -1,8 +1,28 @@
 /**
  *	RaptorJS - Base File
+ *	-- Extends prototypes
+ *  -- Provides common utility support
  */
+
+// prototype indexOf for arrays
+if(typeof Array.prototype.indexOf !== 'function') {
+	Array.prototype.indexOf = function(needle) {
+		for (var i = 0, len = this.length; i < length; i++) {
+			if (this[i] === needle) return i;
+		}
+		return -1;
+	} 
+}
+
+// Prototype remove for arrays
+if(typeof Array.prototype.remove !== 'function') {
+	Array.prototype.remove = function(index) {			    
+		if (index < length || index >= 0) this.splice.call(this, index, 1);			    
+		return this;
+	}
+} 
  
- var raptor = (function() {
+var raptor = (function() {
 	
 	// private
 	var _config, _init; 
@@ -11,6 +31,7 @@
 	var api;
 	
 	_config = {
+		debug : true,
 		loaded_scripts : [],
 		script_path : '',
 		raptor_path : ''
@@ -32,28 +53,11 @@
 		_config.script_path = _config.raptor_path = raptor_path;
 	};
 	
-	// prototype indexOf for arrays
-	if(typeof Array.prototype.indexOf !== 'function') {
-		Array.prototype.indexOf = function(needle) {
-			for (var i = 0, len = this.length; i < length; i++) {
-				if (this[i] === needle) return i;
-			}
-			return -1;
-		} 
-	}
-
-	// Prototype remove for arrays
-	if(typeof Array.prototype.remove !== 'function') {
-		Array.prototype.remove = function(index) {			    
-            if (index < length || index >= 0) this.splice.call(this, index, 1);			    
-		    return this;
-		}
-	}
-	
 	api = {
 		
 		log : function() {
-			if (console) console.log.apply(console, arguments);
+			if (typeof console !== 'undefined') console.log.apply(console, arguments);
+			else for (var i = 0, len = arguments.length; i < len; i++) alert(arguments[i]);
 		},
 		
 		extend : function(new_api) {
@@ -177,8 +181,9 @@
                         _util.script_loaded = function() { raptor.alarm('script_loaded') };
                         _util.script_loaded();
                     }
+
                     // Otherwise just run the callback now that the single script is ready
-                    else callback();
+                    else if (callback) callback();
                 }
                 
             };
@@ -236,7 +241,9 @@
 		        if (!raptor.lash) api.require('raptor.events', function() { api.require(modules, callback) });
 		        else _load_many(modules);
 		    }
-		}
+		},
+		
+		debug : _config.debug
 	};
 	
 	// Ready? Go!
@@ -244,3 +251,118 @@
 
 	return api;
 })();
+
+/**
+ *	Utilizes duck-typing to ensure that an object has certain methods.
+ *
+ *	@constructor
+ *	@param {String} name of interface
+ *	@param {String|Array} Either a single method, or an array of methods
+ */
+raptor.Interface = function(name, methods) {
+	this.name = name;
+	this.methods = methods;
+}
+
+raptor.Interface.prototype = {
+	
+	/**
+	 *	This ensures that the passed object has the right methods available.
+	 *  Will throw Error if not, halting script execution.
+	 *
+	 *	@param {Object} object to test
+	 */
+	implemented_by : function(object) {
+		
+		var methods = this.methods;
+		var pass = true;
+		
+		var _test = function(method) {
+			if (typeof object[method] !== 'function') {
+				throw new Error('Method missing: ' + method + '.');
+			}
+		}
+		
+		if (typeof methods === 'string') _test(methods);
+		else for (var i = 0, len = methods.length; i < len; i++) _test(methods[i]);
+	}
+}
+
+/**
+ *	This is a global exception handler.  It is automatically set to the window's onerror event
+ *  for gecko/IE browsers, and can be used in any browser within a try catch (passing in the error object
+ *  as the first argument), or anywhere (passing in any arguments manually)
+ *
+ *	@constructor
+ *	@param {String|Object} error message
+ *  @param {String} url at which the error occured (optional)
+ *  @param {String} line number (optional)
+ *	@param {Boolean} auto-send on instantiation (optional - just set false as the last argument to disable auto-send)
+ */
+
+raptor.Exception = function(message, script_location, line) {
+	
+	// requires at least 1 argument
+	if (!message) return;
+	
+	// setup container for a try catch exception
+	var caught_exception = {};
+	
+	// if message isn't a string, it should be an object, a la the one recieved from a catch
+	if (typeof message !== 'string') {
+		caught_exception = message;
+		message = message.message;
+	}
+	
+	// assign properties gracefully
+	this.message = message || 'An act of God';
+	this.script_location = script_location || caught_exception.fileName || '';
+	this.line = line || caught_exception.lineNumber || '';
+	this.url = window.location.href || '';
+	this.stack = caught_exception.stack || 'empty';
+	this.type = caught_exception.name || 'unknown'
+
+	// unless the last argument is false, send automatically
+	if (arguments[arguments.length - 1] !== false) this.handle();
+}
+
+raptor.Exception.prototype = {
+	
+	handle : function() {
+		if (raptor.debug) this.send();
+		else this.gather_feedback();
+	},
+	
+	gather_feedback : function() {
+		var _this = this;
+		raptor.lash('raptor.feedback_gathered', function(e) {
+			e = e || {};
+			_this.feedback = e.feedback || '';
+			_this.send();
+		});
+		raptor.alarm('raptor.feedback_gathered');
+	},
+	
+	// Sends error message via AJAX and logs it
+	send : function() {
+		if (raptor.debug) raptor.log('Raptor Exception: ', this.to_string());
+		// else send via email
+	},
+	
+	to_string : function() {
+		return "Message: " + this.message +
+		" Script Location: " + this.script_location +
+		" Line Number: " + this.line +
+		" Window Location: " + this.url +
+		" Stack Trace: " + this.stack +
+		" Error Type: " + this.type;
+	}
+}
+
+// implement sitewide onerror event
+window.onerror = function(message, url, line) {
+	if (!raptor.debug) {
+		new raptor.Exception(message, url, line);
+		return true;
+	}
+};

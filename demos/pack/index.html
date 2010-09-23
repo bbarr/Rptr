@@ -8,17 +8,19 @@
 	<div id="test"></div>
 	
 	<script type="text/javascript" src="../../src/raptor.js"></script>
-
+	
 	<script type="text/javascript">
 	
-		raptor.require(['raptor.pack', 'raptor.events', 'raptor.animate', 'raptor.canopy', 'raptor.jetpack'], function() {
+		raptor.require('raptor.pack', function() {
 			
 			var div = raptor.birth('div', 'test content');
+			
 			raptor.append(div, document.body);
+			
 			raptor.add_class('classy', div);
 			
 			raptor.lash(div, 'click', function(e) {
-				console.log('hi');
+				alert('hi');
 			});
 			
 		});
