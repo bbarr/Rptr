@@ -326,7 +326,7 @@ raptor.Error = function(message, script_location, line) {
 	if (arguments[arguments.length - 1] !== false) this.handle();
 }
 
-raptor.error.prototype = {
+raptor.Error.prototype = {
 	
 	handle : function() {
 		if (raptor.debug) this.send();
