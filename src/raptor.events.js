@@ -9,6 +9,7 @@
 	// utility functions for event management
 	_util = {    		    
 		format_type : function(type) {
+			if (!type) return false;
  			return (type === 'DOMContentLoaded' || /^on/.test(type)) ? type : 'on' + type;
 		}
 	};
@@ -45,6 +46,7 @@
 			for (var i = 0, len = callbacks.length; i < len; i++) callbacks[i](data);
 		},
 		remove : function(target, type, cb) {
+			type = _util.format_type(type);
 			var collection = this.collection;
 			var match = true;
 			if (!type) {
