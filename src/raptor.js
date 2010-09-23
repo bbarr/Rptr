@@ -289,7 +289,7 @@ raptor.Interface.prototype = {
 }
 
 /**
- *	This is a global exception handler.  It is automatically set to the window's onerror event
+ *	This is a global error handler.  It is automatically set to the window's onerror event
  *  for gecko/IE browsers, and can be used in any browser within a try catch (passing in the error object
  *  as the first argument), or anywhere (passing in any arguments manually)
  *
@@ -300,33 +300,33 @@ raptor.Interface.prototype = {
  *	@param {Boolean} auto-send on instantiation (optional - just set false as the last argument to disable auto-send)
  */
 
-raptor.Exception = function(message, script_location, line) {
+raptor.Error = function(message, script_location, line) {
 	
 	// requires at least 1 argument
 	if (!message) return;
 	
-	// setup container for a try catch exception
-	var caught_exception = {};
+	// setup container for a try catch error
+	var caught_error = {};
 	
 	// if message isn't a string, it should be an object, a la the one recieved from a catch
 	if (typeof message !== 'string') {
-		caught_exception = message;
+		caught_error = message;
 		message = message.message;
 	}
 	
 	// assign properties gracefully
 	this.message = message || 'An act of God';
-	this.script_location = script_location || caught_exception.fileName || '';
-	this.line = line || caught_exception.lineNumber || '';
+	this.script_location = script_location || caught_error.fileName || '';
+	this.line = line || caught_error.lineNumber || '';
 	this.url = window.location.href || '';
-	this.stack = caught_exception.stack || 'empty';
-	this.type = caught_exception.name || 'unknown'
+	this.stack = caught_error.stack || 'empty';
+	this.type = caught_error.name || 'unknown'
 
 	// unless the last argument is false, send automatically
 	if (arguments[arguments.length - 1] !== false) this.handle();
 }
 
-raptor.Exception.prototype = {
+raptor.error.prototype = {
 	
 	handle : function() {
 		if (raptor.debug) this.send();
@@ -334,18 +334,20 @@ raptor.Exception.prototype = {
 	},
 	
 	gather_feedback : function() {
+		
 		var _this = this;
 		raptor.lash('raptor.feedback_gathered', function(e) {
 			e = e || {};
 			_this.feedback = e.feedback || '';
 			_this.send();
 		});
+		
 		raptor.alarm('raptor.feedback_gathered');
 	},
 	
 	// Sends error message via AJAX and logs it
 	send : function() {
-		if (raptor.debug) raptor.log('Raptor Exception: ', this.to_string());
+		if (raptor.debug) raptor.log('Raptor error: ', this.to_string());
 		// else send via email
 	},
 	
@@ -362,7 +364,7 @@ raptor.Exception.prototype = {
 // implement sitewide onerror event
 window.onerror = function(message, url, line) {
 	if (!raptor.debug) {
-		new raptor.Exception(message, url, line);
+		new raptor.Error(message, url, line);
 		return true;
 	}
 };
