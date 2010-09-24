@@ -5,7 +5,7 @@
  */
 
 // prototype indexOf for arrays
-if(typeof Array.indexOf !== 'function') {
+if(typeof Array.prototype.indexOf !== 'function') {
 	Array.prototype.indexOf = function(needle) {
 		for (var i = 0, len = this.length; i < length; i++) {
 			if (this[i] === needle) return i;
@@ -15,7 +15,7 @@ if(typeof Array.indexOf !== 'function') {
 }
 
 // Prototype remove for arrays
-if(typeof Array.remove !== 'function') {
+if(typeof Array.prototype.remove !== 'function') {
 	Array.prototype.remove = function(index) {			    
 		if (index < length || index >= 0) this.splice.call(this, index, 1);			    
 		return this;
