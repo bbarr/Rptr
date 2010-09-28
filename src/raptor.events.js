@@ -208,7 +208,7 @@
 		*/
 		ready : function (fn) {										
 						
-			if (this.loaded) {
+			if (api.loaded) {
 				fn();
 				return;
 			}
