@@ -75,10 +75,7 @@
 			if (this.type === 'obtrusive') _util.toggleObtrusive();
 			
 			raptor.remove_class('hide', this.el);	
-			
-			// position it dynamically based on content size, or click location for tooltips
-			this.position();
-			
+						
 			// if there is a callback, execute it, so it can populate the overlay or whatever else it wants to do
 			if (this.callback) {
 				this.callback(this, e);
@@ -86,6 +83,9 @@
 				// finally, if cache is set to true, destroy the callback as it won't be used again
 				if (this.cache) this.callback = null;
 			}
+			
+			// position it dynamically based on content size, or click location for tooltips
+			this.position();
 			
 			if (this.follow) this.start_following();
 		},
