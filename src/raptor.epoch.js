@@ -10,11 +10,11 @@
 	var api;
 	
 	var _months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-	var _short_months ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+	var _short_months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 	
 	util = {
 	
-	}
+	};
 	
 	api = {
 		
@@ -24,13 +24,12 @@
 		* @param {String|Integer} Numeric representation of a month
 		*/
 		find_shortened_month : function (month) {
-			
 			// If a string was passed in let's turn it into a usable index
-			if (typeof month === 'String') month = parseInt(month, 10) - 1;
+			if (typeof month === 'string') month = parseInt(month, 10) - 1;
 			return _short_months[month];
 		}
 		
-	}
+	};
 	
 	if (raptor) raptor.extend(api);
 	
