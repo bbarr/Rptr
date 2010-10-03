@@ -38,10 +38,10 @@
 				start = _increment();
 				
 				if ( _complete() ) {
-					el.style[prop] = (pixel) start + 'px' : start;
+					el.style[prop] = (pixel) ? start + 'px' : start;
 				}
 				else {
-					el.style[prop] = (pixel) end + 'px' : end;
+					el.style[prop] = (pixel) ? end + 'px' : end;
 					clearInterval(_interval);
 				}
 				
