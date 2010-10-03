@@ -21,10 +21,6 @@
 		* @param {Boolean} Pixel based animation?
 		*/
 		animate : function (el, prop, start, end, each, speed, pixel) {
-		
-			// Determine the method to update the animation property
-			var _increment = (start < end) ? function () { return start + each; } : function () { return start - each; };
-			var _complete = (start < end) ? function () { return start <= end; } : function () { return start >= end; }
 			
 			// Setup increment and completion checking methods up front
 			var _increment, _complete;
@@ -42,10 +38,10 @@
 				start = _increment();
 				
 				if ( _complete() ) {
-					el.style[prop] = start + 'px';
+					el.style[prop] = (pixel) start + 'px' : start;
 				}
 				else {
-					el.style[prop] = end + 'px';
+					el.style[prop] = (pixel) end + 'px' : end;
 					clearInterval(_interval);
 				}
 				
