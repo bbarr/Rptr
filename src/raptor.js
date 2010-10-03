@@ -243,6 +243,20 @@ var raptor = (function() {
 		    }
 		},
 		
+		/**
+		* Determines whether or not an object is empty
+		*
+		* @param {Object} The object to check
+		* @return {Boolean}
+		*/
+		obj_empty : function (obj) {
+			for(var prop in obj) {
+				if(obj.hasOwnProperty(prop)) return false;
+			}
+
+			return true;
+		},
+		
 		debug : _config.debug
 	};
 	
