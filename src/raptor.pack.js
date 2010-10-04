@@ -58,6 +58,18 @@
 		insert_text : function(el, text) {
 			if (/\&\S+;/.test(text)) el.innerHTML += text;
 			else el.appendChild(document.createTextNode(text));
+		},
+		
+		/**
+		* Parses HTML entities for content in HTML
+		*
+		* @param {String} content to parse
+		*/
+		parse_entities : function(content) {
+			var tmp = document.createElement('div');
+			tmp.innerHTML = content;
+			
+			return tmp.firstChild.nodeValue;
 		}
 	}
 
