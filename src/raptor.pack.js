@@ -56,7 +56,7 @@
 		 * @param {String} string
 		 */
 		insert_text : function(el, text) {
-			if (/\&\S+;/.test(text)) el.innerHTML += _util.parse_entities(content);
+			if (/\&\S+;/.test(text)) el.innerHTML += _util.parse_entities(text));
 			else el.appendChild(document.createTextNode(text));
 		},
 		
