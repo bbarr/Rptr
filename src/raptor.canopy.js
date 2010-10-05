@@ -157,7 +157,12 @@
 	var init = function() {
 		raptor.lash('.close-overlay', 'click', function(e) {
 			e.preventDefault();
-			var overlayID = e.target.parentNode.getAttribute('id');
+			var parent = e.target.parentNode;
+			
+			// Keep going until we find the actual overlay parent
+			while (!raptor.has_class('overlay', parent)) { parent = parent.parentNode; }
+			
+			var overlayID = parent.getAttribute('id');
 			_overlays[overlayID].hide();
 		});
 	}
