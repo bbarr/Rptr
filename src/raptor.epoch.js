@@ -44,7 +44,7 @@
 		 *
 		 *	@param {Number} value (optional)
 		 */
-		step_back : function(value) {
+		step_back_by_month : function(value) {
 			
 			var new_value = this.combine;
 			value = value || 1;
@@ -66,7 +66,7 @@
 		 *
 		 *	@param {Number} value (optional)
 		 */
-		step_forward : function(value) {
+		step_forward_by_month : function(value) {
 		
 			var new_value = this.combine;
 			value = value || 1;
