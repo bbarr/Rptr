@@ -110,10 +110,21 @@
 		* 
 		* @param {String|Integer} Numeric representation of a month
 		*/
-		find_shortened_month : function (month) {
+		find_shortened_month : function(month) {
 			// If a string was passed in let's turn it into a usable index
 			if (typeof month === 'string') month = parseInt(month, 10) - 1;
 			return _short_months[month];
+		},
+		
+		/**
+		* Allow a user to find a full month name for a month
+		*
+		* @param {String|Integer} Numeric Representation of the Month
+		*/
+		find_full_month : function(month) {
+			// If a string was passed in let's turn it into a usable index
+			if (typeof month === 'string') month = parseInt(month, 10) - 1;
+			return _months[month];
 		},
 		
 		get_days_in_month : function(month, year) {
