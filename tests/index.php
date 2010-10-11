@@ -1,6 +1,6 @@
 <?php 
-	$test_name = $_GET['test'];
-	$tests = array('events');
+	$test_name = $_GET['test']; 
+	$tests = array('epoch');
 ?>
 
 <!DOCTYPE HTML>
@@ -9,18 +9,15 @@
 <head>
 	
 	<!-- QUNIT SOURCE FILES -->
-	<link rel="stylesheet" type="text/css" href="/unit_testing/src/qunit.css" />
-	<script type="text/javascript" src="/unit_testing/src/qunit.js"></script>
+	<link rel="stylesheet" type="text/css" href="/tests/src/qunit.css" />
+	<script type="text/javascript" src="/tests/src/qunit.js"></script>
 	
 	<!-- TEST DEPENDENCIES -->
 	<script type="text/javascript" src="/src/raptor.js"></script>
 	
-	<!-- TEST -->
-	<?php if ($test_name) : ?>
-		<script id="test-script" type="text/javascript" src="/unit_testing/specs/<?php echo $test_name; ?>.js"></script>
-	<?php endif; ?>
-	
 	<script type="text/javascript">
+		
+		raptor.set_script_path('/spend-analyzer/prototype/scripts/');
 		
 		var init = function() {	
 			
@@ -36,7 +33,10 @@
 
 			// change script
 			select.onchange = function(e) {
-				select_test(e.target.value);
+				var target;
+				if (e) target = e.target;
+				else target = window.event.srcElement;
+				select_test(target.value);
 			}
 			
 			// init
@@ -47,34 +47,21 @@
 		
 	</script>
 	
-	<style type="text/css">
-		#test-select-container {
-			padding: 10px;
-			font-size:18px;
-			font-weight:bold;
-		}
-		#test-select {
-			border: 1px solid #555;
-			padding: 1px;
-			width: 200px;
-			margin-left: 5px;
-		}
-		
-	</style>
+	<!-- TEST -->
+	<?php if ($test_name) : ?>
+		<script id="test-script" type="text/javascript" src="/tests/specs/<?php echo $test_name; ?>.js"></script>
+	<?php endif; ?>
 	
 </head>
 <body>
-	<div id="test-select-container">
-		<label>Select Test: </label>
-		<select id="test-select">
-			<?php 
-				foreach ($tests as $test) {
-					$selected = ($test == $test_name) ? 'selected' : '';
-					echo "<option value='$test' $selected>$test</option>";
-				} 
-			?>
-		</select>
-	</div>
+	<select id="test-select">
+		<?php 
+			foreach ($tests as $test) {
+				$selected = ($test == $test_name) ? 'selected' : '';
+				echo "<option value='$test' $selected>$test</option>";
+			} 
+		?>
+	</select>
 	<h1 id="qunit-header">QUnit example</h1>
 	<h2 id="qunit-banner"></h2>
 	<h2 id="qunit-userAgent"></h2>
