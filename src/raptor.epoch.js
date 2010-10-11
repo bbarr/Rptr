@@ -112,7 +112,8 @@
 		*/
 		find_shortened_month : function(month) {
 			// If a string was passed in let's turn it into a usable index
-			if (typeof month === 'string') month = parseInt(month, 10) - 1;
+			if (typeof month === 'string') month = parseInt(month, 10);
+			month = month -1;
 			return _short_months[month];
 		},
 		
@@ -123,7 +124,8 @@
 		*/
 		find_full_month : function(month) {
 			// If a string was passed in let's turn it into a usable index
-			if (typeof month === 'string') month = parseInt(month, 10) - 1;
+			if (typeof month === 'string') month = parseInt(month, 10);
+			month = month - 1;
 			return _months[month];
 		},
 		
