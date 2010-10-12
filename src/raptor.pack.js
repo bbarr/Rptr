@@ -223,7 +223,9 @@
 					break;
 				default : existing.appendChild(el);
 			}
-			raptor.scan_for_life(el);
+			
+			// Make sure the DOM has caught up before trying to scan for life
+			setTimeout(function() {raptor.scan_for_life(el)}, 20);
 		}
 	};
 
