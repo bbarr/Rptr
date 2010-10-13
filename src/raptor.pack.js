@@ -227,7 +227,7 @@
 			}
 			
 			// Make sure the DOM has caught up before trying to scan for life
-			setTimeout(function() {raptor.scan_for_life(scan_me)}, 20);
+			setTimeout(function() {raptor.scan_for_life(el)}, 20);
 		}
 	};
 
