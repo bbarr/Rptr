@@ -215,7 +215,9 @@
 		 * 
 		 */
 		append : function(el, existing, means) {
+			
 			means = means || '';
+			
 			switch(means) {
 				case 'replace' : existing.parentNode.replaceChild(el, existing);
 					break;
@@ -223,9 +225,6 @@
 					break;
 				default : existing.appendChild(el);
 			}
-			
-			// Don't scan a document fragment if that was the el to append, use the existing instead
-			var scan_me = (raptor.type('DocumentFragment', el)) ? existing : el;
 			
 			// Make sure the DOM has caught up before trying to scan for life
 			setTimeout(function() {raptor.scan_for_life(scan_me)}, 20);

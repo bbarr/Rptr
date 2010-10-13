@@ -286,7 +286,8 @@
 			
 			_test(el);
 			
-			var children = el.getElementsByTagName('*');
+			var byTagName = el.getElementsByTagName;
+			var children = (byTagName) ? byTagName('*') : el.childNodes;
 			for (var i = 0, len = children.length; i < len; i++) _test(children[i]);
 		}
 	}
