@@ -218,6 +218,10 @@
 			
 			means = means || '';
 			
+			var frag = el.nodeType === 11;
+			
+			if (frag) var children = el.childNodes;
+			
 			switch(means) {
 				case 'replace' : existing.parentNode.replaceChild(el, existing);
 					break;
@@ -225,6 +229,8 @@
 					break;
 				default : existing.appendChild(el);
 			}
+			
+			if (children) el = children;
 			
 			// Make sure the DOM has caught up before trying to scan for life
 			setTimeout(function() {raptor.scan_for_life(el)}, 20);

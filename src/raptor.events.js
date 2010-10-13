@@ -284,10 +284,14 @@
 			
 			var persistent_events = _persistent.collection;
 			
-			_test(el);
+			var children;
 			
-			var byTagName = el.getElementsByTagName;
-			var children = (byTagName) ? byTagName('*') : el.childNodes;
+			if (el.nodeType === 3) {
+				_test(el);
+				children = el.getElementsByTagName('*');
+			}
+			else children = el;
+			
 			for (var i = 0, len = children.length; i < len; i++) _test(children[i]);
 		}
 	}
