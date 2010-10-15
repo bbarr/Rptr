@@ -11,12 +11,13 @@
 	
 	var _months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 	var _short_months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+	var _days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 	
 	_RaptorDate = function(year, month, day) {
 		
 		// prepare date components
 		if (!month) {
-			var date = api.extract_date(year);
+			var date = (year) ? api.extract_date(year) : api.extract_date(new Date());
 			month = date.month;
 			year = date.year;
 			day = date.day;
@@ -44,7 +45,7 @@
 		 *
 		 *	@param {Number} value (optional)
 		 */
-		step_back_by_month : function(value) {
+		step_back : function(value) {
 			
 			var new_value = this.combine;
 			value = value || 1;
@@ -66,7 +67,7 @@
 		 *
 		 *	@param {Number} value (optional)
 		 */
-		step_forward_by_month : function(value) {
+		step_forward : function(value) {
 		
 			var new_value = this.combine;
 			value = value || 1;
@@ -88,20 +89,12 @@
 			this.year = parseInt(string_value.substr(0, 4), 10);
 			this.month = parseInt(string_value.substr(4, 2), 10);
 			this.day = parseInt(string_value.substr(6, 2), 10);
+		},
+		
+		first_day_of_month : function() {
+			return api.get_day_of_week(this.year, this.month, 1);
 		}
 	}
-	
-	_util = {
-		
-		days_in_month : function(month, year) {
-			month = month - 1;
-			var m = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-			if (month !== 1) return m[month];
-			if (year % 4 !== 0) return m[1];
-			if (year % 100 === 0 && year % 400 !== 0) return m[1];
-			return m[1] + 1;
-		}
-	};
 	
 	api = {
 		
@@ -129,13 +122,34 @@
 			return _months[month];
 		},
 		
-		get_days_in_month : function(month, year) {
+		get_day_of_week : function(month, year, day) {
+			
 			if (!year) {
-				var date = _util.extract_date(month);
+				var date = api.extract_date(month);
+				month = date.month;
+				year = date.year;
+			}
+			
+			var date_obj = new Date(year, month, day);
+			var index = date_obj.getDay();
+			return {index : index, name : _days[index]};
+			
+		},
+		
+		get_days_in_month : function(month, year) {
+			
+			if (!year) {
+				var date = api.extract_date(month);
 				month = date.month;
 				year = date.year;
 			}			
-			return _util.days_in_month(month, year);
+			
+			month = month - 1;
+			var m = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+			if (month !== 1) return m[month];
+			if (year % 4 !== 0) return m[1];
+			if (year % 100 === 0 && year % 400 !== 0) return m[1];
+			return m[1] + 1;
 		},
 		
 		extract_date : function(date) {
@@ -166,7 +180,7 @@
 			}
 			
 			var _handle_date_object = function(object) {
-				if (object instanceof RaptorDate) {
+				if (object instanceof _RaptorDate) {
 					year = object.year;
 					month = object.month;
 					day = object.day;
