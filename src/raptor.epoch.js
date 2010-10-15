@@ -47,7 +47,7 @@
 		 */
 		step_back : function(value) {
 			
-			var new_value = this.combine;
+			var new_value = this.value;
 			value = value || 1;
 			
 			for (var i = 0; i < value; i++) {
@@ -58,8 +58,8 @@
 			}
 			
 			this.update_components(new_value);
-			this.combine = new_value;
-			this.limited_combine = parseInt(new_value.toString().substr(0, 6));
+			this.value = new_value;
+			this.limited = parseInt(new_value.toString().substr(0, 6));
 		},
 		
 		/**
@@ -69,7 +69,7 @@
 		 */
 		step_forward : function(value) {
 		
-			var new_value = this.combine;
+			var new_value = this.value;
 			value = value || 1;
 			
 			for (var i = 0; i < value; i++) {
@@ -80,8 +80,8 @@
 			}
 			
 			this.update_components(new_value);
-			this.combine = new_value;
-			this.limited_combine = parseInt(new_value.toString().substr(0, 6));
+			this.value = new_value;
+			this.limited = parseInt(new_value.toString().substr(0, 6));
 		},
 		
 		update_components : function(value) {
