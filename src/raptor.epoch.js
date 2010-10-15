@@ -32,10 +32,10 @@
 		// combines
 		if (month < 10) year = year * 10;
 		if (day < 10) month = month * 10;
-		this.combine = parseInt((year + '' + month + '' + day), 10);
+		this.value = parseInt((year + '' + month + '' + day), 10);
 		
 		if (month > 12) month = month / 10;
-		this.limited_combine = parseInt((year + '' + month), 10);
+		this.limited = parseInt((year + '' + month), 10);
 	}
 	
 	_RaptorDate.prototype = {
