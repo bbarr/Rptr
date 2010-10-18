@@ -112,7 +112,7 @@
 				if (raptor.type(['String', 'Number'], contents)) {
 					_util.insert_text(el, contents);
 				}
-				else if (raptor.type('HTMLElement', contents)) {
+				else if (raptor.type(['HTMLElement', 'DocumentFragment'], contents)) {
 					el.appendChild(contents);
 				}
 				else if (raptor.type('Array', contents)){
@@ -218,9 +218,12 @@
 			
 			means = means || '';
 			
-			var frag = el.nodeType === 11;
-			
-			if (frag) var children = el.childNodes;
+			// if fragment
+			if (el.nodeType === 11) {
+				var nodes = el.childNodes;
+				var children = [];
+				for (var i = 0, len = nodes.length; i < len; i++) children.push(nodes[i]);
+			}
 			
 			switch(means) {
 				case 'replace' : existing.parentNode.replaceChild(el, existing);

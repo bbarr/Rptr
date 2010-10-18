@@ -17,7 +17,7 @@
 	_dom = {
 		collection : [],
 		add : function(target, type, cb) {
-			
+
 			type = _util.format_type(type);
 			
 			var target_events = this.find_events_by_target(target);
@@ -286,13 +286,19 @@
 			
 			var children;
 			
-			if (el.nodeType === 3) {
+			if (el.nodeType === 1) {
 				_test(el);
 				children = el.getElementsByTagName('*');
+				for (var i = 0, len = children.length; i < len; i++) _test(children[i]);
 			}
-			else children = el;
-			
-			for (var i = 0, len = children.length; i < len; i++) _test(children[i]);
+			else {
+				for (var i = 0, len = el.length; i < len; i++) {
+					var _el = el[i];
+					_test(_el);
+					children = _el.getElementsByTagName('*');
+					for (var x = 0, x_len = children.length; x < x_len; x++) _test(children[x]);
+				}
+			}	
 		}
 	}
 	
