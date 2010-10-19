@@ -97,7 +97,8 @@ var raptor = (function() {
 					case 'HTMLElement':
 						if (data.tagName) match = true;
 					default:
-						if (data.constructor && data.constructor.toString().indexOf(type) !== -1) match = true;		
+						try { if (data.constructor && data.constructor.toString().indexOf(type) !== -1) match = true }
+						catch (e) { new raptor.Error(e) }
 				}
 			}
 			if (typeof types === 'string') test(types);
@@ -362,7 +363,6 @@ raptor.Error.prototype = {
 	// Sends error message via AJAX and logs it
 	send : function() {
 		if (raptor.debug) raptor.log('Raptor error: ', this.to_string());
-		// else send via email
 	},
 	
 	to_string : function() {
@@ -377,8 +377,7 @@ raptor.Error.prototype = {
 
 // implement sitewide onerror event
 window.onerror = function(message, url, line) {
-	if (!raptor.debug) {
+	if (raptor.debug) {
 		new raptor.Error(message, url, line);
-		return true;
 	}
 };
