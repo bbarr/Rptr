@@ -120,18 +120,10 @@
 			return _months[month];
 		},
 		
-		get_day_of_week : function(month, year, day) {
-			
-			if (!year) {
-				var date = api.extract_date(month);
-				month = date.month;
-				year = date.year;
-			}
-			
-			var date_obj = new Date(year, month, day);
+		get_day_of_week : function(year, month, day) {
+			var date_obj = new Date(year, month - 1, day);
 			var index = date_obj.getDay();
 			return {index : index, name : _days[index]};
-			
 		},
 		
 		get_days_in_month : function(month, year) {
