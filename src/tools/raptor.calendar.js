@@ -14,7 +14,7 @@ raptor.Calendar.prototype = {
 		var days = [], active_date = this.active_date;
 		
 		// format proper date combine
-		var get_combine = function(i) { return active_date.year + active_date.month + (i < 10) ? '0' + i : i }
+		var get_combine = function(i) { return active_date.year + active_date.month + ((i < 10) ? '0' + i : i) }
 		console.log(get_combine(2))
 		// current month props
 		var curr_total = raptor.get_days_in_month(this.active_date.month, this.active_date.year);
