@@ -22,13 +22,13 @@ raptor.Calendar.prototype = {
 		var pre_total = raptor.get_days_in_month(pre_month.month, pre_month.year);
 		
 		// build pre-days
-		for (var i = pre_total - curr_start; i <= pre_total; i++) days.push({ date : i, out_of_range : true });
+		for (var i = pre_total - curr_start; i <= pre_total; i++) days.push({ date : i, out_of_range : true , date_combine : this.active_date.value});
 		
 		// build days
-		for (i = 1; i <= curr_total; i++) days.push({ date : i });
+		for (i = 1; i <= curr_total; i++) days.push({ date : i, date_combine : this.active_date.value});
 		
 		// build post-days
-		for (i = 1; days.length < 42; i++) days.push({ date : i, out_of_range : true });
+		for (i = 1; days.length < 42; i++) days.push({ date : i, out_of_range : true, date_combine : this.active_date.value });
 
 		return days;
 	},
