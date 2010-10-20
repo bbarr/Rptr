@@ -12,7 +12,7 @@ raptor.Calendar.prototype = {
 	_get_days : function() {
 		
 		var days = [], active_date = this.active_date;
-		
+		console.log(active_date);
 		// format proper date combine
 		var get_combine = function(i) { return active_date.year + active_date.month + ((i < 10) ? '0' + i : i) }
 		console.log(get_combine(2))
