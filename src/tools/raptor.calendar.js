@@ -11,7 +11,7 @@ raptor.Calendar.prototype = {
 	
 	_get_days : function() {
 		
-		var days = [];
+		var days = [], active_date = this.active_date;
 		
 		// current month props
 		var curr_total = raptor.get_days_in_month(this.active_date.month, this.active_date.year);
@@ -22,13 +22,13 @@ raptor.Calendar.prototype = {
 		var pre_total = raptor.get_days_in_month(pre_month.month, pre_month.year);
 		
 		// build pre-days
-		for (var i = pre_total - curr_start; i <= pre_total; i++) days.push({ date : i, out_of_range : true , date_combine : this.active_date.value});
+		for (var i = pre_total - curr_start; i <= pre_total; i++) days.push({ date : i, out_of_range : true , date_combine : active_date.year + active_date.month + (i < 10) ? '0' + i : i });
 		
 		// build days
-		for (i = 1; i <= curr_total; i++) days.push({ date : i, date_combine : this.active_date.value});
+		for (i = 1; i <= curr_total; i++) days.push({ date : i, date_combine : active_date.year + active_date.month + (i < 10) ? '0' + i : i });
 		
 		// build post-days
-		for (i = 1; days.length < 42; i++) days.push({ date : i, out_of_range : true, date_combine : this.active_date.value });
+		for (i = 1; days.length < 42; i++) days.push({ date : i, out_of_range : true, date_combine : active_date.year + active_date.month + (i < 10) ? '0' + i : i });
 
 		return days;
 	},
