@@ -171,7 +171,8 @@
 			
 			var _add_class = function(el) {
 				var classes = el.className.split(' ');
-				if (classes === '') classes = [];
+				
+				if (classes[0] === '') classes = [];
 				if (classes.indexOf(class_name) < 0) classes.push(class_name);
 				el.className = classes.join(' ');
 			}

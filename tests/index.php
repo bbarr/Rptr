@@ -1,6 +1,14 @@
 <?php 
-	$test_name = $_GET['test']; 
-	$tests = array('epoch');
+	
+	$test_name = $_GET['test'];
+	
+	// Generate an array of the spec's available to test
+	$tests = Array();
+	$handle = opendir('specs');
+	while (false !== ($file = readdir($handle))) {
+		if ($file === '.' || $file === '..') continue;
+		$tests[] = substr($file, 0, strpos($file, '.js'));
+	}
 ?>
 
 <!DOCTYPE HTML>
