@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+	<style type="text/css">
+		td div { background: #aaa; width: 50px; height: 35px;}
+		td div.active-day { background: #fff; }
+	</style>
+</head>
+<body>
+	
+	<div id="test">
+		
+		<input type="text" id="cal-input" />
+		
+	</div>
+		
+	<script type="text/javascript" src="/src/raptor.js"></script>
+	<script type="text/javascript">
+	
+		raptor.ready(function () {
+			
+			var container = document.getElementById('test');
+			
+			var init = function() {
+			
+				var cal = new raptor.Calendar('test');
+				
+				window.cal = cal;
+				
+				var html = cal.build();
+				console.log(html);
+				
+				raptor.lash('.calendar-back', 'click', function(e) {
+					e.preventDefault();
+					cal.step_back();
+				});
+				
+				raptor.lash('.calendar-forward', 'click', function(e) {
+					e.preventDefault();
+					cal.step_forward();
+				});
+			}
+			
+			raptor.require(['raptor.pack', 'raptor.epoch', 'tools/raptor.calendar'], init);
+		});
+		
+	</script>
+</body>
+</html>
