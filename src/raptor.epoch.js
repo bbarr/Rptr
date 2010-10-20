@@ -154,6 +154,7 @@
 					day = parts[1];
 					year = parts[2];
 				}
+				if (year.length === 2) year = '20' + year;
 			}
 			
 			var _handle_combine_value = function(number) {
