@@ -270,7 +270,15 @@
 				for (var type in types) {
 					var callbacks = types[type];
 					for (var i = 0, len = callbacks.length; i < len; i++) {
-						api.lash(test_el, type, callbacks[i]);
+						var callback = callbacks[i];
+						if (!test_el.applied) test_el.applied = {};
+						if (test_el.applied[type]) {
+							if (test_el.applied[type].indexOf(callback) > -1) continue;
+							else test_el.applied[type].push(callback);
+						}
+						else test_el.applied[type] = [callback];
+						console.log(test_el, test_el.applied);
+						api.lash(test_el, type, callback);
 					}
 				}
 			}
@@ -301,6 +309,6 @@
 			}	
 		}
 	}
-	
+
 	if (raptor) raptor.extend(api);
 })();
