@@ -277,7 +277,6 @@
 							else test_el.applied[type].push(callback);
 						}
 						else test_el.applied[type] = [callback];
-						console.log(test_el, test_el.applied);
 						api.lash(test_el, type, callback);
 					}
 				}
