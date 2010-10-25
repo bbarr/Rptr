@@ -46,7 +46,7 @@
 		step_back : function(value) {
 			
 			var new_value = this.value;
-			value = value || 1;
+			value = (typeof value === 'undefined') ? 1 : value;
 			
 			for (var i = 0; i < value; i++) {
 				new_value = new_value - 100;
@@ -68,7 +68,7 @@
 		step_forward : function(value) {
 		
 			var new_value = this.value;
-			value = value || 1;
+			value = (typeof value === 'undefined') ? 1 : value;
 			
 			for (var i = 0; i < value; i++) {
 				new_value = new_value + 100;
