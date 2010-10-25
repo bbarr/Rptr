@@ -31,9 +31,17 @@ raptor.require('raptor.pack', function() {
 		
 			same('my-class class-two class-three', el.className, 'El should have 3 classes on it, correctly formatted.');
 		});
-	
+		
+		test('Do nothing if class is already applied', function() {
+			el.className = 'class-one';
+			same('class-one', el.className, 'Class applied');
+			
+			raptor.add_class('class-one', el);
+			same('class-one', el.className, 'Nothing changed');
+		});
+		
 	module('Add class to existing class string', {
-		setup : function () {
+		setup : function() {
 			el_factory();
 			el.className = 'original-class';
 		},
@@ -67,5 +75,64 @@ raptor.require('raptor.pack', function() {
 			raptor.add_class('new-class-two', el);
 			same('original-class original-two new-class-one new-class-two', el.className, 'El should have original classes plus the 2 new ones');
 		});
+		
+	module('Has Class checks', {
+		setup : function() {
+			el_factory();
+			el.className = 'class-one';
+		},
+		teardown : el_teardown
+	});
 	
+		test('Check for class against single class string', function() {
+			same('class-one', el.className, 'Has class applied');
+			same(true, raptor.has_class('class-one', el), 'raptor found class');
+		});
+		
+		test('Check for class against multi-class string', function() {
+			el.className += ' class-two';
+			same('class-one class-two', el.className, 'Has classes applied');
+			same(true, raptor.has_class('class-two', el), 'raptor found class');
+			same(true, raptor.has_class('class-one', el), 'raptor found class');
+		});
+		
+		test('Return false when class is not existant and class string is empty', function() {
+			el.className = null;
+			same('', el.className, 'No classes applied');
+			same(false, raptor.has_class('class-one', el), 'has_class returned false');
+		});
+		
+		test('Return false when class is not existant but classes are found', function() {
+			same('class-one', el.className, 'Only class-one applied');
+			same(false, raptor.has_class('class-two', el), 'has_class returned false');
+		});
+		
+	module('Remove class', {
+		setup : function() {
+			el_factory();
+			el.className = 'class-one';
+		},
+		teardown : el_teardown
+	});
+	
+		test('Remove a class from single class string', function() {
+			raptor.remove_class('class-one', el);
+			same('', el.className, 'Removed class');
+		});
+		
+		test('Remove a class from a string with multiple classes', function() {
+			el.className = 'class-one class-two class-three';
+			same('class-one class-two class-three', el.className, 'Has 3 setup classes');
+			
+			raptor.remove_class('class-two', el);
+			same('class-one class-three', el.className, 'Removed class-one');
+			
+			raptor.remove_class('class-one', el);
+			same('class-three', el.className, 'Removed class-three');
+		});
+		
+		test('Do nothing if class does not exist', function() {
+			raptor.remove_class('class-two', el);
+			same('class-one', el.className, 'Nothing removed');
+		});
 });

@@ -31,7 +31,7 @@ var raptor = (function() {
 	var api;
 	
 	_config = {
-		debug : false,
+		debug : true,
 		loaded_scripts : [],
 		script_path : '',
 		raptor_path : ''
