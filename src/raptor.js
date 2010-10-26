@@ -258,6 +258,21 @@ var raptor = (function() {
 			return true;
 		},
 		
+		/**
+		* Strips out needle from array
+		*
+		* @param {Array} Haystack
+		* @param {String|Numeric} (Optional) Needle to find and remove
+		*/
+		clean_array : function (arr, needle) {
+			needle = needle || '';
+			for (var i = 0, len = arr.length; i < len; i++) {
+				if (arr[i] === needle) arr.remove(i);
+			}
+			
+			return arr;
+		},
+		
 		debug : _config.debug
 	};
 	
