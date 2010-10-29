@@ -58,6 +58,8 @@
 			this.update_components(new_value);
 			this.value = new_value;
 			this.limited = parseInt(new_value.toString().substr(0, 6));
+			
+			return this;
 		},
 		
 		/**
@@ -80,6 +82,8 @@
 			this.update_components(new_value);
 			this.value = new_value;
 			this.limited = parseInt(new_value.toString().substr(0, 6));
+			
+			return this;
 		},
 		
 		update_components : function(value) {
