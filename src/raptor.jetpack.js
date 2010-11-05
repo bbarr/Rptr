@@ -276,7 +276,7 @@
 				var node;
 				for(var i=0; i<len; i++) {
 					node = xmlDoc.childNodes[i];
-					
+					if (node.nodeName === 'xml') continue;
 					if(!raptor.type('Comment', node)) {						
 						root = node;
 						break;
@@ -293,7 +293,7 @@
 			* @param {Element} Node
 			*/
 			nodeParse : function(node) {
-
+			
 				var jsonNode = {};
 				var simpleNode = true;
 
@@ -355,7 +355,7 @@
 					}
 
 				}
-
+				
 				return jsonNode;
 			},
 

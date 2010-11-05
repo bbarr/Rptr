@@ -31,7 +31,7 @@ var raptor = (function() {
 	var api;
 	
 	_config = {
-		debug : true,
+		debug : false,
 		loaded_scripts : [],
 		script_path : '',
 		raptor_path : ''
@@ -116,8 +116,9 @@ var raptor = (function() {
 		*/
 		
 		require : function(modules, callback) {		
+	
 			var _cache = {};
-
+    
             var _util = {
                 
                 /**
@@ -152,8 +153,8 @@ var raptor = (function() {
                     if (script.readyState) {
                         _util.monitor_completion = function(script) {
                             script.onreadystatechange = function() {
-                                if (script.readyState == 'complete') {
-                                    _util.script_loaded();
+                                if (script.readyState == 'loaded') {
+									_util.script_loaded();
                                 }
                             }
                         }
@@ -161,7 +162,7 @@ var raptor = (function() {
 					else {
                         _util.monitor_completion = function(script) {
                             script.onload = function() {
-                                _util.script_loaded();
+								_util.script_loaded();
                             }
                         };
 					}
@@ -174,7 +175,7 @@ var raptor = (function() {
                 * handle callback and queueing if necessary
                 */
                 script_loaded : function() {
-                    
+					
                     // If we're loading many scripts we need to fire off the script_loaded method
                     // in order to handle the queue and execute the callback for the queue once
                     // all modules have been loaded
@@ -223,6 +224,7 @@ var raptor = (function() {
             * @param {Array} Modules to load
             */
 		    var _load_many = function(modules) {
+				
 		        var loading_many = _cache.loading_many = true;
 		        var modules_length = modules.length;
 		        
