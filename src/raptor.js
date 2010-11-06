@@ -333,7 +333,7 @@ raptor.Interface.prototype = {
  */
 
 raptor.Error = function(message, script_location, line) {
-	
+
 	// requires at least 1 argument
 	if (!message) return;
 	

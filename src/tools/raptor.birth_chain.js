@@ -17,20 +17,33 @@ raptor.BirthChain.prototype = {
 	},
 	c : function(quantity) {
 		quantity = quantity || 1;
-		var current = this.current, current_length = current.length;
+		var current = this.current, current_length;
 		while (quantity) {
+			current_length = current.length;
 			if (current_length > 1) current[current_length - 2].appendChild(current.pop());
-			else this.storage.appendChild(current.pop());
+			else this.storage.appendChild(current[0]);
 			quantity--;
 		}
 		return this;
+	},
+	dump : function() {
+		var html = this.storage;
+		this.storage = document.createDocumentFragment();
+		this.current = [];
+		return html;
+	},
+	embed : function(html) {
+		var current = this.current, current_length = current.length;
+		if (current_length > 0) current[current_length -1].appendChild(html);
+		else this.storage.appendChild(html);
+		return this;		
 	}
 };
 
 // populate custom tag methods
 (function() {
 	
-	var tags = ['div','p','a', 'ul', 'li'], proto = raptor.BirthChain.prototype;
+	var tags = ['div','h1','p','a', 'ul', 'li'], proto = raptor.BirthChain.prototype;
 		
 	var build_element_method = function(tag) {
 		return function(data) {
@@ -46,63 +59,28 @@ raptor.BirthChain.prototype = {
 		}
 	}
 	
+	var build_post_close_element = function(tag) {
+		return function(data) {
+			this.c();
+			this._add_element(raptor.birth(tag, data));
+			return this;
+		}
+	}
+	
+	var build_post_close_container_element = function(tag) {
+		return function(data) {
+			this.c();
+			this._add_element(raptor.birth(tag, data), true);
+			return this;
+		}
+	}
+	
 	for (var i = 0, len = tags.length; i < len; i++) {
 		var tag = tags[i];
 		proto[tag] = build_element_method(tag);
 		proto[tag + '_'] = build_container_element_method(tag);
+		proto['_' + tag] = build_post_close_element(tag);
+		proto['_' + tag + '_'] = build_post_close_container_element(tag);
 	}
 	
 })();
-
-/*
-
-(function() {
-		
-	var template = function(tag, attrs) {
-		storage = document.createDocumentFragment();
-		current[0] = raptor.birth(tag, attrs);
-	}
-	
-	template.prototype = {
-		
-		b : function(tag, attrs) {
-			current[current.length - 1].appendChild(raptor.birth(tag, attrs));
-			
-			return this;
-		},
-		
-		t : function(text) {
-			current[current.length - 1].innerHTML += text;
-			
-			return this;
-		},
-		
-		bc : function(tag, attrs) {
-			current.push(raptor.birth(tag, attrs));
-			
-			return this;
-		},
-		
-		close : function() {
-			if (current.length > 1) {
-				current[current.length - 2].appendChild(current.pop());
-			}
-			else storage.appendChild(current[0])
-			
-			return this;
-		}
-	}
-	
-	var api = {
-		birth_chain : function(tag, attrs) {
-			return new template(tag, attrs);
-		},
-		get_birth_chain : function() {
-			return storage;
-		}
-	}
-	
-	raptor.extend(api);
-})();
-
-*/
