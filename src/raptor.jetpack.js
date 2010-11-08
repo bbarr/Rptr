@@ -276,7 +276,7 @@
 				var node;
 				for(var i=0; i<len; i++) {
 					node = xmlDoc.childNodes[i];
-					if (node.nodeName === 'xml') continue;
+					if (node.nodeName === 'xml' || node.nodeName === '#comment') continue;
 					if(!raptor.type('Comment', node)) {						
 						root = node;
 						break;
