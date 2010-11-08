@@ -229,6 +229,10 @@
 			switch(means) {
 				case 'replace' : existing.parentNode.replaceChild(el, existing);
 					break;
+				case 'replace_contents' :
+					existing.innerHTML = '';
+					existing.appendChild(el);
+					break;
 				case 'before' : existing.parentNode.insertBefore(el, existing);
 					break;
 				default : existing.appendChild(el);

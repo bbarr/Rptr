@@ -26,6 +26,10 @@ raptor.BirthChain.prototype = {
 		}
 		return this;
 	},
+	fn : function(fn) {
+		fn(this);
+		return this;
+	},
 	dump : function() {
 		var html = this.storage;
 		this.storage = document.createDocumentFragment();
@@ -43,7 +47,7 @@ raptor.BirthChain.prototype = {
 // populate custom tag methods
 (function() {
 	
-	var tags = ['div','h1','p','a', 'ul', 'li'], proto = raptor.BirthChain.prototype;
+	var tags = ['div','h1','h2','h3','p','a','ul','li'], proto = raptor.BirthChain.prototype;
 		
 	var build_element_method = function(tag) {
 		return function(data) {
