@@ -114,7 +114,6 @@ var raptor = (function() {
 		* @param {Array|String} Scripts to load
 		* @param {Function} Callback to execute after loading modules
 		*/
-		
 		require : function(modules, callback) {		
 	
 			var _cache = {};
@@ -185,7 +184,7 @@ var raptor = (function() {
                     }
 
                     // Otherwise just run the callback now that the single script is ready
-                    else if (callback) callback();
+                    else if (callback) setTimeout(callback, 1000);
                 }
                 
             };
@@ -241,7 +240,7 @@ var raptor = (function() {
             
 		    if (typeof modules === 'string') _load_single(modules);
 		    else {
-		        if (!raptor.lash) api.require('raptor.events', function() { api.require(modules, callback) });
+		        if (!raptor.lash) api.require('raptor.events', function() { api.require(modules, function() { setTimeout(callback, 1000) })});
 		        else _load_many(modules);
 		    }
 		},
