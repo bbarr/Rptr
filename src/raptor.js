@@ -115,7 +115,6 @@ var raptor = (function() {
 		* @param {Function} Callback to execute after loading modules
 		*/
 		require : function(modules, callback) {		
-	
 			var _cache = {};
     
             var _util = {
@@ -152,7 +151,7 @@ var raptor = (function() {
                     if (script.readyState) {
                         _util.monitor_completion = function(script) {
                             script.onreadystatechange = function() {
-                                if (script.readyState == 'loaded') {
+                                if (script.readyState === 'loaded' || script.readyState === 'complete') {
 									_util.script_loaded();
                                 }
                             }
@@ -182,9 +181,8 @@ var raptor = (function() {
                         _util.script_loaded = function() { raptor.alarm('script_loaded') };
                         _util.script_loaded();
                     }
-
                     // Otherwise just run the callback now that the single script is ready
-                    else if (callback) setTimeout(callback, 1000);
+                    else if (callback) callback();
                 }
                 
             };
@@ -195,14 +193,13 @@ var raptor = (function() {
             * @param {String} Module Path
             */
 		    var _load_single = function(module) {
-                
 		        // Check and ensure that a module was not already loaded before
 		        // if it was, make sure to run the script_loaded event
 		        // to properly continue the queue progress and leave
-		        if (_config.loaded_scripts.indexOf(module) > -1) {		           
+		        if (_config.loaded_scripts.indexOf(module) > -1) {
                     _util.script_loaded();
 		            return;
-		        }                
+		        }     
                 
                 // Create the script for this module
 		        var script = _util.create_script(module);
@@ -230,7 +227,7 @@ var raptor = (function() {
 		        // Event to fire the callback once we're sure all
 		        // modules in the array have been loaded
 		        raptor.lash('script_loaded', function(e) {
-		            callback(e);
+					callback();
 		            raptor.unlash('script_loaded');
 		        }, modules_length);
 		        
@@ -240,7 +237,7 @@ var raptor = (function() {
             
 		    if (typeof modules === 'string') _load_single(modules);
 		    else {
-		        if (!raptor.lash) api.require('raptor.events', function() { api.require(modules, function() { setTimeout(callback, 1000) })});
+		        if (!raptor.lash) api.require('raptor.events', function() { api.require(modules, callback)});
 		        else _load_many(modules);
 		    }
 		},
