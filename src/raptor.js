@@ -71,6 +71,15 @@ var raptor = (function() {
 		},
 		
 		/**
+		* Set a custom UID to append to the end of requires for cache busting
+		*
+		* @param {String}
+		*/
+		set_script_uid : function(uid) {
+			_config.script_uid = Math.random() * 100;
+		},
+		
+		/**
 		* Set up the shortcut to raptor.ready from
 		* raptor.events
 		*
@@ -129,8 +138,11 @@ var raptor = (function() {
                     var load_path = (module.indexOf('raptor.') > -1) ? _config.raptor_path : _config.script_path;
                                                         
                     var script = document.createElement('script');
-                    script.setAttribute('type', 'text/javascript');                                       
-                    script.setAttribute('src', load_path + module + '.js');
+                    script.setAttribute('type', 'text/javascript');
+
+					var uid = (_config.script_uid) ? '?' + _config.script_uid : '';
+                
+                    script.setAttribute('src', load_path + module + '.js' + uid);
                     
                     _config.loaded_scripts.push(module);
 
