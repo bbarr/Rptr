@@ -107,7 +107,7 @@
 				var	timer = setTimeout(function() {				
 					clearTimeout(timer);
 					_this._following_method(e, _this);
-				}, 50);
+				}, 20);
 			});
 		},
 		
