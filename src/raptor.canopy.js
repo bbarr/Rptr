@@ -86,7 +86,7 @@
 			
 			// position it dynamically based on content size, or click location for tooltips
 			this.position();
-			
+			this.el.style.left = '-999em';
 			if (this.follow) this.start_following();
 		},
 		
@@ -103,13 +103,17 @@
 		
 		'start_following' : function() {
 			var _this = this;
-			raptor.lash(window, 'mousemove', function(e) {
-				_this._following_method(e, _this);
+			raptor.lash(document, 'mousemove', function(e) {
+				var	timer = setTimeout(function() {				
+					clearTimeout(timer);
+					_this._following_method(e, _this);
+				}, 50);
 			});
 		},
 		
 		'stop_following' : function() {
 			raptor.unlash(window, 'mousemove', this._following_method);
+			this.following = false;
 		},
 		
 		'position' : function(event) {
