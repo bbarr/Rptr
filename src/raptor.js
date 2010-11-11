@@ -7,7 +7,7 @@
 // prototype indexOf for arrays
 if(typeof Array.prototype.indexOf !== 'function') {
 	Array.prototype.indexOf = function(needle) {
-		for (var i = 0, len = this.length; i < length; i++) {
+		for (var i = 0, len = this.length; i < len; i++) {
 			if (this[i] === needle) return i;
 		}
 		return -1;
