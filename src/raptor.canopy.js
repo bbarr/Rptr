@@ -86,8 +86,11 @@
 			
 			// position it dynamically based on content size, or click location for tooltips
 			this.position();
-			this.el.style.left = '-999em';
-			if (this.follow) this.start_following();
+			
+			if (this.follow) {
+				this.el.style.left = '-999em';
+				this.start_following();
+			}
 		},
 		
 		'hide' : function() {
