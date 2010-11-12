@@ -24,17 +24,21 @@
 </head>
 <body>
 	
-	<div id="container" class="container">
-		container box
-		<div id="inner" class="inner">
-			inner box
+	<div id="wrapper">
+	
+		<div id="container" class="container">
+			container box
+			<div id="inner" class="inner">
+				inner box
+			</div>
 		</div>
-	</div>
 	
-	<div class="container" id="other">
-		other
-	</div>
+		<div class="container" id="other">
+			other
+		</div>
 	
+	</div>	
+		
 	<script type="text/javascript" src="/src/raptor.js"></script>
 	<script type="text/javascript" src="/src/raptor.pack.js"></script>
 	<script type="text/javascript" src="/src/raptor.events.js"></script>
@@ -65,7 +69,7 @@
 				alert('div inside #container');
 			});
 			
-			raptor.lash('#other div', 'click', function(e) {
+			raptor.lash('#wrapper #other div', 'click', function(e) {
 				alert('div inside #other');
 			});
 			
@@ -75,8 +79,8 @@
 			var inner_div = raptor.birth('div', {'class' : 'inner'}, 'another inner div');
 			raptor.append(inner_div, container);
 			
-			var other_inner = raptor.birth('div', {'class' : 'inner'}, 'inner');
-			raptor.append(other_inner, other);
+			var other_inner = raptor.birth('div', {'class' : 'inner'}, [raptor.birth('div'), raptor.birth('div')], 'test');
+			raptor.append(raptor.nursery('test', true), other);
 		});
 		
 	</script>

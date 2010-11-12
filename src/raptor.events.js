@@ -311,7 +311,7 @@
 					else {
 						prelim = parts[parts_length - 1];
 						if (raptor.hunt(prelim, sandbox).indexOf(sandbox_test_el) > -1) {
-							if (raptor.hunt(query, test_context).indexOf(test_el) > -1) {
+							if (raptor.hunt(query).indexOf(test_el) > -1) {
 								_apply(test_el, persistent_event);
 							}
 						}
@@ -327,7 +327,6 @@
 			// if el is container element
 			if (el.nodeType === 1) {
 				_test(el);
-				test_context = el;
 				children = el.getElementsByTagName('*');
 				for (var i = 0, len = children.length; i < len; i++) _test(children[i], true);
 			}
@@ -337,7 +336,6 @@
 				for (var i = 0, len = el.length; i < len; i++) {
 					var _el = el[i];
 					_test(_el);
-					test_context = _el;
 					children = _el.getElementsByTagName('*');
 					for (var x = 0, x_len = children.length; x < x_len; x++) _test(children[x], true);
 				}
