@@ -237,7 +237,7 @@
 					break;
 				default : existing.appendChild(el);
 			}
-			
+
 			if (children) el = children;
 			
 			// Make sure the DOM has caught up before trying to scan for life

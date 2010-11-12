@@ -265,6 +265,12 @@
 		
 		scan_for_life : function(el) {
 
+			var sandbox = document.createElement('div');
+			var _get_sandbox = function() {
+				sandbox.innerHTML = '';
+				return sandbox;
+			}
+			
 			var _apply = function(test_el, persistent_event) {
 				var types = persistent_event.types;
 				for (var type in types) {
@@ -284,26 +290,56 @@
 		
 			var _test = function(test_el) {
 				for (var i = 0, len = persistent_events.length; i < len; i++) {
+					
 					var persistent_event = persistent_events[i];
-					if (raptor.hunt(persistent_event.query).indexOf(test_el) > -1) _apply(test_el, persistent_event);
+					var query = persistent_event.query;
+					
+					var parts = query.split(' ');
+					var parts_length = parts.length;
+					var prelim;
+					
+					var sandbox = _get_sandbox();
+					
+					sandbox_test_el = test_el.cloneNode(true);
+					sandbox.appendChild(sandbox_test_el);
+					
+					// if query string has depth of 1 only test in local sandbox
+					if (parts_length === 1) {
+						prelim = parts[0];
+						if (raptor.hunt(prelim, sandbox).indexOf(sandbox_test_el) > -1) _apply(test_el, persistent_event);	
+					}
+					else {
+						prelim = parts[parts_length - 1];
+						if (raptor.hunt(prelim, sandbox).indexOf(sandbox_test_el) > -1) {
+							if (raptor.hunt(query, test_context).indexOf(test_el) > -1) {
+								_apply(test_el, persistent_event);
+							}
+						}
+					}
 				}
 			}
 			
 			var persistent_events = _persistent.collection;
 			
 			var children;
+			var test_context = false;
 			
+			// if el is container element
 			if (el.nodeType === 1) {
 				_test(el);
+				test_context = el;
 				children = el.getElementsByTagName('*');
-				for (var i = 0, len = children.length; i < len; i++) _test(children[i]);
+				for (var i = 0, len = children.length; i < len; i++) _test(children[i], true);
 			}
 			else {
+				
+				// if el is document fragment
 				for (var i = 0, len = el.length; i < len; i++) {
 					var _el = el[i];
 					_test(_el);
+					test_context = el;
 					children = _el.getElementsByTagName('*');
-					for (var x = 0, x_len = children.length; x < x_len; x++) _test(children[x]);
+					for (var x = 0, x_len = children.length; x < x_len; x++) _test(children[x], true);
 				}
 			}	
 		}

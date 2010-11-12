@@ -8,13 +8,13 @@
 			padding: 0;
 		}
 		
-		#container { 
+		.container { 
 			border: 1px solid #000; 
 			margin:20px;
 			padding: 20px;
 		}
 		
-		#inner {
+		.inner {
 			margin:20px;
 			border: 1px solid red;
 			padding:20px;
@@ -24,12 +24,15 @@
 </head>
 <body>
 	
-	<div id="container">
+	<div id="container" class="container">
 		container box
-		<div id="inner">
+		<div id="inner" class="inner">
 			inner box
 		</div>
-		
+	</div>
+	
+	<div class="container" id="other">
+		other
 	</div>
 	
 	<script type="text/javascript" src="/src/raptor.js"></script>
@@ -41,17 +44,39 @@
 		
 			var container = document.getElementById('container');
 			var inner = document.getElementById('inner');
+			var other = document.getElementById('other');
 			
 			//container.onclick = function() { console.log('container clicked'); };
 
-			raptor.lash('#container', 'click', function(e) {
+			raptor.lash('.container', 'click', function(e) {
 				alert('container clicked');
 			});
 			
-			raptor.lash('#inner', 'click', function(e) {
+			raptor.lash('.inner', 'click', function(e) {
 				alert('inner clicked');
 			});
 			
+			raptor.lash('#inner a', 'click', function(e) {
+				e.preventDefault();
+				alert('a live event!')
+			});
+			
+			raptor.lash('#container div', 'click', function(e) {
+				alert('div inside #container');
+			});
+			
+			raptor.lash('#other div', 'click', function(e) {
+				alert('div inside #other');
+			});
+			
+			var a = raptor.birth('a', {'href' : '#'}, 'asdafsadf');
+			raptor.append(a, inner);
+			
+			var inner_div = raptor.birth('div', {'class' : 'inner'}, 'another inner div');
+			raptor.append(inner_div, container);
+			
+			var other_inner = raptor.birth('div', {'class' : 'inner'}, 'inner');
+			raptor.append(other_inner, other);
 		});
 		
 	</script>
