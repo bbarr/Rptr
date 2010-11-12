@@ -37,7 +37,7 @@ raptor.require('raptor.pack', function() {
 			same('class-one', el.className, 'Class applied');
 			
 			raptor.add_class('class-one', el);
-			same('class-one', el.className, 'Nothing changed');
+			same(el.className, 'class-one', 'Nothing changed');
 		});
 		
 	module('Add class to existing class string', {
@@ -97,9 +97,11 @@ raptor.require('raptor.pack', function() {
 		});
 		
 		test('Return false when class is not existant and class string is empty', function() {
-			el.className = null;
-			same('', el.className, 'No classes applied');
-			same(false, raptor.has_class('class-one', el), 'has_class returned false');
+			delete el;
+			el_factory();
+			
+			same(el.className, '', 'No classes applied');
+			same(raptor.has_class('class-one', el), false, 'has_class returned false');
 		});
 		
 		test('Return false when class is not existant but classes are found', function() {
@@ -134,5 +136,15 @@ raptor.require('raptor.pack', function() {
 		test('Do nothing if class does not exist', function() {
 			raptor.remove_class('class-two', el);
 			same('class-one', el.className, 'Nothing removed');
+		});
+		
+		test('Fail gracefully if no classes are applied', function() {
+			delete el;
+			el_factory();
+			
+			same(el.className, '', 'No classes applied');
+			
+			raptor.remove_class('class-one', el);
+			same(el.className, '', 'Nothing done');
 		});
 });

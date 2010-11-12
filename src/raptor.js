@@ -7,7 +7,7 @@
 // prototype indexOf for arrays
 if(typeof Array.prototype.indexOf !== 'function') {
 	Array.prototype.indexOf = function(needle) {
-		for (var i = 0, len = this.length; i < length; i++) {
+		for (var i = 0, len = this.length; i < len; i++) {
 			if (this[i] === needle) return i;
 		}
 		return -1;
@@ -71,6 +71,15 @@ var raptor = (function() {
 		},
 		
 		/**
+		* Set a custom UID to append to the end of requires for cache busting
+		*
+		* @param {String}
+		*/
+		set_script_uid : function(uid) {
+			_config.script_uid = Math.random() * 100;
+		},
+		
+		/**
 		* Set up the shortcut to raptor.ready from
 		* raptor.events
 		*
@@ -114,9 +123,7 @@ var raptor = (function() {
 		* @param {Array|String} Scripts to load
 		* @param {Function} Callback to execute after loading modules
 		*/
-		
 		require : function(modules, callback) {		
-	
 			var _cache = {};
     
             var _util = {
@@ -131,8 +138,11 @@ var raptor = (function() {
                     var load_path = (module.indexOf('raptor.') > -1) ? _config.raptor_path : _config.script_path;
                                                         
                     var script = document.createElement('script');
-                    script.setAttribute('type', 'text/javascript');                                       
-                    script.setAttribute('src', load_path + module + '.js');
+                    script.setAttribute('type', 'text/javascript');
+
+					var uid = (_config.script_uid) ? '?' + _config.script_uid : '';
+                
+                    script.setAttribute('src', load_path + module + '.js' + uid);
                     
                     _config.loaded_scripts.push(module);
 
@@ -153,7 +163,7 @@ var raptor = (function() {
                     if (script.readyState) {
                         _util.monitor_completion = function(script) {
                             script.onreadystatechange = function() {
-                                if (script.readyState == 'loaded') {
+                                if (script.readyState === 'loaded' || script.readyState === 'complete') {
 									_util.script_loaded();
                                 }
                             }
@@ -183,7 +193,6 @@ var raptor = (function() {
                         _util.script_loaded = function() { raptor.alarm('script_loaded') };
                         _util.script_loaded();
                     }
-
                     // Otherwise just run the callback now that the single script is ready
                     else if (callback) callback();
                 }
@@ -196,14 +205,13 @@ var raptor = (function() {
             * @param {String} Module Path
             */
 		    var _load_single = function(module) {
-                
 		        // Check and ensure that a module was not already loaded before
 		        // if it was, make sure to run the script_loaded event
 		        // to properly continue the queue progress and leave
-		        if (_config.loaded_scripts.indexOf(module) > -1) {		           
+		        if (_config.loaded_scripts.indexOf(module) > -1) {
                     _util.script_loaded();
 		            return;
-		        }                
+		        }     
                 
                 // Create the script for this module
 		        var script = _util.create_script(module);
@@ -231,7 +239,7 @@ var raptor = (function() {
 		        // Event to fire the callback once we're sure all
 		        // modules in the array have been loaded
 		        raptor.lash('script_loaded', function(e) {
-		            callback(e);
+					callback();
 		            raptor.unlash('script_loaded');
 		        }, modules_length);
 		        
@@ -241,7 +249,7 @@ var raptor = (function() {
             
 		    if (typeof modules === 'string') _load_single(modules);
 		    else {
-		        if (!raptor.lash) api.require('raptor.events', function() { api.require(modules, callback) });
+		        if (!raptor.lash) api.require('raptor.events', function() { api.require(modules, callback)});
 		        else _load_many(modules);
 		    }
 		},
