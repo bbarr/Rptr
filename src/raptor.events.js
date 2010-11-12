@@ -337,7 +337,7 @@
 				for (var i = 0, len = el.length; i < len; i++) {
 					var _el = el[i];
 					_test(_el);
-					test_context = el;
+					test_context = _el;
 					children = _el.getElementsByTagName('*');
 					for (var x = 0, x_len = children.length; x < x_len; x++) _test(children[x], true);
 				}
