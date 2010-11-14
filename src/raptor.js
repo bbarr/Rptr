@@ -326,6 +326,30 @@ raptor.Interface.prototype = {
 		if (typeof methods === 'string') _test(methods);
 		else for (var i = 0, len = methods.length; i < len; i++) _test(methods[i]);
 	}
+};
+
+raptor.ComplexData = function() {
+	this.data = {};
+};
+
+raptor.ComplexData.prototype = {
+	trace : function(arr, data) {
+		var current, store;
+		for (var i = 0, len = arr.length; i < len; i++) {
+			current = (current) ? current[arr[i]] : this[arr[i]];
+			if (!current) {
+				if (data) {
+ 					for (var x = i; x < len; x++) {
+ 						store[arr[x]] = (x === (len - 1)) ? data : {};
+ 					}
+ 					return true;
+ 				}
+ 				else return false;
+ 			}
+ 			else store = current;
+ 		}
+ 		return true;
+	}
 }
 
 /**

@@ -25,7 +25,33 @@
 				.close()
 			.close()
 		.close();
-		
+		/*
+		if (typeof Object.trace === 'undefined') {
+		467 Object.prototype.trace = function(arr, data) {
+		468
+		469 var current,
+		470 store;
+		471
+		472 for (var i = 0, len = arr.length; i < len; i++) {
+		473 current = (current) ? current[arr[i]] : this[arr[i]];
+		474 if (!current) {
+		475 if (data) {
+		476
+		477 for (var x = i; x < len; x++) {
+		478 store[arr[x]] = (x === (len - 1)) ? data : new Object();
+		479 }
+		480
+		481 return true;
+		482 }
+		483 else return false;
+		484 }
+		485 else store = current;
+		486 }
+		487
+		488 return true;
+		489 }
+		490}
+		*/
 		test.appendChild(raptor.get_birth_chain());
 	</script>
 </body>
