@@ -829,7 +829,6 @@ var rptr = (function() {
 		return api;
 	})();
 	
-	
 	ajax = (function () {
 
 		var xhr = null;
