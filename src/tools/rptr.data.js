@@ -32,6 +32,7 @@ rptr.Data.prototype = {
 		
 		rptr.ajax.request({
 			uri : path,
+			json : true,
 			success : function(data) {
 				_this.object[key] = (callback) ? callback(data) : data;
 				_this.active_requests--;
