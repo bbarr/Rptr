@@ -241,6 +241,7 @@ var rptr = (function() {
 		        else _load_many(modules);
 		    }
 		},
+	
 	}
 	
 	dom = (function() {
@@ -1274,5 +1275,3 @@ var rptr = (function() {
 	
 	return api;
 })();
-
-console.log(rptr)

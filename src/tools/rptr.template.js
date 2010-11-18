@@ -75,14 +75,14 @@ rptr.Template.prototype = {
 		
 	var build_element_method = function(tag) {
 		return function(data) {
-			this._add_element(rptr.build(tag, data));
+			this._add_element(rptr.dom.build(tag, data));
 			return this;
 		}
 	}
 	
 	var build_container_element_method = function(tag) {
 		return function(data) {
-			this._add_element(rptr.build(tag, data), true);
+			this._add_element(rptr.dom.build(tag, data), true);
 			return this;
 		}
 	}
@@ -90,7 +90,7 @@ rptr.Template.prototype = {
 	var build_post_close_element = function(tag) {
 		return function(data) {
 			this.c();
-			this._add_element(rptr.build(tag, data));
+			this._add_element(rptr.dom.build(tag, data));
 			return this;
 		}
 	}
@@ -98,7 +98,7 @@ rptr.Template.prototype = {
 	var build_post_close_container_element = function(tag) {
 		return function(data) {
 			this.c();
-			this._add_element(rptr.build(tag, data), true);
+			this._add_element(rptr.dom.build(tag, data), true);
 			return this;
 		}
 	}
