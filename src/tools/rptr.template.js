@@ -21,7 +21,7 @@ rptr.Template.prototype = {
 		while (quantity) {
 			current_length = current.length;
 			if (current_length > 1) current[current_length - 2].appendChild(current.pop());
-			else this.storage.appendChild(current[0]);
+			else this.storage.appendChild(current.pop());
 			quantity--;
 		}
 		this.current = current;
