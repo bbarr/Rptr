@@ -24,7 +24,6 @@ rptr.Template.prototype = {
 			else this.storage.appendChild(current.pop());
 			quantity--;
 		}
-		this.current = current;
 		return this;
 	},
 	fn : function(fn) {
