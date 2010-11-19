@@ -1,6 +1,6 @@
 /*
 
-	Copyright (c) 2010 Brendan Barr, Damian Galarza, http://www.raptorjs.com
+	Copyright (c) 2010 Brendan Barr, Damian Galarza, http://www.rptrjs.com
 
 	Permission is hereby granted, free of charge, to any person obtaining
 	a copy of this software and associated documentation files (the
@@ -82,6 +82,19 @@ var rptr = (function() {
 			return destination;
 		},
 		
+		throttle : function(id, interval, fn) {
+			
+			var _this = core.throttle;
+			
+			if (_this[id]) return;
+			else {
+				fn();
+				_this[id] = setTimeout(function() {
+					delete _this[id];
+				}, interval);
+			}
+		},
+		
 		/**
 		 * Tests for data type by constructor name
 		 * 
@@ -102,7 +115,7 @@ var rptr = (function() {
 						break;
 					default:
 						try { if (data.constructor && data.constructor.toString().indexOf(type) !== -1) match = true }
-						catch (e) { new raptor.Error(e) }
+						catch (e) { new rptr.Error(e) }
 				}
 			}
 			
@@ -178,7 +191,7 @@ var rptr = (function() {
                     // in order to handle the queue and execute the callback for the queue once
                     // all modules have been loaded
                     if (_cache.loading_many) {
-                        _util.script_loaded = function() { raptor.alarm('script_loaded') };
+                        _util.script_loaded = function() { rptr.alarm('script_loaded') };
                         _util.script_loaded();
                     }
                     // Otherwise just run the callback now that the single script is ready
@@ -226,9 +239,9 @@ var rptr = (function() {
 		        
 		        // Event to fire the callback once we're sure all
 		        // modules in the array have been loaded
-		        raptor.lash('script_loaded', function(e) {
+		        rptr.lash('script_loaded', function(e) {
 					callback();
-		            raptor.unlash('script_loaded');
+		            rptr.unlash('script_loaded');
 		        }, modules_length);
 		        
 		        // Loop through and load modules one at a time
@@ -237,7 +250,7 @@ var rptr = (function() {
             
 		    if (typeof modules === 'string') _load_single(modules);
 		    else {
-		        if (!raptor.lash) api.require('raptor.events', function() { api.require(modules, callback)});
+		        if (!rptr.lash) api.require('rptr.events', function() { api.require(modules, callback)});
 		        else _load_many(modules);
 		    }
 		},
@@ -411,7 +424,7 @@ var rptr = (function() {
 					el.className = classes.join(' ');
 				}
 
-				if (raptor.type('Array', el)) {
+				if (core.type('Array', el)) {
 					for (var i = 0, len = el.length; i < len; i++) _add_class(el[i]);
 				}
 				else _add_class(el);
@@ -427,7 +440,7 @@ var rptr = (function() {
 					el.className = classes.join(' ');
 				}
 
-				if (raptor.type('Array', el)) {
+				if (core.type('Array', el)) {
 					for (var i = 0, len = el.length; i < len; i++) _remove_class(el[i]);
 				}
 				else _remove_class(el);
@@ -441,7 +454,7 @@ var rptr = (function() {
 
 			set_html : function(html, el) {
 				el.innerHTML = html;
-				raptor.scan_for_life(el);
+				rptr.scan_for_life(el);
 			},
 
 			/**
@@ -475,7 +488,7 @@ var rptr = (function() {
 				if (children) el = children;
 
 				// Make sure the DOM has caught up before trying to scan for life
-				setTimeout(function() {raptor.scan_for_life(el)}, 20);
+				setTimeout(function() {rptr.scan_for_life(el)}, 20);
 			}
 		};
 		
@@ -514,7 +527,7 @@ var rptr = (function() {
 					this.collection.push(new_target_event);
 				}
 
-				target[type] = api.alarm;
+				target[type] = api.fire;
 			},
 			fire : function(event, ie_current_target) {
 
@@ -597,7 +610,7 @@ var rptr = (function() {
 					this.collection.push(new_persistent_event);
 				}
 
-				var current_set = raptor.hunt(query);
+				var current_set = rptr.hunt(query);
 				api.lash(current_set, type, cb);
 			},
 			remove : function(query, type, cb) {
@@ -697,7 +710,7 @@ var rptr = (function() {
 					return;
 				}
 
-				raptor.lash(document, 'DOMContentLoaded', fn);
+				rptr.lash(document, 'DOMContentLoaded', fn);
 
 				if (document.readyState) {
 					if (!timer) {
@@ -722,7 +735,7 @@ var rptr = (function() {
 						else _custom.add(target, type, cb);
 					}
 					else {
-						if (raptor.type('Array', target)) {
+						if (core.type('Array', target)) {
 							for (var i = 0, len = target.length; i < len; i++) _dom.add(target[i], type, cb);
 						}
 						else _dom.add(target, type, cb);
@@ -790,12 +803,12 @@ var rptr = (function() {
 						// if query string has depth of 1 only test in local sandbox
 						if (parts_length === 1) {
 							prelim = parts[0];
-							if (raptor.hunt(prelim, sandbox).indexOf(sandbox_test_el) > -1) _apply(test_el, persistent_event);	
+							if (rptr.hunt(prelim, sandbox).indexOf(sandbox_test_el) > -1) _apply(test_el, persistent_event);	
 						}
 						else {
 							prelim = parts[parts_length - 1];
-							if (raptor.hunt(prelim, sandbox).indexOf(sandbox_test_el) > -1) {
-								if (raptor.hunt(query).indexOf(test_el) > -1) {
+							if (rptr.hunt(prelim, sandbox).indexOf(sandbox_test_el) > -1) {
+								if (rptr.hunt(query).indexOf(test_el) > -1) {
 									_apply(test_el, persistent_event);
 								}
 							}
@@ -1100,7 +1113,7 @@ var rptr = (function() {
 					for(var i=0; i<len; i++) {
 						node = xmlDoc.childNodes[i];
 						if (node.nodeName === 'xml' || node.nodeName === '#comment') continue;
-						if(!raptor.type('Comment', node)) {						
+						if(!core.type('Comment', node)) {						
 							root = node;
 							break;
 						}
