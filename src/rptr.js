@@ -49,7 +49,7 @@ var rptr = (function() {
 			}
 		}
 
-		api.base_path = api.rptr_path = rptr_path;
+		api.scripts.base_path = api.scripts.rptr_path = rptr_path;
 		
 		return api;
 	})();
@@ -144,7 +144,7 @@ var rptr = (function() {
                 */
                 create_script : function(module) {
                     var load_path = (module.indexOf('rptr.') > -1) ? config.scripts.rptr_path : config.scripts.base_path;
-					load_path += (module + 'js');
+					load_path += (module + '.js');
                     var script = dom.build('script', { type : 'text/javascript', src : load_path });
 					config.scripts.loaded.push(module);
                     return script;
@@ -191,7 +191,7 @@ var rptr = (function() {
                     // in order to handle the queue and execute the callback for the queue once
                     // all modules have been loaded
                     if (_cache.loading_many) {
-                        _util.script_loaded = function() { rptr.alarm('script_loaded') };
+                        _util.script_loaded = function() { rptr.events.fire('script_loaded') };
                         _util.script_loaded();
                     }
                     // Otherwise just run the callback now that the single script is ready
@@ -209,7 +209,7 @@ var rptr = (function() {
 		        // Check and ensure that a module was not already loaded before
 		        // if it was, make sure to run the script_loaded event
 		        // to properly continue the queue progress and leave
-		        if (_config.loaded_scripts.indexOf(module) > -1) {
+		        if (config.scripts.loaded.indexOf(module) > -1) {
                     _util.script_loaded();
 		            return;
 		        }     
@@ -239,9 +239,9 @@ var rptr = (function() {
 		        
 		        // Event to fire the callback once we're sure all
 		        // modules in the array have been loaded
-		        rptr.lash('script_loaded', function(e) {
+		        rptr.events.add('script_loaded', function(e) {
 					callback();
-		            rptr.unlash('script_loaded');
+		            rptr.events.remove('script_loaded');
 		        }, modules_length);
 		        
 		        // Loop through and load modules one at a time
@@ -250,7 +250,7 @@ var rptr = (function() {
             
 		    if (typeof modules === 'string') _load_single(modules);
 		    else {
-		        if (!rptr.lash) api.require('rptr.events', function() { api.require(modules, callback)});
+		        if (!rptr.events) api.require('rptr.events', function() { api.require(modules, callback)});
 		        else _load_many(modules);
 		    }
 		},
@@ -405,11 +405,6 @@ var rptr = (function() {
 				return frag || false;
 			},
 
-			/**
-			 * hunt is sizzling!
-			 */
-			query : window.Sizzle,
-
 			has_class : function(class_name, el) {
 				return el.className.split(' ').indexOf(class_name) > -1;
 			},
@@ -488,7 +483,7 @@ var rptr = (function() {
 				if (children) el = children;
 
 				// Make sure the DOM has caught up before trying to scan for life
-				setTimeout(function() {rptr.scan_for_life(el)}, 20);
+				setTimeout(function() {rptr.events.apply_persistence(el)}, 20);
 			}
 		};
 		
@@ -610,8 +605,8 @@ var rptr = (function() {
 					this.collection.push(new_persistent_event);
 				}
 
-				var current_set = rptr.hunt(query);
-				api.lash(current_set, type, cb);
+				var current_set = rptr.query(query);
+				api.add(current_set, type, cb);
 			},
 			remove : function(query, type, cb) {
 				var collection = this.collection;
@@ -710,7 +705,7 @@ var rptr = (function() {
 					return;
 				}
 
-				rptr.lash(document, 'DOMContentLoaded', fn);
+				rptr.events.add(document, 'DOMContentLoaded', fn);
 
 				if (document.readyState) {
 					if (!timer) {
@@ -780,7 +775,7 @@ var rptr = (function() {
 								else test_el.applied[type].push(callback);
 							}
 							else test_el.applied[type] = [callback];
-							api.lash(test_el, type, callback);
+							api.add(test_el, type, callback);
 						}
 					}
 				}
@@ -803,12 +798,12 @@ var rptr = (function() {
 						// if query string has depth of 1 only test in local sandbox
 						if (parts_length === 1) {
 							prelim = parts[0];
-							if (rptr.hunt(prelim, sandbox).indexOf(sandbox_test_el) > -1) _apply(test_el, persistent_event);	
+							if (rptr.query(prelim, sandbox).indexOf(sandbox_test_el) > -1) _apply(test_el, persistent_event);	
 						}
 						else {
 							prelim = parts[parts_length - 1];
-							if (rptr.hunt(prelim, sandbox).indexOf(sandbox_test_el) > -1) {
-								if (rptr.hunt(query).indexOf(test_el) > -1) {
+							if (rptr.query(prelim, sandbox).indexOf(sandbox_test_el) > -1) {
+								if (rptr.query(query).indexOf(test_el) > -1) {
 									_apply(test_el, persistent_event);
 								}
 							}
@@ -1280,7 +1275,8 @@ var rptr = (function() {
 		events : events,
 		config : config,
 		dom : dom,
-		ajax : ajax
+		ajax : ajax,
+		query : window.Sizzle
 	}
 	
 	// merge into API

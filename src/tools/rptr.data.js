@@ -6,22 +6,33 @@ rptr.Data = function(obj) {
 rptr.Data.prototype = {
 	
 	trace : function(arr, data) {
-		var current, store = {};
-		for (var i = 0, len = arr.length; i < len; i++) {
-			current = (current) ? current[arr[i]] : this.object[arr[i]];
-			if (!current) {
-				if (data) {
-					for (var x = i, limit = len - 1; x < len; x++) {
-						store = store[arr[x]] = (x === limit) ? data : {};
-						if (!current) current = this.object[arr[i]] = store;
-		  			}
-		  			return true;
-		  		}
-		  		else return false;
-		  	}
-		  	else store = current;
+		
+		var live_link, key, current;
+
+		key = arr[0];
+
+		live_link = current = this.object[key];
+		if (!current) {
+			this.object[key] = {};
+			current = this.object[key];
+			live_link = this.object[key];
 		}
-		return true;
+
+		for (var i = 1, len = arr.length; i < len; i++) {
+			
+			key = arr[i];
+			
+			current = current[key];
+			if (!current) {
+				live_link[key] = {};
+				current = live_link[key];
+			}
+			
+			if (i === (len - 1)) {
+				if (data) live_link[key] = data;
+			}
+			else live_link = live_link[key];
+		}
 	},
 	
 	remote_extend : function(key, path, callback) {

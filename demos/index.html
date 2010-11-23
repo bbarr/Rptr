@@ -6,12 +6,11 @@
 <body>
 	<div id="blah">click here</div>
 	<script type="text/javascript" src="/src/rptr.js"></script>
+	<script type="text/javascript" src="/src/tools/rptr.data.js"></script>
 	<script type="text/javascript">
-		rptr.events.add(document.getElementById('blah'), 'click', function(e) {
-			rptr.throttle('test_click', 500, function() {
-				console.log('throttled click');
-			});
-		});
+		var data = new rptr.Data();
+		var result = data.trace(['a', 'b', 'c', 'd'], 'custom data!');
+		console.log(data.object)
 	</script>
 </body>
 </html>
