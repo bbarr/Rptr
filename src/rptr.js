@@ -35,9 +35,9 @@ var rptr = (function() {
 				loaded : [],
 				rptr_path : '',
 				base_path : '',
-				set_base_path : function(path) { api.scripts.base_path = path }
+				set_base_path : function(path) { api.scripts.base_path = path; }
 			}
-		}
+		};
 		
 		//  Determine where the core file is located, and store the URI prefix
 		var scripts = document.getElementsByTagName("script");
@@ -82,6 +82,13 @@ var rptr = (function() {
 			return destination;
 		},
 		
+		/**
+		 *  Limits a function to being called only once during a specified time.
+		 *
+		 *  @param {String} unique id
+		 *  @param {Number} how often can it run (milliseconds)
+		 *  @param {Function} the function to limit
+		 */
 		throttle : function(id, interval, fn) {
 			
 			var _this = core.throttle;
@@ -101,14 +108,14 @@ var rptr = (function() {
 		 * @param {Array|String} types
 		 * @param {*} data
 		 */
-		type : function(types, data) {
+		type : function() {
 			
 			var match = false;
 			
 			var test = function(type) {
 				switch(type) {
 					case 'Object':
-						if (typeof data === 'object' && !data.length && data && data.constructor) match = true;
+						if (typeof data === 'object' && data && !data.length && data.constructor) match = true;
 						break;
 					case 'HTMLElement':
 						if (data.tagName) match = true;
@@ -119,11 +126,13 @@ var rptr = (function() {
 				}
 			}
 			
-			if (typeof types === 'string') test(types);
-			else for (var i = 0; i < types.length && !match; i++) test(types[i]);
-			
-			return match;
-		},
+			return function(types, data) {
+				if (typeof types === 'string') test(types);
+				else for (var i = 0; i < types.length && !match; i++) test(types[i]);
+
+				return match;
+			}
+		}(),
 	
 		/**
 		 *  Dynamic JavaScript loader
@@ -131,7 +140,7 @@ var rptr = (function() {
 		 *  @param {Array|String} Scripts to load
 		 *  @param {Function} Callback to execute after loading modules
 		 */
-		require : function(modules, callback) {		
+		require : function() {		
 			
 			var _cache = {};
 			
@@ -248,15 +257,24 @@ var rptr = (function() {
 		        for(var i=0; i < modules_length; i++) _load_single(modules[i]);
 		    }
             
-		    if (typeof modules === 'string') _load_single(modules);
-		    else {
-		        if (!rptr.events) api.require('rptr.events', function() { api.require(modules, callback)});
-		        else _load_many(modules);
-		    }
-		},
-	
+			return function(modules, callback) {
+				if (typeof modules === 'string') _load_single(modules);
+			    else {
+			        if (!rptr.events) api.require('rptr.events', function() { api.require(modules, callback)});
+			        else _load_many(modules);
+			    }
+			}
+		}(),
+		
+		tool : function(name, constructor) {
+			if (!api.tools) api.tools = {};
+			else if (core.tools[name]) {
+				new Error('rptr.tool of that name already exists');
+			}
+			api.tools[name] = constructor;
+		}
 	}
-	
+
 	dom = (function() {
 		
 		
@@ -386,6 +404,8 @@ var rptr = (function() {
 				return el;
 			},
 
+			query : window.Sizzle,
+			
 			/**
 			 * Returns the stored fragment if unique is true,
 			 * otherwise returns a clone of the fragment
@@ -393,7 +413,7 @@ var rptr = (function() {
 			 * @param {String} name
 			 * @param {Bool} is this a unique usage
 			 */
-			get_fragment : function(name, unique) {
+			fragment : function(name, unique) {
 
 				var frag = _fragments[name];
 
@@ -441,13 +461,13 @@ var rptr = (function() {
 				else _remove_class(el);
 			},
 
-			set_style : function(styles, el) {
+			style : function(styles, el) {
 				var style_text = "";
 				for (var prop in styles) style_text += prop + ":" + styles[prop] + ";";
 				el.style.cssText = style_text;
 			},
 
-			set_html : function(html, el) {
+			html : function(html, el) {
 				el.innerHTML = html;
 				rptr.scan_for_life(el);
 			},
@@ -698,7 +718,7 @@ var rptr = (function() {
 			*
 			* @param {Function} Callback
 			*/
-			ready : function (fn) {										
+			ready : function (fn) {
 
 				if (api.loaded) {
 					fn();
@@ -723,7 +743,7 @@ var rptr = (function() {
 				}
 			},	
 
-			add : function(target, type, cb) {
+			subscribe : function(target, type, cb) {
 				if (cb) {
 					if (typeof target === 'string') {
 						if (typeof cb === 'function') _persistent.add(target, type, cb);
@@ -739,7 +759,7 @@ var rptr = (function() {
 				else _custom.add(target, type);
 			},
 
-			remove : function(target, type, cb) {
+			unsubscribe : function(target, type, cb) {
 				if (cb) {
 					(typeof target === 'string') ? _persistent.remove(target, type, cb) : _dom.remove(target, type, cb);
 				}
@@ -750,12 +770,12 @@ var rptr = (function() {
 				}
 			},
 
-			fire : function(target, data) {
+			publish : function(target, data) {
 				if (typeof target === 'string') _custom.fire(target, data);
 				else _dom.fire(target, this);
 			},
 
-			apply_persistence : function(el) {
+			apply_subscriptions : function() {
 
 				var sandbox = document.createElement('div');
 				var _get_sandbox = function() {
@@ -810,29 +830,31 @@ var rptr = (function() {
 						}
 					}
 				}
-
+	
 				var persistent_events = _persistent.collection;
 
 				var children;
 				var test_context = false;
 
-				// if el is container element
-				if (el.nodeType === 1) {
-					_test(el);
-					children = el.getElementsByTagName('*');
-					for (var i = 0, len = children.length; i < len; i++) _test(children[i], true);
-				}
-				else {
+				return function(el) {
+					// if el is container element
+					if (el.nodeType === 1) {
+						_test(el);
+						children = el.getElementsByTagName('*');
+						for (var i = 0, len = children.length; i < len; i++) _test(children[i], true);
+					}
+					else {
 
-					// if el is document fragment
-					for (var i = 0, len = el.length; i < len; i++) {
-						var _el = el[i];
-						_test(_el);
-						children = _el.getElementsByTagName('*');
-						for (var x = 0, x_len = children.length; x < x_len; x++) _test(children[x], true);
+						// if el is document fragment
+						for (var i = 0, len = el.length; i < len; i++) {
+							var _el = el[i];
+							_test(_el);
+							children = _el.getElementsByTagName('*');
+							for (var x = 0, x_len = children.length; x < x_len; x++) _test(children[x], true);
+						}
 					}
 				}	
-			}
+			}()
 		}
 
 		return api;
@@ -849,7 +871,7 @@ var rptr = (function() {
 		var currentRequest = null;
 
 		// Hold our queue
-		var requestQueue = new Array();
+		var requestQueue = [];
 
 		// Hold a timeout
 		var queueTimeout = null;
@@ -1246,7 +1268,7 @@ var rptr = (function() {
 
 		// Registry of parsers
 		var parsers = {
-			'xml' : xmlParser.read,
+			'xml' : xmlParser,
 			'json' : jsonParser
 		};
 
@@ -1259,28 +1281,27 @@ var rptr = (function() {
 			* @param {Object} Configuration for the request 
 			* See jetpackRequest
 			*/
-			request : function (cfg) {
+			ajax : function (cfg) {
 				var _request = new JetpackRequest(cfg);
 			},
 
 			// Make parsers publicly available
-			parseXML : parsers.xml,		
-			parseJSON : parsers.json
+			xml : parsers.xml,		
+			json : parsers.json
 		};
 
 		return api;
 	})();
 		
 	api = {
-		events : events,
-		config : config,
-		dom : dom,
-		ajax : ajax,
-		query : window.Sizzle
+		config : config
 	}
 	
 	// merge into API
 	core.extend(core);
-	
+	core.extend(ajax);
+	core.extend(dom);
+	core.extend(events);
+		
 	return api;
 })();
