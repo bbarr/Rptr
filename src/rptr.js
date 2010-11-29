@@ -25,7 +25,7 @@
 
 var rptr = (function() {
 	
-	var config, api, core, dom, events, ajax;
+	var config, api, core, dom, events, ajax, overlays;
 	
 	config = (function() {
 		
@@ -288,11 +288,11 @@ var rptr = (function() {
 		},
 		
 		tool : function(name, constructor) {
-			if (!core.tools) api.tools = {};
-			else if (core.tools[name]) {
+			if (!api.tools) api.tools = {};
+			else if (api.tools[name]) {
 				new Error('rptr.tool of that name already exists');
 			}
-			core.tools[name] = constructor;
+			api.tools[name] = constructor;
 		}
 	}
 
@@ -1312,7 +1312,11 @@ var rptr = (function() {
 
 		return api;
 	})();
+	
+	overlays = (function() {
 		
+	})()
+	
 	api = {
 		config : config
 	}
