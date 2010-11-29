@@ -72,7 +72,7 @@
 
 	];
 	
-	var proto = rptr.Template.prototype;
+	var proto = Template.prototype;
 
 	var build_element_method = function(tag) {
 		return function(data) {

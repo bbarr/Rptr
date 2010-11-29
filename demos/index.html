@@ -6,12 +6,15 @@
 <body>
 	<div id="blah">click here</div>
 	<script type="text/javascript" src="/src/rptr.js"></script>
-	<script type="text/javascript" src="/src/tools/rptr.data.js"></script>
+	<script type="text/javascript" src="/src/tools/rptr.tree.js"></script>
 	<script type="text/javascript">
 		
-		var data = new rptr.tools.Data();
-		var result = data.trace(['a', 'b', 'c', 'd'], 'custom data!');
-		console.log(data.object)
+		var data = new rptr.tools.Tree();
+		
+		console.log(data.branch(['a', 'b']));
+		data.branch(['a', 'b', 'c', 'd'], 'custom data!');
+		console.log(data.branch(['a', 'b']));
+		
 	</script>
 </body>
 </html>

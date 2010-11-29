@@ -83,6 +83,35 @@ var rptr = (function() {
 		},
 		
 		/**
+		 *  Fetches some content using an AJAX request and assigns the response
+		 *  or the return value of the callback (which will be passed the response)
+		 *  to the destination[key]
+		 *  Once populated, it will fire the optional destination.remote_ready function
+		 *
+		 *  @param {Object} the object to extend
+		 *  @param {String} the property to populate
+		 *  @param {String} the url to fetch from
+		 *  @param {Function} callback to handle data and return the the value of destination[key]
+		 */
+		remote_extend : function(destination, key, path, callback) {
+			
+			destination._active_requests = destination._active_requests || 0;
+			destination._active_requests++;
+
+			api.ajax({
+				uri : path,
+				json : true,
+				success : function(data) {
+					destination[key] = (callback) ? callback(data) : data;
+					destination._active_requests--;
+					if (!destination._active_requests) {
+						if (destination.ready) destination.remote_ready();
+					}
+				}
+			});
+		},
+		
+		/**
 		 *  Limits a function to being called only once during a specified time.
 		 *
 		 *  @param {String} unique id
@@ -108,11 +137,11 @@ var rptr = (function() {
 		 * @param {Array|String} types
 		 * @param {*} data
 		 */
-		type : function() {
+		type : function(types, data) {
 			
 			var match = false;
 			
-			var test = function(type) {
+			var test = function(type, data) {
 				switch(type) {
 					case 'Object':
 						if (typeof data === 'object' && data && !data.length && data.constructor) match = true;
@@ -122,17 +151,14 @@ var rptr = (function() {
 						break;
 					default:
 						try { if (data.constructor && data.constructor.toString().indexOf(type) !== -1) match = true }
-						catch (e) { new rptr.Error(e) }
+						catch (e) { new Error(e) }
 				}
 			}
 			
-			return function(types, data) {
-				if (typeof types === 'string') test(types);
-				else for (var i = 0; i < types.length && !match; i++) test(types[i]);
-
-				return match;
-			}
-		}(),
+			if (typeof types === 'string') test(types, data);
+			else for (var i = 0; i < types.length && !match; i++) test(types[i]);
+			return match;
+		},
 	
 		/**
 		 *  Dynamic JavaScript loader
@@ -140,7 +166,7 @@ var rptr = (function() {
 		 *  @param {Array|String} Scripts to load
 		 *  @param {Function} Callback to execute after loading modules
 		 */
-		require : function() {		
+		require : function(modules, callback) {		
 			
 			var _cache = {};
 			
@@ -200,7 +226,7 @@ var rptr = (function() {
                     // in order to handle the queue and execute the callback for the queue once
                     // all modules have been loaded
                     if (_cache.loading_many) {
-                        _util.script_loaded = function() { rptr.events.fire('script_loaded') };
+                        _util.script_loaded = function() { rptr.publish('script_loaded') };
                         _util.script_loaded();
                     }
                     // Otherwise just run the callback now that the single script is ready
@@ -248,27 +274,22 @@ var rptr = (function() {
 		        
 		        // Event to fire the callback once we're sure all
 		        // modules in the array have been loaded
-		        rptr.events.add('script_loaded', function(e) {
+		        rptr.subscribe('script_loaded', function(e) {
 					callback();
-		            rptr.events.remove('script_loaded');
+		            rptr.unsubscribe('script_loaded');
 		        }, modules_length);
 		        
 		        // Loop through and load modules one at a time
 		        for(var i=0; i < modules_length; i++) _load_single(modules[i]);
 		    }
             
-			return function(modules, callback) {
-				if (typeof modules === 'string') _load_single(modules);
-			    else {
-			        if (!rptr.events) api.require('rptr.events', function() { api.require(modules, callback)});
-			        else _load_many(modules);
-			    }
-			}
-		}(),
+			if (typeof modules === 'string') _load_single(modules);
+		    else _load_many(modules);
+		},
 		
 		tool : function(name, constructor) {
 			if (!api.tools) api.tools = {};
-			else if (core.tools[name]) {
+			else if (api.tools[name]) {
 				new Error('rptr.tool of that name already exists');
 			}
 			api.tools[name] = constructor;
@@ -360,7 +381,7 @@ var rptr = (function() {
 				if (attrs && core.type('Object', attrs)) {
 					for (var attr in attrs) {
 
-						if (attr == 'style') api.set_style(attrs[attr], el);
+						if (attr == 'style') api.style(attrs[attr], el);
 
 						// Properly handle classes attributes
 						else if( attr === 'class') el.className = attrs[attr];
@@ -542,7 +563,7 @@ var rptr = (function() {
 					this.collection.push(new_target_event);
 				}
 
-				target[type] = api.fire;
+				target[type] = api.publish;
 			},
 			fire : function(event, ie_current_target) {
 
@@ -626,7 +647,7 @@ var rptr = (function() {
 				}
 
 				var current_set = rptr.query(query);
-				api.add(current_set, type, cb);
+				api.subscribe(current_set, type, cb);
 			},
 			remove : function(query, type, cb) {
 				var collection = this.collection;
@@ -725,7 +746,7 @@ var rptr = (function() {
 					return;
 				}
 
-				rptr.events.add(document, 'DOMContentLoaded', fn);
+				rptr.subscribe(document, 'DOMContentLoaded', fn);
 
 				if (document.readyState) {
 					if (!timer) {
@@ -735,7 +756,7 @@ var rptr = (function() {
 									api.loaded = true;
 									clearInterval(timer);
 									timer = null;
-									api.alarm({'currentTarget' : document, 'type' : 'DOMContentLoaded'});
+									api.publish({'currentTarget' : document, 'type' : 'DOMContentLoaded'});
 								}
 							}
 						}, 10);
@@ -795,7 +816,7 @@ var rptr = (function() {
 								else test_el.applied[type].push(callback);
 							}
 							else test_el.applied[type] = [callback];
-							api.add(test_el, type, callback);
+							api.subscribe(test_el, type, callback);
 						}
 					}
 				}
