@@ -288,11 +288,11 @@ var rptr = (function() {
 		},
 		
 		tool : function(name, constructor) {
-			if (!api.tools) api.tools = {};
-			else if (api.tools[name]) {
+			if (!core.tools) api.tools = {};
+			else if (core.tools[name]) {
 				new Error('rptr.tool of that name already exists');
 			}
-			api.tools[name] = constructor;
+			core.tools[name] = constructor;
 		}
 	}
 
@@ -454,7 +454,6 @@ var rptr = (function() {
 
 				var _add_class = function(el) {
 					var classes = el.className.split(' ');
-
 					if (classes[0] === '') classes = [];
 					if (classes.indexOf(class_name) < 0) classes.push(class_name);
 					el.className = classes.join(' ');
@@ -490,7 +489,7 @@ var rptr = (function() {
 
 			html : function(html, el) {
 				el.innerHTML = html;
-				rptr.scan_for_life(el);
+				rptr.apply_persistence(el);
 			},
 
 			/**
@@ -524,7 +523,7 @@ var rptr = (function() {
 				if (children) el = children;
 
 				// Make sure the DOM has caught up before trying to scan for life
-				setTimeout(function() {rptr.events.apply_persistence(el)}, 20);
+				setTimeout(function() {rptr.apply_persistence(el)}, 20);
 			}
 		};
 		
