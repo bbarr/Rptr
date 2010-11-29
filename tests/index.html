@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="/tests/src/qunit.css"></link>
+</head>
+<body>
+	<div id="tests"></div>
+	<script type="text/javascript" src="/src/rptr.js"></script>
+	<script type="text/javascript" src="/tests/src/qunit.js"></script>
+	<script type="text/javascript" id="spec"></script>
+	<script type="text/javascript">
+
+		(function() {
+			
+			// find current spec to test
+			var script_name = window.location.search;
+			if (!script_name) script_name = window.location = window.location + '?core';
+			script_name = script_name.substr(1);
+			
+			// populate proper script
+			var script = document.getElementById('spec');
+			script.setAttribute('src', '/tests/specs/' + script_name + '.js');
+			
+		})();
+
+	</script>
+</body>
+</html>

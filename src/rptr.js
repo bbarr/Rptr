@@ -293,7 +293,7 @@ var rptr = (function() {
 				new Error('rptr.tool of that name already exists');
 			}
 			api.tools[name] = constructor;
-		}
+		},
 	
 		object_empty : function(obj) {
 		    for (var prop in obj) {
@@ -761,7 +761,7 @@ var rptr = (function() {
 					return;
 				}
 
-				rptr.subscribe(document, 'DOMContentLoaded', fn);
+				api.subscribe(document, 'DOMContentLoaded', fn);
 
 				if (document.readyState) {
 					if (!timer) {
@@ -1526,6 +1526,7 @@ var rptr = (function() {
 		return api;
 	})()
 	
+	// setup API
 	api = {
 		config : config
 	}
