@@ -97,17 +97,24 @@ var rptr = (function() {
 			
 			destination._active_requests = destination._active_requests || 0;
 			destination._active_requests++;
+			
+			var success = function(data) {
+				this.success.destination[this.success.key] = (this.success.callback) ? this.success.callback(data) : data;
+				this.success.destination._active_requests--;
+				if (!this.success.destination._active_requests) {
+					if (this.success.destination.remote_ready) this.success.destination.remote_ready();
+				}
+			}
+			
+			success.destination = destination;
+			success.key = key;
+			success.path = path;
+			success.callback = callback;
 
 			api.ajax({
 				uri : path,
 				json : true,
-				success : function(data) {
-					destination[key] = (callback) ? callback(data) : data;
-					destination._active_requests--;
-					if (!destination._active_requests) {
-						if (destination.ready) destination.remote_ready();
-					}
-				}
+				success : success
 			});
 		},
 		
@@ -156,7 +163,7 @@ var rptr = (function() {
 			}
 			
 			if (typeof types === 'string') test(types, data);
-			else for (var i = 0; i < types.length && !match; i++) test(types[i]);
+			else for (var i = 0; i < types.length && !match; i++) test(types[i], data);
 			return match;
 		},
 	
@@ -504,7 +511,7 @@ var rptr = (function() {
 
 			html : function(html, el) {
 				el.innerHTML = html;
-				rptr.apply_persistence(el);
+				rptr.apply_subscriptions(el);
 			},
 
 			/**
@@ -538,7 +545,7 @@ var rptr = (function() {
 				if (children) el = children;
 
 				// Make sure the DOM has caught up before trying to scan for life
-				setTimeout(function() {rptr.apply_persistence(el)}, 20);
+				setTimeout(function() {rptr.apply_subscriptions(el)}, 20);
 			}
 		};
 		

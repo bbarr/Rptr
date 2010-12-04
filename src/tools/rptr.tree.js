@@ -35,12 +35,22 @@
 					if (data) {
 						live_link[key] = data;
 					}
-					return true;
+					return live_link[key];
 				}
 				else live_link = live_link[key];
 			}
 			
-			return true;
+			return live_link;
+		},
+		
+		add : function() {
+			return this.branch.apply(this, arguments);
+		},
+		
+		find : function() {
+			var found = this.branch.apply(this, arguments);
+			if (found) this.found = found;
+			return found;
 		}
 	}
 	
