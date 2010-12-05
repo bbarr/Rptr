@@ -74,7 +74,8 @@ var rptr = (function() {
 			for (var prop in source) {
 				var curr = source[prop];
 				if (core.type('Object', curr)) {
-					core.extend(source[prop], curr);
+					destination[prop] = destination[prop] || {};
+					core.extend(destination[prop], curr);
 				}
 				else destination[prop] = curr;
 			}
@@ -448,7 +449,7 @@ var rptr = (function() {
 			},
 
 			query : window.Sizzle,
-			
+
 			/**
 			 * Returns the stored fragment if unique is true,
 			 * otherwise returns a clone of the fragment

@@ -9,11 +9,13 @@
 	<script type="text/javascript" src="/src/tools/rptr.tree.js"></script>
 	<script type="text/javascript">
 		
-		var data = new rptr.tools.Tree();
+		var a = {};
+		var b = {
+			blah : { c : 'd' }
+		}
 		
-		console.log(data.branch(['a', 'b']));
-		data.branch(['a', 'b', 'c', 'd'], 'custom data!');
-		console.log(data.branch(['a', 'b']));
+		rptr.extend(a, b);
+		console.log(a);
 		
 	</script>
 </body>
