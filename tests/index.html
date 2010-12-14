@@ -1,28 +1,52 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<link rel="stylesheet" href="/tests/src/qunit.css"></link>
+    <link rel="stylesheet" type="text/css" href="/tests/jasmine/lib/jasmine.css">
 </head>
 <body>
-	<div id="tests"></div>
-	<script type="text/javascript" src="/src/rptr.js"></script>
-	<script type="text/javascript" src="/tests/src/qunit.js"></script>
-	<script type="text/javascript" id="spec"></script>
-	<script type="text/javascript">
+    
+    <!-- jasmine lib files -->
+    <script type="text/javascript" src="/tests/jasmine/lib/jasmine.js"></script>
+    <script type="text/javascript" src="/tests/jasmine/lib/jasmine-html.js"></script>
+    
+    <!-- rptr file to test -->
+    <script type="text/javascript" src="/src/rptr.js"></script>
+    
+    <!-- specific test suite to run -->
+    <script type="text/javascript" id="suite"></script>
+    
+    <!-- show test results -->
+    <div id="tests">
+        
+        <script type="text/javascript">
+    
+            (function() {
+                    
+                // find current spec to test
+                var script_name = window.location.search;
 
-		(function() {
-			
-			// find current spec to test
-			var script_name = window.location.search;
-			if (!script_name) script_name = window.location = window.location + '?core';
-			script_name = script_name.substr(1);
-			
-			// populate proper script
-			var script = document.getElementById('spec');
-			script.setAttribute('src', '/tests/specs/' + script_name + '.js');
-			
-		})();
-
-	</script>
+                // if not set yet, defaults to core and redirects properly
+                if (!script_name) {
+                    window.location.href = window.location.href.replace(/\?|$/, '?core');
+                }
+                
+                // remove ?-mark
+                script_name = script_name.substr(1);
+                
+                // populate proper script
+                var script = document.getElementById('suite');
+                script.setAttribute('src', '/tests/specs/' + script_name + '.js');
+                
+                script.onload = function() {
+                    jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
+                    jasmine.getEnv().execute();
+                }
+                
+            })();
+    
+        </script>
+        
+    </div>
+    
 </body>
 </html>

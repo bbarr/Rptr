@@ -5,8 +5,8 @@
 </head>
 <body>
 	<div id="blah">click here</div>
-	<script type="text/javascript" src="/src/rptr.js"></script>
-	<script type="text/javascript" src="/src/tools/rptr.tree.js"></script>
+	<script type="text/javascript" src="../src/rptr.js"></script>
+	<script type="text/javascript" src="../src/tools/rptr.tree.js"></script>
 	<script type="text/javascript">
 		
 		var a = {};
@@ -15,8 +15,16 @@
 		}
 		
 		rptr.extend(a, b);
+		
 		console.log(a);
 		
+		var x = new rptr.tools.Tree();
+		var y = {
+			blah : { c : 'd' }
+		}
+		x.add(y);
+		
+		console.log(x)
 	</script>
 </body>
 </html>
