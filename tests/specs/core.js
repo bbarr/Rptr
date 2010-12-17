@@ -34,7 +34,7 @@ describe('RptrJS core methods', function() {
                 rptr.extend(destination, source);
                 var new_prop = 'new property';
                 source.a.b = new_prop;
-                expect(destination.a.b).not.toBe(new_prop);
+                expect(destination.a.b).toBe(new_prop);
             });
             
             it('should pass objects by value when final argument is true', function() {
@@ -55,7 +55,7 @@ describe('RptrJS core methods', function() {
             });
         });
         
-        describe('trace', function() {
+        describe('branch', function() {
             
             it('should return property if the value exists', function() {
                 var result = rptr.branch(source, ['a', 'b']);
@@ -72,6 +72,13 @@ describe('RptrJS core methods', function() {
                 rptr.branch(source, ['a', 'b'], data);
                 expect(source.a.b).toBe(data);
             });
+			
+			it('should work with array of only 1', function() {
+				var result = rptr.branch(destination, ['a']);
+				expect(result).toBe(false);
+				result = rptr.branch(source, ['a']);
+				expect(result).toBe(source.a);
+			});
             
         });
         

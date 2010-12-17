@@ -64,59 +64,109 @@ var rptr = (function() {
 		 *  @param {Object} (optional) source
 		 *  @returns the merged destination object
 		 */
-		extend : function(destination, source) {
+		extend : function(destination, source, by_value) {
 			
 			if (!source) {
 				source = destination;
 				destination = api;
+				by_value = true;
 			}
 			
 			for (var prop in source) {
+				
 				var curr = source[prop];
-				if (core.type('Object', curr)) {
-					destination[prop] = destination[prop] || {};
-					core.extend(destination[prop], curr);
+				if (by_value) {
+					if (core.type('Object', curr)) {
+						destination[prop] = {};
+						core.extend(destination[prop], curr);
+					}
+					else destination[prop] = curr;
 				}
 				else destination[prop] = curr;
+
 			}
 			
 			return destination;
+		},
+		
+		merge : function(destination, source, by_value) {
+			
+		},
+		
+		branch : function(destination, path, data) {
+			
+			var current, previous, property, last_property;
+			
+			// if path only has 1 element
+			if (path.length === 1) {
+				last_property = path[0];
+				if (data) {
+					destination[last_property] = data;
+					return destination;
+				}
+				else {
+					return (destination[last_property]) ? destination[last_property] : false;
+				}
+			}
+			
+			// if more than 1 element
+			previous = destination;
+			property = path.shift();
+			current = destination[property];
+			if (!current) current = previous[property] = {};
+			
+			while (property = path[1]) {
+				previous = current;
+				current = current[property];
+				if (!current) current = previous[property] = {};
+			}
+						
+			previous = current;
+			last_property = path[0];
+			
+			if (data) {
+				current[last_property] = data;
+				return destination;
+			}
+			else {
+				return (current[last_property]) ? current[last_property] : false;
+			}
 		},
 		
 		/**
 		 *  Fetches some content using an AJAX request and assigns the response
 		 *  or the return value of the callback (which will be passed the response)
 		 *  to the destination[key]
-		 *  Once populated, it will fire the optional destination.remote_ready function
 		 *
-		 *  @param {Object} the object to extend
-		 *  @param {String} the property to populate
-		 *  @param {String} the url to fetch from
-		 *  @param {Function} callback to handle data and return the the value of destination[key]
 		 */
-		remote_extend : function(destination, key, path, callback) {
+		remote_extend : function(config) {
 			
-			destination._active_requests = destination._active_requests || 0;
-			destination._active_requests++;
-			
-			var success = function(data) {
-				this.success.destination[this.success.key] = (this.success.callback) ? this.success.callback(data) : data;
-				this.success.destination._active_requests--;
-				if (!this.success.destination._active_requests) {
-					if (this.success.destination.remote_ready) this.success.destination.remote_ready();
-				}
-			}
-			
-			success.destination = destination;
-			success.key = key;
-			success.path = path;
-			success.callback = callback;
-
-			api.ajax({
-				uri : path,
-				json : true,
-				success : success
-			});
+            var id = config.id || config.url;
+            
+            var cache = this.remote_extend[id];
+            if (!cache) {
+                cache = this.remote_extend[id] = {
+                    count : 1,
+                    ready : config.ready || function() {}
+                };
+            }
+            else cache.count++;
+            
+            api.ajax({
+                uri : config.url,
+                json : config.format === 'json',
+                success : function(data) {
+                    
+                    if (cache.count > 1) {
+                        cache.count--;
+                        return;
+                    }
+                    
+                    data = (config.process) ? config.process(data) : data;
+                    config.destination[config.new_property] = data;
+                    cache.ready(data);
+                }
+            });
 		},
 		
 		/**
@@ -129,7 +179,6 @@ var rptr = (function() {
 		throttle : function(id, interval, fn) {
 			
 			var _this = core.throttle;
-			
 			if (_this[id]) return;
 			else {
 				fn();
@@ -152,11 +201,14 @@ var rptr = (function() {
 			var test = function(type, data) {
 				switch(type) {
 					case 'Object':
-						if (typeof data === 'object' && data && !data.length && data.constructor) match = true;
+						if (typeof data === 'object' && data && !data.length && !data.tagName) match = true;
 						break;
 					case 'HTMLElement':
 						if (data.tagName) match = true;
 						break;
+                    case 'HTMLCollection':
+                        if (data.length && !data.push) match = true;
+                        break;
 					default:
 						try { if (data.constructor && data.constructor.toString().indexOf(type) !== -1) match = true }
 						catch (e) { new Error(e) }
@@ -283,7 +335,7 @@ var rptr = (function() {
 		        // Event to fire the callback once we're sure all
 		        // modules in the array have been loaded
 		        rptr.subscribe('script_loaded', function(e) {
-					callback();
+					if (callback) callback();
 		            rptr.unsubscribe('script_loaded');
 		        }, modules_length);
 		        
@@ -470,7 +522,19 @@ var rptr = (function() {
 			},
 
 			has_class : function(class_name, el) {
-				return el.className.split(' ').indexOf(class_name) > -1;
+                
+                var _has_class = function(el) {
+                    return el.className.split(' ').indexOf(class_name) > -1;    
+                }
+				
+                if (core.type(['Array', 'HTMLCollection'], el)) {
+					for (var i = 0, len = el.length; i < len; i++) {
+                        if (_has_class(el[i])) return true;
+                    }
+				}
+				else return _has_class(el);
+                
+                return false;
 			},
 
 			add_class : function(class_name, el) {
@@ -482,7 +546,7 @@ var rptr = (function() {
 					el.className = classes.join(' ');
 				}
 
-				if (core.type('Array', el)) {
+				if (core.type(['Array', 'HTMLCollection'], el)) {
 					for (var i = 0, len = el.length; i < len; i++) _add_class(el[i]);
 				}
 				else _add_class(el);
@@ -498,7 +562,7 @@ var rptr = (function() {
 					el.className = classes.join(' ');
 				}
 
-				if (core.type('Array', el)) {
+				if (core.type(['Array', 'HTMLCollection'], el)) {
 					for (var i = 0, len = el.length; i < len; i++) _remove_class(el[i]);
 				}
 				else _remove_class(el);
