@@ -1,0 +1,105 @@
+## rptr.extend
+<br />
+#### Definition:
+``rptr.extend(destination, source, by_value)``
+
+#### Parameters:
+* destination - {Object}  the object to extend
+* source - {Object} the object to extend from
+* by_value - {Boolean} should it extend by value or by reference (defaults false)
+
+#### Usage:
+
+    var dest = {};
+    var src = {
+        'a' : {
+            'b' : 'c'
+        }
+    }
+    
+	rptr.extend(dest, src);
+    
+	=>	dest = {
+			'a' : {
+				'b' : 'c'
+			}
+		}
+
+## rptr.merge
+<br />
+#### Definition:
+``rptr.merge(destination, source, by_value)``
+
+#### Parameters:
+* destination - {Object}  the object to extend
+* source - {Object} the object to extend from
+* by_value - {Boolean} should it extend by value or by reference (defaults false)
+
+#### Usage:
+
+    var dest = {
+		'a' : {
+			'b' : 'something'
+		}
+	};
+    var src = {
+        'a' : {
+            'b' : 'c',
+			'd' : 'e'
+        }
+    }
+    
+	rptr.extend(dest, src);
+	=>	dest = {
+			'a' : {
+				'b' : 'something',
+				'd' : 'e'
+			}
+		}
+
+## rptr.branch
+<br />
+#### Definition
+``rptr.branch(destination, path, data)``
+
+#### Parameters:
+* destination - {Object} the object to branch
+* path - {Array} the property path to trace
+* data - {*} data to insert at end of path (optional)
+
+#### Usage:
+
+	var dest = {};
+	var path = ['a', 'b', 'c'];
+	var data = 'blah';
+	
+	rptr.branch(dest, path, data);
+	=> 	dest = {
+			'a' : {
+				'b' {
+					'c' : 'blah'
+				}
+			}
+		}
+		
+	rptr.branch(dest, path);
+	=>	true
+	
+	rptr.branch(dest, ['d', 'e']);
+	=> false
+	
+## rptr.remote_extend
+<br />
+#### Definition
+``rptr.remote_extend(config)``
+
+#### Parameters:
+* config - {object}
+
+#### Usage:
+
+	var destination = {};
+
+	var config = {
+		destination : 
+	}

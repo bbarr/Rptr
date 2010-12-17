@@ -57,6 +57,32 @@ var rptr = (function() {
 	core = {
 		
 		/**
+		 *
+		 *
+		 *
+		 */
+		_augment_object : function(destination, source, by_value, force) {
+			for (var prop in source) {
+				var curr = source[prop];
+				if (by_value) {
+					if (core.type('Object', curr)) {
+						if (!force) {
+							if (destination[prop]) continue;
+						}
+						destination[prop] = {};
+						core._augment_object(destination[prop], curr, true, force);
+					}
+					else {
+						destination[prop] = (force) ? curr : destination[prop] || curr;
+					}
+				}
+				else {
+					destination[prop] = (force) ? curr : destination[prop] || curr;
+				}
+			}
+		},
+		
+		/**
 		 *  Deep extend of destination.
 		 *  If no source, destination is added to rptr api.
 		 *
@@ -72,25 +98,22 @@ var rptr = (function() {
 				by_value = true;
 			}
 			
-			for (var prop in source) {
-				
-				var curr = source[prop];
-				if (by_value) {
-					if (core.type('Object', curr)) {
-						destination[prop] = {};
-						core.extend(destination[prop], curr);
-					}
-					else destination[prop] = curr;
-				}
-				else destination[prop] = curr;
-
-			}
+			core._augment_object(destination, source, by_value, true);
 			
 			return destination;
 		},
 		
 		merge : function(destination, source, by_value) {
 			
+			if (!source) {
+				source = destination;
+				destination = api;
+				by_value = true;
+			}
+			
+			core._augment_object(destination, source, by_value, false);
+			
+			return destination;
 		},
 		
 		branch : function(destination, path, data) {
@@ -115,7 +138,9 @@ var rptr = (function() {
 			current = destination[property];
 			if (!current) current = previous[property] = {};
 			
-			while (property = path[1]) {
+			while (path[1]) {
+				property = path.shift();
+				return
 				previous = current;
 				current = current[property];
 				if (!current) current = previous[property] = {};
@@ -807,7 +832,6 @@ var rptr = (function() {
 				var collection = this.collection;
 				for (var i in collection) {
 					var re = new RegExp(i);
-					console.log(re);
 					if (re.test(name)) {
 						var events = collection[i];
 						for (var i = 0, len = events.length; i < len; i++) events[i](data);

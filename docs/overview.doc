@@ -1,0 +1,24 @@
+# Overview
+
+## Organization
+
+### 1. Core
+- contains some useful utility functions for manipulating objects, requiring scripts, and checking data types.
+
+### 2. DOM
+- manipulates the DOM with methods for building, querying and manipulating DOM elements.
+
+### 3. Events
+- Handles the creation and firing of different types of events.  Supports the pub/sub pattern, event delegation (think Live events) and standard DOM events.
+
+### 4. Overlays
+- Aids in the creation of any type of overlay.Tooltips, (un)obtrusive and options to have an overlay track the users mouse.
+
+### 5. Ajax
+- Provides AJAX functionality for automatic queuing of requests, and automatic parsing of JSON/XML.
+
+## Tools
+A RptrJS tool is any unit of functionality/utility that could be helpful sometimes, but doesn't warrant being included in the base RptrJS library. This is intended to keep the library lightweight yet extensible.
+
+## Namespace
+The global namespace for RptrJS is ``rptr``.  Most of the methods fall into this first level, eg: ``rptr.subscribe``, ``rptr.build``, rather than ``rptr.events.subscribe`` or ``rptr.dom.build``. The goal is to keep RptrJS trim enough to maintain this structure.
