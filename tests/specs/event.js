@@ -58,6 +58,22 @@ describe('RptrJS Events', function() {
 				
 				expect(data.message).toEqual('blah');
 			});
+			
+			it('should parse regular expressions', function() {
+				
+				var fired = false;
+				
+				rptr.subscribe('.', function() {
+					fired = true;
+				});
+				
+				expect(fired).toEqual(false);
+				
+				rptr.publish('a');
+				
+				expect(fired).toEqual(true);
+				
+			});
 		});
 	});
 	

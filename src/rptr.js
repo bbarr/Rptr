@@ -780,6 +780,7 @@ var rptr = (function() {
 	        * @param {Integer} Number of fires required to execute cb
 	        */
 			add : function(name, cb, count) {
+				
 				var collection = this.collection;
 				var match = false;
 
@@ -805,7 +806,9 @@ var rptr = (function() {
 			fire : function(name, data) {
 				var collection = this.collection;
 				for (var i in collection) {
-					if (i === name) {
+					var re = new RegExp(i);
+					console.log(re);
+					if (re.test(name)) {
 						var events = collection[i];
 						for (var i = 0, len = events.length; i < len; i++) events[i](data);
 					}
