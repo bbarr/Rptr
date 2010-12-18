@@ -140,7 +140,6 @@ var rptr = (function() {
 			
 			while (path[1]) {
 				property = path.shift();
-				return
 				previous = current;
 				current = current[property];
 				if (!current) current = previous[property] = {};
@@ -179,7 +178,6 @@ var rptr = (function() {
             
             api.ajax({
                 uri : config.url,
-                json : config.format === 'json',
                 success : function(data) {
                     
                     if (cache.count > 1) {
@@ -189,7 +187,7 @@ var rptr = (function() {
                     
                     data = (config.process) ? config.process(data) : data;
                     config.destination[config.new_property] = data;
-                    cache.ready(data);
+                    config.callback(data);
                 }
             });
 		},
@@ -1027,7 +1025,6 @@ var rptr = (function() {
 		* success (Optional) : Callback for successful transmission
 		* cache (Optional) : Cache GET requests, defaults to true
 		* async (Optional) : {Bool}
-		* json {Optional} : {Bool} Should we parse the data as JSON
 		*  
 		*/
 		var JetpackRequest = function (cfg) {
@@ -1133,15 +1130,21 @@ var rptr = (function() {
 					// Finished request		
 					if(xhr.status === 200) {
 						if(currentRequest.success) {
-							// Execute user provided callback for successful transmission
-							var response = xhr.responseXML || xhr.responseText;																		
-
-							// Handle a 'receiveAs' parameter, converting the data received as needed
-							if(currentRequest.json) {							
-								if(xhr.responseXML) response = parsers.xml(response);
-								else response = parsers.json.read(response);					
+							
+							var response;
+							
+							if (xhr.responseXML) {
+								response = parsers.xml(response);
 							}
-
+							else {
+								var text = response = xhr.responseText;
+								
+								// try to detect json string
+								if (text.charAt(1) === '{' && text.charAt(text.length - 1) === '}') {
+									response = parsers.json.read(text);
+								}
+							}
+							
 							// Cache the response if we are supposed to
 							if(currentRequest.cache) cache[currentRequest.uri] = response;	
 

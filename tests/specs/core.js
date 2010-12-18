@@ -92,7 +92,7 @@ describe('RptrJS core methods', function() {
                     destination : destination,
                     new_property : 'new_property',
                     url : '/tests/remote/remote_extend.json',
-                    ready : function() {
+                    callback : function() {
                         ready = true;
                     }
                 });

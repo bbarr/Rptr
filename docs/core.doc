@@ -100,6 +100,64 @@
 
 	var destination = {};
 
-	var config = {
-		destination : 
-	}
+	rptr.remote_extend({
+		destination : destination,
+		new_property : 'to_be_populated',
+		url : '/user/1/edit.json',
+		process : function() {
+			
+			// optional, can process the incoming data and whatever it returns will populate the new_property
+			
+		},
+		callback : function() {
+			
+			// do things once the data is populated
+			
+			=> 	destination = {
+					'to_be_populated' : {
+						'name' : 'Damian',
+						'friends' : 0
+					}
+				}
+		}
+	});
+
+## rptr.throttle
+<br />
+#### Definition
+``rptr.throttle(id, interval, fn)``
+
+#### Parameters:
+* id {String} - unique among other current throttling
+* interval {Number} - milliseconds to throttle
+* fn {Function} - the function to prevent overcalling
+
+#### Usage:
+
+	rptr.subscribe(link, 'click', function(e) {
+		e.preventDefault();
+		rptr.throttle('link click', 100, function() {
+			for (var i = 0; i < 100000; i++) // do something crazy
+		});
+	});
+	
+	=> The above event will only be allowed to fire once every 100 milliseconds.. which is good
+	because it looks pretty darn expensive.
+
+## rptr.type
+<br />
+#### Definition
+``rptr.type(types, data)``
+
+#### Parameters:
+* types {String|Array} - type or types to test for
+* data {*} - data to test
+
+#### Usage:
+	
+	rptr.type(['Object', 'Number'], []);
+	=> false
+	
+	rptr.type('String', 'A man, a plan...');
+	=> true
+	
