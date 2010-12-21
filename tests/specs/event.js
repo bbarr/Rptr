@@ -79,6 +79,19 @@ describe('RptrJS Events', function() {
 	
 	describe('DOM Events', function() {
 		
+		var div;
+		
+		beforeEach(function() {
+			div = document.createElement();
+		});
+		
+		it('should add an event handler', function() {
+			
+			rptr.subscribe(div, 'click', function(e) {
+				
+			});
+			
+		});
 	});
 	
     describe('Delegate Events', function() {

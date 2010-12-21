@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style type="text/css">
+		.hide {
+			display: none;
+		}
+		div {
+			float:left;
+			
+		}
+	</style>
+</head>
+<body>
+	
+	<div>
+		<img src="/demos/tools/image_cropper/matured.png" id="test" />
+	</div>
+	
+	<script type="text/javascript" src="/src/rptr.js"></script>
+	<script type="text/javascript" src="/src/tools/rptr.image_cropper.js"></script>
+	
+	<script type="text/javascript">
+		var image = document.getElementById('test');
+		var cropper = new rptr.tools.ImageCropper(image);
+	</script>
+</body>
+</html>

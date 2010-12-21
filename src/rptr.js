@@ -594,14 +594,14 @@ var rptr = (function() {
 			style : function(styles, el) {
 				var style_text = "";
 				for (var prop in styles) style_text += prop + ":" + styles[prop] + ";";
-				el.style.cssText = style_text;
+				el.style.cssText += style_text;
 			},
 
 			html : function(html, el) {
 				el.innerHTML = html;
 				rptr.apply_subscriptions(el);
 			},
-
+			
 			/**
 			 * Checks for "persistent" events to apply
 			 * to the element before appending.
