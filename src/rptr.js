@@ -178,6 +178,7 @@ var rptr = (function() {
             
             api.ajax({
                 uri : config.url,
+				cache : false,
                 success : function(data) {
                     
                     if (cache.count > 1) {
@@ -185,9 +186,10 @@ var rptr = (function() {
                         return;
                     }
                     
+					cache.count = 0;
                     data = (config.process) ? config.process(data) : data;
-                    config.destination[config.new_property] = data;
-                    config.callback(data);
+                    config.destination[config.name] = data;
+                    config.ready(data);
                 }
             });
 		},
@@ -1039,32 +1041,31 @@ var rptr = (function() {
 					return;
 				}
 			}
-			catch(ex) {};
+			catch (ex) {};
 
 			this.method = cfg.method || 'GET';
 
 			// If we're given some data to send; prepare it
-			if(cfg.data) {
-				this.data = '?' + jetpack.prepareQueryString(cfg.data);
-			} else {
+			if (cfg.data) {
+				this.data = jetpack.prepareQueryString(cfg.data);
+			} 
+			else {
 				this.data = '';
 			}
 
 			// Set up method specific values
-			if(this.method === 'GET') {
-				this.uri += this.data;
-
+			if (this.method === 'GET') {
+				this.uri += (this.data) ? '?' + this.data : '';
 				this.cache = cfg.cache !== false;
-
-			//	if(cfg.cache !== false) this.cache = true;			
-			}		
-			else {									
+			}
+			else {
 				this.cache = cfg.cache || false;
 			}
 
 			this.errorHandler = cfg.errorHandler || null;
 			this.preFire = cfg.preFire || null;
 			this.success = cfg.success || null;
+			this.callback = cfg.callback || null;
 			this.async = cfg.async || true;
 			this.json = cfg.json || false;
 			this.contentType = cfg.contentType || 'application/x-www-form-urlencoded';
@@ -1127,8 +1128,29 @@ var rptr = (function() {
 			*/
 			_onreadystatechange : function () {
 				if(xhr.readyState == 4) {
-					// Finished request		
-					if(xhr.status === 200) {
+					// Finished request	
+					if(xhr.status) {
+						
+						if (currentRequest.callback) {
+							
+							var response;
+							
+							if (xhr.responseXML) {
+								response = parsers.xml(xhr.responseXML);
+							}
+							else {
+								response = xhr.responseText;
+								if ((response.charAt(0) === '{' && response.charAt(response.length - 1) === '}') || (response.charAt(0) === '[' && response.charAt(response.length - 1) === ']')) {
+									response = parsers.json.read(response);
+								}
+							}
+							
+							currentRequest.callback(response, xhr.status);
+						}
+						
+						jetpack.finishRequest();
+					}
+					/*	
 						if(currentRequest.success) {
 							
 							var response;
@@ -1140,7 +1162,7 @@ var rptr = (function() {
 								var text = response = xhr.responseText;
 								
 								// try to detect json string
-								if (text.charAt(1) === '{' && text.charAt(text.length - 1) === '}') {
+								if ((text.charAt(0) === '{' && text.charAt(text.length - 1) === '}') || (text.charAt(0) === '[' && text.charAt(text.length - 1) === ']')) {
 									response = parsers.json.read(text);
 								}
 							}
@@ -1162,6 +1184,9 @@ var rptr = (function() {
 
 						jetpack.finishRequest();
 					}
+					
+				*/
+
 				}
 			},
 
@@ -1213,7 +1238,7 @@ var rptr = (function() {
 				} 
 				// Otherwise we should go ahead and send the request
 				else {
-					if(jetpackRequest.method === 'POST') {
+					if(jetpackRequest.method !== 'GET') {
 						data = jetpackRequest.data;
 					}
 					else {
