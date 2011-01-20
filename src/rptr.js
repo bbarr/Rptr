@@ -213,6 +213,17 @@ var rptr = (function() {
 			}
 		},
 		
+		for_any : function(subject, fn) {
+			if (rptr.type('Array', subject)) {
+				for (var i = 0, len = subject.length; i < len; i++) {
+					fn(subject);	
+				}
+			}
+			else {
+				fn(subject);
+			}
+		},
+		
 		/**
 		 * Tests for data type by constructor name
 		 * 
