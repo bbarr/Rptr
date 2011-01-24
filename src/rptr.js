@@ -375,7 +375,7 @@ var rptr = (function() {
 		for_any : function(subject, fn) {
 			if (rptr.type('Array', subject)) {
 				for (var i = 0, len = subject.length; i < len; i++) {
-					fn(subject, i);
+					fn(subject[i], i);
 				}
 			}
 			else {
