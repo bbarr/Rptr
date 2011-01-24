@@ -372,6 +372,17 @@ var rptr = (function() {
 		    else _load_many(modules);
 		},
 		
+		for_any : function(subject, fn) {
+			if (rptr.type('Array', subject)) {
+				for (var i = 0, len = subject.length; i < len; i++) {
+					fn(subject, i);
+				}
+			}
+			else {
+				fn(subject, 0);
+			}
+		},
+		
 		tool : function(name, constructor) {
 			if (!api.tools) api.tools = {};
 			else if (api.tools[name]) {
